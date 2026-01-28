@@ -3,14 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Kiểm tra nếu đã đăng nhập
     checkLoggedIn();
     
-    // Khởi tạo tabs
-    initAuthTabs();
-    
     // Khởi tạo form đăng nhập
     initLoginForm();
-    
-    // Khởi tạo form đăng ký
-    initRegisterForm();
     
     // Khởi tạo form quên mật khẩu
     initForgotPasswordForm();
@@ -18,11 +12,22 @@ document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo nút hiển thị/ẩn mật khẩu
     initPasswordToggles();
     
-    // Khởi tạo kiểm tra độ mạnh mật khẩu
-    initPasswordStrengthChecker();
-    
     // Khởi tạo đăng nhập bằng mạng xã hội
     initSocialLogin();
+    
+    // Xử lý quên mật khẩu
+    document.getElementById('forgot-password')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('forgot-password-form').style.display = 'block';
+    });
+    
+    // Quay lại đăng nhập từ quên mật khẩu
+    document.getElementById('back-to-login')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        document.getElementById('forgot-password-form').style.display = 'none';
+        document.getElementById('loginForm').style.display = 'block';
+    });
 });
 
 // Kiểm tra nếu đã đăng nhập
@@ -37,69 +42,6 @@ function checkLoggedIn() {
             window.location.href = 'index.html';
         }
     }
-}
-
-// Khởi tạo tabs đăng nhập/đăng ký
-function initAuthTabs() {
-    const tabs = document.querySelectorAll('.auth-tab');
-    const forms = document.querySelectorAll('.auth-form');
-    
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const tabName = this.getAttribute('data-tab');
-            
-            // Cập nhật active tab
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Hiển thị form tương ứng
-            forms.forEach(form => {
-                form.classList.remove('active');
-                if (form.id === `${tabName}-form`) {
-                    form.classList.add('active');
-                }
-            });
-        });
-    });
-    
-    // Chuyển đổi giữa đăng nhập và đăng ký
-    document.getElementById('switch-to-register')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelector('.auth-tab[data-tab="register"]').click();
-    });
-    
-    document.getElementById('switch-to-login')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelector('.auth-tab[data-tab="login"]').click();
-    });
-    
-    // Quên mật khẩu
-    document.getElementById('forgot-password')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        showForgotPasswordForm();
-    });
-    
-    // Quay lại đăng nhập từ quên mật khẩu
-    document.getElementById('back-to-login')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        document.querySelector('.auth-tab[data-tab="login"]').click();
-    });
-}
-
-// Hiển thị form quên mật khẩu
-function showForgotPasswordForm() {
-    // Ẩn tất cả các form
-    document.querySelectorAll('.auth-form').forEach(form => {
-        form.classList.remove('active');
-    });
-    
-    // Hiển thị form quên mật khẩu
-    document.getElementById('forgot-password-form').classList.add('active');
-    
-    // Cập nhật tabs (ẩn cả hai)
-    document.querySelectorAll('.auth-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
 }
 
 // Khởi tạo form đăng nhập
@@ -129,6 +71,9 @@ function initLoginForm() {
 
 // Xác thực người dùng
 function authenticateUser(email, password, rememberMe) {
+    // Khởi tạo dữ liệu mẫu nếu chưa có
+    initializeSampleData();
+    
     // Lấy người dùng từ localStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
     
@@ -184,104 +129,144 @@ function authenticateUser(email, password, rememberMe) {
     }
 }
 
-// Khởi tạo form đăng ký
-function initRegisterForm() {
-    const form = document.getElementById('registerForm');
-    
-    if (!form) return;
-    
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Lấy dữ liệu từ form
-        const firstName = document.getElementById('register-firstname').value.trim();
-        const lastName = document.getElementById('register-lastname').value.trim();
-        const email = document.getElementById('register-email').value.trim();
-        const phone = document.getElementById('register-phone').value.trim();
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('register-confirm-password').value;
-        const acceptTerms = document.getElementById('accept-terms').checked;
-        
-        // Kiểm tra dữ liệu
-        if (!firstName || !lastName || !email || !phone || !password || !confirmPassword) {
-            showAuthNotification('Vui lòng điền đầy đủ thông tin', 'error');
-            return;
-        }
-        
-        if (!acceptTerms) {
-            showAuthNotification('Vui lòng đồng ý với điều khoản dịch vụ', 'error');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showAuthNotification('Mật khẩu xác nhận không khớp', 'error');
-            return;
-        }
-        
-        if (password.length < 6) {
-            showAuthNotification('Mật khẩu phải có ít nhất 6 ký tự', 'error');
-            return;
-        }
-        
-        // Kiểm tra email đã tồn tại chưa
-        if (isEmailExists(email)) {
-            showAuthNotification('Email đã được sử dụng', 'error');
-            return;
-        }
-        
-        // Đăng ký người dùng mới
-        registerUser(firstName, lastName, email, phone, password);
-    });
-}
-
-// Kiểm tra email đã tồn tại chưa
-function isEmailExists(email) {
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    return users.some(user => user.email === email);
-}
-
-// Đăng ký người dùng mới
-function registerUser(firstName, lastName, email, phone, password) {
-    // Lấy người dùng từ localStorage
+// Hàm khởi tạo dữ liệu mẫu
+function initializeSampleData() {
+    // Khởi tạo người dùng mẫu
     let users = JSON.parse(localStorage.getItem('users')) || [];
     
-    // Tạo ID mới
-    const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+    if (users.length === 0) {
+        users = [
+            {
+                id: 1,
+                fullName: 'Admin Custom Store',
+                email: 'admin@customstore.com',
+                phone: '0123456789',
+                role: 'admin',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 2,
+                fullName: 'Nguyễn Văn A',
+                email: 'user@example.com',
+                phone: '0987654321',
+                role: 'user',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 3,
+                fullName: 'Trần Thị B',
+                email: 'tranthi.b@example.com',
+                phone: '0912345678',
+                role: 'user',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 4,
+                fullName: 'Lê Văn C',
+                email: 'levan.c@example.com',
+                phone: '0934567890',
+                role: 'user',
+                status: 'inactive',
+                createdAt: new Date().toISOString()
+            }
+        ];
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        console.log('Đã khởi tạo dữ liệu người dùng mẫu');
+    }
     
-    // Tạo người dùng mới
-    const newUser = {
-        id: newId,
-        fullName: `${lastName} ${firstName}`,
-        email: email,
-        phone: phone,
-        role: 'user',
-        status: 'active',
-        createdAt: new Date().toISOString()
-    };
-    
-    // Thêm người dùng mới
-    users.push(newUser);
-    
-    // Lưu vào localStorage
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    // Đăng nhập ngay sau khi đăng ký
-    const currentUser = {
-        id: newUser.id,
-        fullName: newUser.fullName,
-        email: newUser.email,
-        role: newUser.role
-    };
-    
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Hiển thị thông báo thành công
-    showAuthNotification('Đăng ký thành công!', 'success');
-    
-    // Chuyển hướng về trang chủ sau 1 giây
-    setTimeout(() => {
-        window.location.href = 'index.html';
-    }, 1000);
+    // Khởi tạo sản phẩm mẫu nếu chưa có
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    if (products.length === 0) {
+        products = [
+            {
+                id: 1,
+                name: 'Áo thun basic nam nữ',
+                category: 'ao',
+                price: 199000,
+                description: 'Áo thun basic chất liệu cotton thoáng mát, dễ phối đồ',
+                image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 50,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 2,
+                name: 'Quần jeans slimfit',
+                category: 'quan',
+                price: 450000,
+                description: 'Quần jeans slimfit chất liệu denim cao cấp, form ôm vừa vặn',
+                image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 30,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 3,
+                name: 'Giày thể thao Nike',
+                category: 'giay',
+                price: 1200000,
+                description: 'Giày thể thao Nike chính hãng, êm ái và bền đẹp',
+                image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 20,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 4,
+                name: 'Nón lưỡi trai thời trang',
+                category: 'non',
+                price: 150000,
+                description: 'Nón lưỡi trai unisex, nhiều màu sắc, chất liệu vải cao cấp',
+                image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 45,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 5,
+                name: 'Áo sơ mi nam công sở',
+                category: 'ao',
+                price: 350000,
+                description: 'Áo sơ mi nam form regular, chất liệu vải lụa mát mẻ',
+                image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 25,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 6,
+                name: 'Quần short kaki',
+                category: 'quan',
+                price: 280000,
+                description: 'Quần short kaki nam nữ, chất liệu thấm hút tốt, thoáng mát',
+                image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 40,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 7,
+                name: 'Giày sandal nữ',
+                category: 'giay',
+                price: 320000,
+                description: 'Giày sandal nữ quai ngang, đế bằng êm ái, nhiều màu sắc',
+                image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 35,
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 8,
+                name: 'Nón rộng vành nữ',
+                category: 'non',
+                price: 220000,
+                description: 'Nón rộng vành nữ đi biển, chất liệu cói tự nhiên, nhẹ nhàng',
+                image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                quantity: 28,
+                createdAt: new Date().toISOString()
+            }
+        ];
+        
+        localStorage.setItem('products', JSON.stringify(products));
+        console.log('Đã khởi tạo dữ liệu sản phẩm mẫu');
+    }
 }
 
 // Khởi tạo form quên mật khẩu
@@ -310,7 +295,8 @@ function initForgotPasswordForm() {
             
             // Quay lại form đăng nhập sau 2 giây
             setTimeout(() => {
-                document.querySelector('.auth-tab[data-tab="login"]').click();
+                document.getElementById('forgot-password-form').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
                 form.reset();
             }, 2000);
         } else {
@@ -337,72 +323,6 @@ function initPasswordToggles() {
             }
         });
     });
-}
-
-// Khởi tạo kiểm tra độ mạnh mật khẩu
-function initPasswordStrengthChecker() {
-    const passwordInput = document.getElementById('register-password');
-    const strengthBar = document.querySelector('.strength-bar');
-    const strengthText = document.querySelector('.strength-text span');
-    
-    if (!passwordInput || !strengthBar || !strengthText) return;
-    
-    passwordInput.addEventListener('input', function() {
-        const password = this.value;
-        const strength = calculatePasswordStrength(password);
-        
-        // Cập nhật thanh độ mạnh
-        let width, color, text;
-        
-        switch (strength) {
-            case 0:
-                width = '20%';
-                color = '#dc3545';
-                text = 'Rất yếu';
-                break;
-            case 1:
-                width = '40%';
-                color = '#ff6b6b';
-                text = 'Yếu';
-                break;
-            case 2:
-                width = '60%';
-                color = '#ffc107';
-                text = 'Trung bình';
-                break;
-            case 3:
-                width = '80%';
-                color = '#28a745';
-                text = 'Mạnh';
-                break;
-            case 4:
-                width = '100%';
-                color = '#20c997';
-                text = 'Rất mạnh';
-                break;
-            default:
-                width = '0%';
-                color = '#e9ecef';
-                text = '';
-        }
-        
-        strengthBar.style.width = width;
-        strengthBar.style.backgroundColor = color;
-        strengthText.textContent = text;
-        strengthText.style.color = color;
-    });
-}
-
-// Tính độ mạnh mật khẩu
-function calculatePasswordStrength(password) {
-    let strength = 0;
-    
-    if (password.length >= 8) strength++;
-    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
-    
-    return strength;
 }
 
 // Khởi tạo đăng nhập bằng mạng xã hội

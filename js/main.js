@@ -1,3 +1,130 @@
+// Khởi tạo dữ liệu mẫu nếu chưa có
+function initializeSampleData() {
+    // Khởi tạo người dùng mẫu
+    let users = JSON.parse(localStorage.getItem('users')) || [];
+    
+    if (users.length === 0) {
+        users = [
+            {
+                id: 1,
+                fullName: 'Admin Custom Store',
+                email: 'admin@customstore.com',
+                phone: '0123456789',
+                role: 'admin',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 2,
+                fullName: 'Nguyễn Văn A',
+                email: 'user@example.com',
+                phone: '0987654321',
+                role: 'user',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 3,
+                fullName: 'Trần Thị B',
+                email: 'tranthi.b@example.com',
+                phone: '0912345678',
+                role: 'user',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 4,
+                fullName: 'Lê Văn C',
+                email: 'levan.c@example.com',
+                phone: '0934567890',
+                role: 'user',
+                status: 'inactive',
+                createdAt: new Date().toISOString()
+            }
+        ];
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        console.log('Đã khởi tạo dữ liệu người dùng mẫu');
+    }
+    
+    // Khởi tạo sản phẩm mẫu nếu chưa có
+    let products = JSON.parse(localStorage.getItem('products')) || [];
+    if (products.length === 0) {
+        products = getSampleProducts();
+        localStorage.setItem('products', JSON.stringify(products));
+        console.log('Đã khởi tạo dữ liệu sản phẩm mẫu');
+    }
+    
+    // Khởi tạo đơn hàng mẫu nếu chưa có
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    if (orders.length === 0) {
+        orders = [
+            {
+                id: 1001,
+                customerName: 'Nguyễn Văn A',
+                customerPhone: '0987654321',
+                customerEmail: 'user@example.com',
+                customerAddress: '123 Đường ABC, Quận XYZ, TP.HCM',
+                paymentMethod: 'cod',
+                items: [
+                    {
+                        id: 1,
+                        name: 'Áo thun basic nam nữ',
+                        category: 'ao',
+                        price: 199000,
+                        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        quantity: 2
+                    },
+                    {
+                        id: 4,
+                        name: 'Nón lưỡi trai thời trang',
+                        category: 'non',
+                        price: 150000,
+                        image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        quantity: 1
+                    }
+                ],
+                subtotal: 548000,
+                shippingFee: 30000,
+                discount: 0,
+                total: 578000,
+                status: 'completed',
+                createdAt: new Date('2023-11-15').toISOString()
+            },
+            {
+                id: 1002,
+                customerName: 'Trần Thị B',
+                customerPhone: '0912345678',
+                customerEmail: 'tranthi.b@example.com',
+                customerAddress: '456 Đường DEF, Quận GHI, TP.HCM',
+                paymentMethod: 'banking',
+                items: [
+                    {
+                        id: 3,
+                        name: 'Giày thể thao Nike',
+                        category: 'giay',
+                        price: 1200000,
+                        image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+                        quantity: 1
+                    }
+                ],
+                subtotal: 1200000,
+                shippingFee: 30000,
+                discount: 0,
+                total: 1230000,
+                status: 'pending',
+                createdAt: new Date('2023-11-20').toISOString()
+            }
+        ];
+        
+        localStorage.setItem('orders', JSON.stringify(orders));
+        console.log('Đã khởi tạo dữ liệu đơn hàng mẫu');
+    }
+}
+
+// Gọi hàm khởi tạo dữ liệu
+initializeSampleData();
+
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo menu mobile
@@ -267,6 +394,12 @@ function addToCart(productId) {
         return;
     }
     
+    // Kiểm tra số lượng tồn kho
+    if (product.quantity <= 0) {
+        showNotification('Sản phẩm đã hết hàng!', 'error');
+        return;
+    }
+    
     // Lấy giỏ hàng từ localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -274,6 +407,12 @@ function addToCart(productId) {
     const existingItemIndex = cart.findIndex(item => item.id == productId);
     
     if (existingItemIndex !== -1) {
+        // Kiểm tra số lượng trong giỏ không vượt quá tồn kho
+        if (cart[existingItemIndex].quantity >= product.quantity) {
+            showNotification('Đã đạt số lượng tối đa trong kho!', 'error');
+            return;
+        }
+        
         // Tăng số lượng nếu sản phẩm đã có trong giỏ
         cart[existingItemIndex].quantity += 1;
     } else {
@@ -351,6 +490,10 @@ function showProductDetailModal(product) {
                             <span class="stock-value ${product.quantity > 0 ? 'in-stock' : 'out-of-stock'}">
                                 ${product.quantity > 0 ? 'Còn hàng' : 'Hết hàng'}
                             </span>
+                        </div>
+                        <div class="product-stock">
+                            <span class="stock-label">Số lượng còn lại:</span>
+                            <span class="stock-quantity">${product.quantity}</span>
                         </div>
                         <div class="product-actions">
                             <button class="btn-add-to-cart-detail" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
