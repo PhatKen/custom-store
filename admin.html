@@ -17,7 +17,18 @@
                 <a href="index.html" class="logo">Custom<span>Store</span> <span class="admin-badge">Admin</span></a>
                 <div class="admin-nav">
                     <a href="index.html" class="btn-back">Về trang chủ</a>
-                    <button id="logout-btn" class="btn-logout">Đăng xuất</button>
+                    <div class="user-menu">
+                        <button class="user-btn" id="admin-user-menu-btn">
+                            <i class="fas fa-user"></i>
+                            <span id="admin-user-name">Admin</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="user-dropdown" id="admin-user-dropdown">
+                            <a href="#" class="dropdown-item" id="admin-logout-btn">
+                                <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </nav>
         </div>
@@ -275,5 +286,44 @@
     </div>
 
     <script src="js/admin.js"></script>
+    <script>
+        // Cập nhật header cho trang admin
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (currentUser) {
+                const userName = currentUser.fullName || currentUser.email.split('@')[0];
+                const adminUserName = document.getElementById('admin-user-name');
+                if (adminUserName) {
+                    adminUserName.textContent = userName;
+                }
+            }
+            
+            // Thêm sự kiện cho menu người dùng trong admin
+            const adminUserMenuBtn = document.getElementById('admin-user-menu-btn');
+            const adminUserDropdown = document.getElementById('admin-user-dropdown');
+            
+            if (adminUserMenuBtn && adminUserDropdown) {
+                adminUserMenuBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    adminUserDropdown.classList.toggle('show');
+                });
+                
+                document.addEventListener('click', function() {
+                    adminUserDropdown.classList.remove('show');
+                });
+            }
+            
+            // Thêm sự kiện đăng xuất cho admin
+            const adminLogoutBtn = document.getElementById('admin-logout-btn');
+            if (adminLogoutBtn) {
+                adminLogoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('currentUser');
+                    window.location.href = 'index.html';
+                });
+            }
+        });
+    </script>
 </body>
 </html>
