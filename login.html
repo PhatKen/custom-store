@@ -14,13 +14,7 @@
             <a href="index.html" class="logo">Custom<span>Store</span></a>
         </div>
         
-        <div class="auth-tabs">
-            <button class="auth-tab active" data-tab="login">Đăng nhập</button>
-            <button class="auth-tab" data-tab="register">Đăng ký</button>
-        </div>
-        
-        <!-- Login Form -->
-        <div id="login-form" class="auth-form active">
+        <div class="auth-form active">
             <h2>Chào mừng trở lại</h2>
             <p>Đăng nhập vào tài khoản của bạn</p>
             
@@ -63,86 +57,7 @@
                 </div>
                 
                 <div class="auth-switch">
-                    <p>Chưa có tài khoản? <a href="#" id="switch-to-register">Đăng ký ngay</a></p>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Register Form -->
-        <div id="register-form" class="auth-form">
-            <h2>Tạo tài khoản mới</h2>
-            <p>Đăng ký để trải nghiệm mua sắm tốt hơn</p>
-            
-            <form id="registerForm">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="register-firstname">Họ</label>
-                        <input type="text" id="register-firstname" placeholder="Nhập họ của bạn" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="register-lastname">Tên</label>
-                        <input type="text" id="register-lastname" placeholder="Nhập tên của bạn" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" placeholder="Nhập email của bạn" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="register-phone">Số điện thoại</label>
-                    <input type="tel" id="register-phone" placeholder="Nhập số điện thoại" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="register-password">Mật khẩu</label>
-                    <div class="password-input">
-                        <input type="password" id="register-password" placeholder="Nhập mật khẩu" required>
-                        <button type="button" class="toggle-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="password-strength" id="password-strength">
-                        <div class="strength-bar"></div>
-                        <div class="strength-text">Độ mạnh mật khẩu: <span>Yếu</span></div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="register-confirm-password">Xác nhận mật khẩu</label>
-                    <div class="password-input">
-                        <input type="password" id="register-confirm-password" placeholder="Nhập lại mật khẩu" required>
-                        <button type="button" class="toggle-password">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="form-options">
-                    <label class="checkbox">
-                        <input type="checkbox" id="accept-terms" required>
-                        <span>Tôi đồng ý với <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a></span>
-                    </label>
-                </div>
-                
-                <button type="submit" class="btn-primary">Đăng ký</button>
-                
-                <div class="divider">
-                    <span>Hoặc đăng ký với</span>
-                </div>
-                
-                <div class="social-login">
-                    <button type="button" class="social-btn google">
-                        <i class="fab fa-google"></i> Google
-                    </button>
-                    <button type="button" class="social-btn facebook">
-                        <i class="fab fa-facebook"></i> Facebook
-                    </button>
-                </div>
-                
-                <div class="auth-switch">
-                    <p>Đã có tài khoản? <a href="#" id="switch-to-login">Đăng nhập ngay</a></p>
+                    <p>Chưa có tài khoản? <a href="register.html">Đăng ký ngay</a></p>
                 </div>
             </form>
         </div>
@@ -174,5 +89,296 @@
     </div>
 
     <script src="js/auth.js"></script>
+    <script>
+        // Chỉ giữ lại phần đăng nhập và quên mật khẩu
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kiểm tra nếu đã đăng nhập
+            checkLoggedIn();
+            
+            // Khởi tạo form đăng nhập
+            initLoginForm();
+            
+            // Khởi tạo form quên mật khẩu
+            initForgotPasswordForm();
+            
+            // Khởi tạo nút hiển thị/ẩn mật khẩu
+            initPasswordToggles();
+            
+            // Khởi tạo đăng nhập bằng mạng xã hội
+            initSocialLogin();
+            
+            // Xử lý quên mật khẩu
+            document.getElementById('forgot-password')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('forgot-password-form').style.display = 'block';
+            });
+            
+            // Quay lại đăng nhập từ quên mật khẩu
+            document.getElementById('back-to-login')?.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.getElementById('forgot-password-form').style.display = 'none';
+                document.getElementById('loginForm').style.display = 'block';
+            });
+        });
+        
+        function checkLoggedIn() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            if (currentUser) {
+                // Nếu đã đăng nhập, chuyển hướng
+                if (currentUser.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+        }
+        
+        function initLoginForm() {
+            const form = document.getElementById('loginForm');
+            
+            if (!form) return;
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Lấy dữ liệu từ form
+                const email = document.getElementById('login-email').value.trim();
+                const password = document.getElementById('login-password').value;
+                const rememberMe = document.getElementById('remember-me').checked;
+                
+                // Kiểm tra dữ liệu
+                if (!email || !password) {
+                    showAuthNotification('Vui lòng điền đầy đủ thông tin', 'error');
+                    return;
+                }
+                
+                // Xác thực người dùng
+                authenticateUser(email, password, rememberMe);
+            });
+        }
+        
+        function authenticateUser(email, password, rememberMe) {
+            // Lấy người dùng từ localStorage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            // Tìm người dùng
+            const user = users.find(u => u.email === email && u.status === 'active');
+            
+            // Kiểm tra thông tin đăng nhập
+            if (!user) {
+                showAuthNotification('Email hoặc mật khẩu không đúng', 'error');
+                return;
+            }
+            
+            // Trong thực tế, mật khẩu phải được mã hóa và so sánh
+            // Ở đây, chúng ta sử dụng mật khẩu mặc định cho tài khoản mẫu
+            const defaultPasswords = {
+                'admin@customstore.com': 'admin123',
+                'user@example.com': 'user123',
+                'tranthi.b@example.com': 'password123',
+                'levan.c@example.com': 'password123'
+            };
+            
+            // Kiểm tra mật khẩu
+            if (defaultPasswords[email] && defaultPasswords[email] === password) {
+                // Đăng nhập thành công
+                
+                // Lưu thông tin người dùng hiện tại
+                const currentUser = {
+                    id: user.id,
+                    fullName: user.fullName,
+                    email: user.email,
+                    role: user.role
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                // Lưu thông tin đăng nhập nếu chọn "Ghi nhớ đăng nhập"
+                if (rememberMe) {
+                    localStorage.setItem('rememberedEmail', email);
+                } else {
+                    localStorage.removeItem('rememberedEmail');
+                }
+                
+                // Chuyển hướng dựa trên vai trò
+                if (user.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+                
+                showAuthNotification('Đăng nhập thành công!', 'success');
+            } else {
+                showAuthNotification('Email hoặc mật khẩu không đúng', 'error');
+            }
+        }
+        
+        function initForgotPasswordForm() {
+            const form = document.getElementById('forgotPasswordForm');
+            
+            if (!form) return;
+            
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('forgot-email').value.trim();
+                
+                if (!email) {
+                    showAuthNotification('Vui lòng nhập email của bạn', 'error');
+                    return;
+                }
+                
+                // Kiểm tra email có tồn tại không
+                const users = JSON.parse(localStorage.getItem('users')) || [];
+                const userExists = users.some(user => user.email === email);
+                
+                if (userExists) {
+                    // Trong thực tế, gửi email đặt lại mật khẩu
+                    showAuthNotification('Liên kết đặt lại mật khẩu đã được gửi đến email của bạn', 'success');
+                    
+                    // Quay lại form đăng nhập sau 2 giây
+                    setTimeout(() => {
+                        document.getElementById('forgot-password-form').style.display = 'none';
+                        document.getElementById('loginForm').style.display = 'block';
+                        form.reset();
+                    }, 2000);
+                } else {
+                    showAuthNotification('Email không tồn tại trong hệ thống', 'error');
+                }
+            });
+        }
+        
+        function initPasswordToggles() {
+            document.querySelectorAll('.toggle-password').forEach(button => {
+                button.addEventListener('click', function() {
+                    const input = this.closest('.password-input').querySelector('input');
+                    const icon = this.querySelector('i');
+                    
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        }
+        
+        function initSocialLogin() {
+            // Đăng nhập bằng Google
+            document.querySelectorAll('.social-btn.google').forEach(button => {
+                button.addEventListener('click', function() {
+                    showAuthNotification('Tính năng đăng nhập bằng Google đang được phát triển', 'info');
+                });
+            });
+            
+            // Đăng nhập bằng Facebook
+            document.querySelectorAll('.social-btn.facebook').forEach(button => {
+                button.addEventListener('click', function() {
+                    showAuthNotification('Tính năng đăng nhập bằng Facebook đang được phát triển', 'info');
+                });
+            });
+        }
+        
+        function showAuthNotification(message, type = 'info') {
+            // Tạo thông báo
+            const notification = document.createElement('div');
+            notification.className = `auth-notification auth-notification-${type}`;
+            notification.innerHTML = `
+                <div class="auth-notification-content">
+                    <i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            // Thêm CSS cho thông báo xác thực
+            if (!document.querySelector('.auth-notification-styles')) {
+                const style = document.createElement('style');
+                style.className = 'auth-notification-styles';
+                style.textContent = `
+                    .auth-notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background-color: white;
+                        border-radius: var(--border-radius);
+                        padding: 15px 20px;
+                        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        z-index: 10000;
+                        max-width: 400px;
+                        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s forwards;
+                        border-left: 4px solid var(--primary-color);
+                    }
+                    
+                    .auth-notification-success {
+                        border-left-color: var(--success-color);
+                    }
+                    
+                    .auth-notification-error {
+                        border-left-color: var(--danger-color);
+                    }
+                    
+                    .auth-notification-info {
+                        border-left-color: var(--primary-color);
+                    }
+                    
+                    .auth-notification-content i {
+                        font-size: 20px;
+                    }
+                    
+                    .auth-notification-success .auth-notification-content i {
+                        color: var(--success-color);
+                    }
+                    
+                    .auth-notification-error .auth-notification-content i {
+                        color: var(--danger-color);
+                    }
+                    
+                    .auth-notification-info .auth-notification-content i {
+                        color: var(--primary-color);
+                    }
+                    
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    
+                    @keyframes fadeOut {
+                        from {
+                            opacity: 1;
+                        }
+                        to {
+                            opacity: 0;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            // Thêm thông báo vào body
+            document.body.appendChild(notification);
+            
+            // Tự động xóa thông báo sau 3 giây
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
