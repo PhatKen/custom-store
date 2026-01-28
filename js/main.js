@@ -14,6 +14,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tạo hiệu ứng scroll mượt
     initSmoothScroll();
+    
+    // Cập nhật header theo trạng thái đăng nhập
+    updateUserHeader();
 });
 
 // Khởi tạo menu mobile
@@ -557,4 +560,96 @@ function initSmoothScroll() {
             }
         });
     });
+}
+
+// Hàm cập nhật header theo trạng thái đăng nhập
+function updateUserHeader() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const navActions = document.getElementById('nav-actions');
+    
+    if (!navActions) return;
+    
+    if (currentUser) {
+        // Người dùng đã đăng nhập
+        const userName = currentUser.fullName || currentUser.email.split('@')[0];
+        navActions.innerHTML = `
+            <div class="user-menu">
+                <button class="user-btn" id="user-menu-btn">
+                    <i class="fas fa-user"></i>
+                    <span>${userName}</span>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="#" class="dropdown-item" id="edit-profile-btn">
+                        <i class="fas fa-user-edit"></i> Chỉnh sửa tài khoản
+                    </a>
+                    ${currentUser.role === 'admin' ? 
+                        `<a href="admin.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i> Quản lý admin
+                        </a>` : ''}
+                    <a href="#" class="dropdown-item" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                    </a>
+                </div>
+            </div>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        `;
+        
+        // Thêm sự kiện cho menu người dùng
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        const userDropdown = document.getElementById('user-dropdown');
+        
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('show');
+            });
+            
+            // Đóng dropdown khi click ra ngoài
+            document.addEventListener('click', function() {
+                userDropdown.classList.remove('show');
+            });
+        }
+        
+        // Thêm sự kiện đăng xuất
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('currentUser');
+                updateUserHeader();
+                updateCartCount();
+                showNotification('Đã đăng xuất thành công!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            });
+        }
+        
+        // Thêm sự kiện chỉnh sửa profile
+        const editProfileBtn = document.getElementById('edit-profile-btn');
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showNotification('Tính năng đang được phát triển!', 'info');
+            });
+        }
+        
+        // Khởi tạo lại menu mobile
+        initMobileMenu();
+    } else {
+        // Người dùng chưa đăng nhập
+        navActions.innerHTML = `
+            <a href="register.html" class="btn-register">Đăng ký</a>
+            <a href="login.html" class="btn-login">Đăng nhập</a>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+        `;
+        
+        // Khởi tạo lại menu mobile
+        initMobileMenu();
+    }
 }
