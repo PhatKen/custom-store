@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Store - Thời Trang Thời Thượng</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Trang chủ</a></li>
+                    <li><a href="#products">Sản phẩm</a></li>
+                    <li><a href="#categories">Danh mục</a></li>
+                    <li><a href="#about">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="login.html" class="btn-login">Đăng nhập</a>
+                    <a href="admin.html" class="btn-admin">Admin</a>
+                    <div class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Phong Cách Của Bạn, <span>Thời Trang Của Chúng Tôi</span></h1>
+                <p>Khám phá bộ sưu tập mới nhất với đầy đủ các loại áo, quần, giày và nón thời thượng</p>
+                <a href="#products" class="btn-primary">Mua sắm ngay</a>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" alt="Thời trang Custom Store">
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    <section class="categories" id="categories">
+        <div class="container">
+            <h2 class="section-title">Danh Mục Sản Phẩm</h2>
+            <div class="categories-grid">
+                <div class="category-card" data-category="ao">
+                    <div class="category-icon">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <h3>Áo</h3>
+                    <p>Áo thun, áo sơ mi, áo khoác thời trang</p>
+                </div>
+                <div class="category-card" data-category="quan">
+                    <div class="category-icon">
+                        <i class="fas fa-vest"></i>
+                    </div>
+                    <h3>Quần</h3>
+                    <p>Quần jeans, quần âu, quần short</p>
+                </div>
+                <div class="category-card" data-category="giay">
+                    <div class="category-icon">
+                        <i class="fas fa-shoe-prints"></i>
+                    </div>
+                    <h3>Giày</h3>
+                    <p>Giày thể thao, giày tây, giày sandal</p>
+                </div>
+                <div class="category-card" data-category="non">
+                    <div class="category-icon">
+                        <i class="fas fa-hat-cowboy"></i>
+                    </div>
+                    <h3>Nón</h3>
+                    <p>Nón lưỡi trai, nón rộng vành, nón len</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Products Section -->
+    <section class="products" id="products">
+        <div class="container">
+            <h2 class="section-title">Sản Phẩm Nổi Bật</h2>
+            <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="all">Tất cả</button>
+                <button class="filter-btn" data-filter="ao">Áo</button>
+                <button class="filter-btn" data-filter="quan">Quần</button>
+                <button class="filter-btn" data-filter="giay">Giày</button>
+                <button class="filter-btn" data-filter="non">Nón</button>
+            </div>
+            <div class="products-grid" id="products-container">
+                <!-- Sản phẩm sẽ được thêm bằng JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-content">
+                <h2 class="section-title">Về Custom Store</h2>
+                <p>Custom Store là thương hiệu thời trang hàng đầu với cam kết mang đến cho khách hàng những sản phẩm chất lượng cao, thiết kế thời thượng và giá cả hợp lý. Chúng tôi không ngừng cập nhật xu hướng thời trang mới nhất để đáp ứng nhu cầu đa dạng của khách hàng.</p>
+                <p>Với bốn danh mục chính: Áo, Quần, Giày và Nón, chúng tôi tự hào cung cấp đa dạng sản phẩm từ cơ bản đến cao cấp, phù hợp với mọi lứa tuổi và phong cách.</p>
+                <a href="#products" class="btn-secondary">Khám phá bộ sưu tập</a>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80" alt="Về Custom Store">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Custom Store</h3>
+                    <p>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</p>
+                    <p>Email: info@customstore.com</p>
+                    <p>Điện thoại: 0123 456 789</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Danh mục</h3>
+                    <ul>
+                        <li><a href="#products">Áo</a></li>
+                        <li><a href="#products">Quần</a></li>
+                        <li><a href="#products">Giày</a></li>
+                        <li><a href="#products">Nón</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Liên kết</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="#about">Về chúng tôi</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                        <li><a href="login.html">Đăng nhập</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Theo dõi chúng tôi</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Custom Store. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

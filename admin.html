@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Quản lý sản phẩm</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Admin Header -->
+    <header class="admin-header">
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span> <span class="admin-badge">Admin</span></a>
+                <div class="admin-nav">
+                    <a href="index.html" class="btn-back">Về trang chủ</a>
+                    <button id="logout-btn" class="btn-logout">Đăng xuất</button>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="admin-container">
+        <div class="sidebar">
+            <h3>Quản lý</h3>
+            <ul class="admin-menu">
+                <li><a href="#dashboard" class="active" data-section="dashboard"><i class="fas fa-chart-bar"></i> Tổng quan</a></li>
+                <li><a href="#products-management" data-section="products-management"><i class="fas fa-box"></i> Quản lý sản phẩm</a></li>
+                <li><a href="#add-product" data-section="add-product"><i class="fas fa-plus-circle"></i> Thêm sản phẩm</a></li>
+                <li><a href="#orders" data-section="orders"><i class="fas fa-shopping-cart"></i> Đơn hàng</a></li>
+                <li><a href="#users" data-section="users"><i class="fas fa-users"></i> Người dùng</a></li>
+            </ul>
+        </div>
+
+        <main class="admin-main">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="admin-section active">
+                <h2><i class="fas fa-chart-bar"></i> Tổng quan</h2>
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #4e73df;">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Tổng sản phẩm</h3>
+                            <p id="total-products">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #1cc88a;">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Đơn hàng</h3>
+                            <p id="total-orders">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #36b9cc;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Người dùng</h3>
+                            <p id="total-users">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background-color: #f6c23e;">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Doanh thu</h3>
+                            <p id="total-revenue">0 VNĐ</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="recent-activity">
+                    <h3>Hoạt động gần đây</h3>
+                    <div class="activity-list" id="activity-list">
+                        <!-- Hoạt động sẽ được thêm bằng JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Products Management Section -->
+            <section id="products-management" class="admin-section">
+                <h2><i class="fas fa-box"></i> Quản lý sản phẩm</h2>
+                <div class="filter-controls">
+                    <div class="search-box">
+                        <input type="text" id="product-search" placeholder="Tìm kiếm sản phẩm...">
+                        <button><i class="fas fa-search"></i></button>
+                    </div>
+                    <select id="category-filter">
+                        <option value="all">Tất cả danh mục</option>
+                        <option value="ao">Áo</option>
+                        <option value="quan">Quần</option>
+                        <option value="giay">Giày</option>
+                        <option value="non">Nón</option>
+                    </select>
+                </div>
+                
+                <div class="products-table-container">
+                    <table class="products-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Hình ảnh</th>
+                                <th>Tên sản phẩm</th>
+                                <th>Danh mục</th>
+                                <th>Giá</th>
+                                <th>Số lượng</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table-body">
+                            <!-- Dữ liệu sản phẩm sẽ được thêm bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Add Product Section -->
+            <section id="add-product" class="admin-section">
+                <h2><i class="fas fa-plus-circle"></i> Thêm sản phẩm mới</h2>
+                <form id="add-product-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-name">Tên sản phẩm *</label>
+                            <input type="text" id="product-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-category">Danh mục *</label>
+                            <select id="product-category" required>
+                                <option value="">Chọn danh mục</option>
+                                <option value="ao">Áo</option>
+                                <option value="quan">Quần</option>
+                                <option value="giay">Giày</option>
+                                <option value="non">Nón</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product-price">Giá *</label>
+                            <input type="number" id="product-price" min="0" step="1000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="product-quantity">Số lượng *</label>
+                            <input type="number" id="product-quantity" min="0" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-description">Mô tả sản phẩm *</label>
+                        <textarea id="product-description" rows="4" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-image">Hình ảnh sản phẩm *</label>
+                        <div class="image-upload-container">
+                            <div class="image-preview" id="image-preview">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Kéo thả hình ảnh vào đây hoặc nhấn để tải lên</p>
+                            </div>
+                            <input type="file" id="product-image" accept="image/*" hidden>
+                            <button type="button" class="btn-upload" id="upload-btn">Chọn hình ảnh</button>
+                        </div>
+                        <p class="image-note">Kích thước đề xuất: 600x600px. Định dạng: JPG, PNG, GIF. Dung lượng tối đa: 2MB.</p>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Thêm sản phẩm</button>
+                        <button type="reset" class="btn-secondary">Làm mới</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Orders Section -->
+            <section id="orders" class="admin-section">
+                <h2><i class="fas fa-shopping-cart"></i> Quản lý đơn hàng</h2>
+                <div class="orders-table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Mã đơn hàng</th>
+                                <th>Khách hàng</th>
+                                <th>Ngày đặt</th>
+                                <th>Tổng tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table-body">
+                            <!-- Dữ liệu đơn hàng sẽ được thêm bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Users Section -->
+            <section id="users" class="admin-section">
+                <h2><i class="fas fa-users"></i> Quản lý người dùng</h2>
+                <div class="users-table-container">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>Loại tài khoản</th>
+                                <th>Ngày đăng ký</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <!-- Dữ liệu người dùng sẽ được thêm bằng JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Edit Product Modal -->
+    <div id="edit-product-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Chỉnh sửa sản phẩm</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="edit-product-form">
+                    <input type="hidden" id="edit-product-id">
+                    <div class="form-group">
+                        <label for="edit-product-name">Tên sản phẩm</label>
+                        <input type="text" id="edit-product-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-category">Danh mục</label>
+                        <select id="edit-product-category" required>
+                            <option value="ao">Áo</option>
+                            <option value="quan">Quần</option>
+                            <option value="giay">Giày</option>
+                            <option value="non">Nón</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="edit-product-price">Giá</label>
+                            <input type="number" id="edit-product-price" min="0" step="1000" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-product-quantity">Số lượng</label>
+                            <input type="number" id="edit-product-quantity" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-product-description">Mô tả</label>
+                        <textarea id="edit-product-description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Lưu thay đổi</button>
+                        <button type="button" class="btn-secondary close-modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

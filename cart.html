@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ hàng - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="index.html#products">Sản phẩm</a></li>
+                    <li><a href="index.html#categories">Danh mục</a></li>
+                    <li><a href="index.html#about">Về chúng tôi</a></li>
+                    <li><a href="cart.html" class="active">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions">
+                    <a href="login.html" class="btn-login">Đăng nhập</a>
+                    <a href="admin.html" class="btn-admin">Admin</a>
+                    <div class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Cart Section -->
+    <section class="cart-section">
+        <div class="container">
+            <h1 class="page-title">Giỏ hàng của bạn</h1>
+            
+            <div class="cart-container">
+                <div class="cart-items-container">
+                    <div class="cart-header">
+                        <h2>Sản phẩm</h2>
+                        <div class="cart-header-details">
+                            <span>Đơn giá</span>
+                            <span>Số lượng</span>
+                            <span>Tổng tiền</span>
+                            <span>Thao tác</span>
+                        </div>
+                    </div>
+                    
+                    <div class="cart-items" id="cart-items">
+                        <!-- Sản phẩm trong giỏ hàng sẽ được thêm bằng JavaScript -->
+                        <div class="empty-cart-message" id="empty-cart-message">
+                            <i class="fas fa-shopping-cart"></i>
+                            <h3>Giỏ hàng của bạn đang trống</h3>
+                            <p>Hãy thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+                            <a href="index.html#products" class="btn-primary">Tiếp tục mua sắm</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="cart-summary">
+                    <h2>Tóm tắt đơn hàng</h2>
+                    <div class="summary-details">
+                        <div class="summary-row">
+                            <span>Tạm tính</span>
+                            <span id="subtotal">0 VNĐ</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Phí vận chuyển</span>
+                            <span id="shipping-fee">30,000 VNĐ</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Giảm giá</span>
+                            <span id="discount">0 VNĐ</span>
+                        </div>
+                        <div class="summary-row total">
+                            <span>Tổng cộng</span>
+                            <span id="total">30,000 VNĐ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="coupon-section">
+                        <input type="text" id="coupon-code" placeholder="Mã giảm giá">
+                        <button id="apply-coupon">Áp dụng</button>
+                    </div>
+                    
+                    <button id="checkout-btn" class="btn-checkout">Tiến hành thanh toán</button>
+                    <a href="index.html#products" class="continue-shopping">Tiếp tục mua sắm</a>
+                </div>
+            </div>
+            
+            <div class="recommended-products">
+                <h2>Có thể bạn quan tâm</h2>
+                <div class="recommended-grid" id="recommended-products">
+                    <!-- Sản phẩm đề xuất sẽ được thêm bằng JavaScript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Checkout Modal -->
+    <div id="checkout-modal" class="modal">
+        <div class="modal-content checkout-modal">
+            <div class="modal-header">
+                <h3>Thanh toán đơn hàng</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="checkout-form">
+                    <div class="form-section">
+                        <h4>Thông tin giao hàng</h4>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullname">Họ và tên *</label>
+                                <input type="text" id="fullname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại *</label>
+                                <input type="tel" id="phone" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" id="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="address">Địa chỉ giao hàng *</label>
+                            <textarea id="address" rows="2" required></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h4>Phương thức thanh toán</h4>
+                        <div class="payment-methods">
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="cod" checked>
+                                <div class="payment-content">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                    <div>
+                                        <h5>Thanh toán khi nhận hàng (COD)</h5>
+                                        <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="banking">
+                                <div class="payment-content">
+                                    <i class="fas fa-university"></i>
+                                    <div>
+                                        <h5>Chuyển khoản ngân hàng</h5>
+                                        <p>Chuyển khoản qua tài khoản ngân hàng</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="payment-option">
+                                <input type="radio" name="payment" value="momo">
+                                <div class="payment-content">
+                                    <i class="fas fa-mobile-alt"></i>
+                                    <div>
+                                        <h5>Ví điện tử Momo</h5>
+                                        <p>Thanh toán qua ứng dụng Momo</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="order-summary">
+                        <h4>Tóm tắt đơn hàng</h4>
+                        <div class="summary-items" id="checkout-summary">
+                            <!-- Tóm tắt đơn hàng sẽ được thêm bằng JavaScript -->
+                        </div>
+                        <div class="summary-total">
+                            <span>Tổng cộng:</span>
+                            <span id="checkout-total">0 VNĐ</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">Xác nhận đơn hàng</button>
+                        <button type="button" class="btn-secondary close-modal">Hủy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="modal">
+        <div class="modal-content success-modal">
+            <div class="success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3>Đặt hàng thành công!</h3>
+            <p>Cảm ơn bạn đã mua sắm tại Custom Store. Đơn hàng của bạn đã được xác nhận.</p>
+            <p>Mã đơn hàng: <strong id="order-id">#ORD-12345</strong></p>
+            <p>Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận đơn hàng.</p>
+            <div class="success-actions">
+                <a href="index.html" class="btn-primary">Tiếp tục mua sắm</a>
+                <button id="view-order-details" class="btn-secondary">Xem chi tiết đơn hàng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Custom Store</h3>
+                    <p>Địa chỉ: 123 Đường ABC, Quận XYZ, TP.HCM</p>
+                    <p>Email: info@customstore.com</p>
+                    <p>Điện thoại: 0123 456 789</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Danh mục</h3>
+                    <ul>
+                        <li><a href="index.html#products">Áo</a></li>
+                        <li><a href="index.html#products">Quần</a></li>
+                        <li><a href="index.html#products">Giày</a></li>
+                        <li><a href="index.html#products">Nón</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Liên kết</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="index.html#about">Về chúng tôi</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                        <li><a href="login.html">Đăng nhập</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Theo dõi chúng tôi</h3>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 Custom Store. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/cart.js"></script>
+</body>
+</html>
