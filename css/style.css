@@ -1301,42 +1301,6 @@ footer {
     background-color: var(--danger-color);
 }
 
-/* Login Notice Styles */
-.login-notice {
-    background-color: rgba(255, 193, 7, 0.1);
-    border: 1px solid var(--warning-color);
-    border-radius: var(--border-radius);
-    padding: 15px;
-    margin-bottom: 30px;
-    grid-column: 1 / -1;
-}
-
-.notice-content {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.notice-content i {
-    color: var(--warning-color);
-    font-size: 24px;
-}
-
-.notice-content p {
-    margin: 0;
-    color: var(--dark-color);
-}
-
-.notice-content a {
-    color: var(--primary-color);
-    font-weight: 600;
-    text-decoration: none;
-}
-
-.notice-content a:hover {
-    text-decoration: underline;
-}
-
 /* Responsive */
 @media (max-width: 992px) {
     .hero-content h1 {
