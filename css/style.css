@@ -405,7 +405,7 @@ nav {
     gap: 10px;
 }
 
-.btn-add-to-cart, .btn-view {
+.btn-add-to-cart, .btn-view, .btn-login-required {
     flex: 1;
     padding: 10px 0;
     border: none;
@@ -427,6 +427,16 @@ nav {
 
 .btn-add-to-cart:hover {
     background-color: var(--primary-dark);
+}
+
+.btn-login-required {
+    background-color: #e9ecef;
+    color: var(--gray-color);
+    cursor: not-allowed;
+}
+
+.btn-login-required:hover {
+    background-color: #dee2e6;
 }
 
 .btn-view {
