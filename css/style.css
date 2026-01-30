@@ -1514,12 +1514,14 @@ footer {
 
 .price-range-inputs {
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
-    gap: 10px;
 }
 
 .price-range-inputs input {
     flex: 1;
+    min-width: 100px;
     padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
@@ -1528,6 +1530,8 @@ footer {
 .price-range-inputs span {
     color: var(--gray-color);
     font-weight: 500;
+    width: 100%;
+    text-align: center;
 }
 
 .btn-reset {
