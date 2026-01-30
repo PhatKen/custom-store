@@ -22,7 +22,12 @@
                     <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
                 </ul>
                 <div class="nav-actions" id="nav-actions">
-                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                    <!-- Fallback tĩnh (sẽ bị JS ghi đè khi main.js chạy) -->
+                    <a href="register.html" class="btn-register">Đăng ký</a>
+                    <a href="login.html" class="btn-login">Đăng nhập</a>
+                    <div class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </div>
                 </div>
             </nav>
         </div>
@@ -91,7 +96,33 @@
                 <button class="filter-btn" data-filter="non">Nón</button>
             </div>
             <div class="products-grid" id="products-container">
-                <!-- Sản phẩm sẽ được thêm bằng JavaScript -->
+                <!-- Fallback sản phẩm tĩnh (JS sẽ render lại khi chạy) -->
+                <div class="product-card" data-category="ao">
+                    <div class="product-image"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Áo thun"></div>
+                    <div class="product-info">
+                        <span class="product-category">Áo</span>
+                        <h3 class="product-name">Áo thun basic nam nữ</h3>
+                        <p class="product-description">Áo thun basic chất liệu cotton thoáng mát</p>
+                        <div class="product-price">199.000 VNĐ</div>
+                        <div class="product-actions">
+                            <button class="btn-add-to-cart" disabled><i class="fas fa-shopping-cart"></i> Vui lòng đăng nhập</button>
+                            <button class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card" data-category="quan">
+                    <div class="product-image"><img src="https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Quần jeans"></div>
+                    <div class="product-info">
+                        <span class="product-category">Quần</span>
+                        <h3 class="product-name">Quần jeans slimfit</h3>
+                        <p class="product-description">Quần jeans slimfit chất liệu denim cao cấp</p>
+                        <div class="product-price">450.000 VNĐ</div>
+                        <div class="product-actions">
+                            <button class="btn-add-to-cart" disabled><i class="fas fa-shopping-cart"></i> Vui lòng đăng nhập</button>
+                            <button class="btn-view"><i class="fas fa-eye"></i> Xem chi tiết</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
