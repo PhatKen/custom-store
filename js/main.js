@@ -1,3 +1,5 @@
+[file name]: main.js
+[file content begin]
 // Khởi tạo dữ liệu mẫu nếu chưa có
 function initializeSampleData() {
     // Khởi tạo người dùng mẫu
@@ -348,6 +350,10 @@ function createProductCard(product) {
         'non': 'Nón'
     };
     
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const isLoggedIn = currentUser !== null;
+    
     card.innerHTML = `
         <div class="product-image">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
@@ -358,8 +364,8 @@ function createProductCard(product) {
             <p class="product-description">${product.description}</p>
             <div class="product-price">${formattedPrice}</div>
             <div class="product-actions">
-                <button class="btn-add-to-cart" data-product-id="${product.id}">
-                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                <button class="btn-add-to-cart" data-product-id="${product.id}" ${!isLoggedIn ? 'disabled' : ''}>
+                    <i class="fas fa-shopping-cart"></i> ${!isLoggedIn ? 'Vui lòng đăng nhập' : 'Thêm vào giỏ'}
                 </button>
                 <button class="btn-view" data-product-id="${product.id}">
                     <i class="fas fa-eye"></i> Xem chi tiết
@@ -371,6 +377,10 @@ function createProductCard(product) {
     // Thêm sự kiện cho nút thêm vào giỏ
     const addToCartBtn = card.querySelector('.btn-add-to-cart');
     addToCartBtn.addEventListener('click', function() {
+        if (!isLoggedIn) {
+            showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'error');
+            return;
+        }
         addToCart(product.id);
     });
     
@@ -385,6 +395,13 @@ function createProductCard(product) {
 
 // Thêm sản phẩm vào giỏ hàng
 function addToCart(productId) {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'error');
+        return;
+    }
+    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
@@ -465,6 +482,10 @@ function showProductDetailModal(product) {
         'non': 'Nón'
     };
     
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const isLoggedIn = currentUser !== null;
+    
     // Tạo modal HTML
     const modalHTML = `
         <div class="modal active" id="product-detail-modal">
@@ -496,8 +517,8 @@ function showProductDetailModal(product) {
                             <span class="stock-quantity">${product.quantity}</span>
                         </div>
                         <div class="product-actions">
-                            <button class="btn-add-to-cart-detail" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
-                                <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                            <button class="btn-add-to-cart-detail" data-product-id="${product.id}" ${product.quantity === 0 || !isLoggedIn ? 'disabled' : ''}>
+                                <i class="fas fa-shopping-cart"></i> ${!isLoggedIn ? 'Vui lòng đăng nhập' : 'Thêm vào giỏ'}
                             </button>
                             <button class="btn-secondary close-modal">Đóng</button>
                         </div>
@@ -522,6 +543,11 @@ function showProductDetailModal(product) {
     const addToCartBtn = document.querySelector('.btn-add-to-cart-detail');
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', function() {
+            if (!isLoggedIn) {
+                showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'error');
+                return;
+            }
+            
             if (product.quantity === 0) {
                 showNotification('Sản phẩm đã hết hàng!', 'error');
                 return;

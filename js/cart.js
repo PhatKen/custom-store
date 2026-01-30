@@ -1,5 +1,17 @@
+[file name]: cart.js
+[file content begin]
 // Khởi tạo trang giỏ hàng
 document.addEventListener('DOMContentLoaded', function() {
+    // Kiểm tra đăng nhập trước khi tải giỏ hàng
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để xem giỏ hàng', 'error');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+    
     // Tải giỏ hàng
     loadCart();
     
@@ -171,6 +183,13 @@ function initCartEvents() {
 
 // Cập nhật số lượng sản phẩm
 function updateQuantity(productId, change) {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thực hiện thao tác này', 'error');
+        return;
+    }
+    
     // Lấy giỏ hàng từ localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -199,6 +218,13 @@ function updateQuantity(productId, change) {
 
 // Xóa sản phẩm khỏi giỏ hàng
 function removeFromCart(productId) {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thực hiện thao tác này', 'error');
+        return;
+    }
+    
     if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?')) {
         return;
     }
@@ -221,6 +247,13 @@ function removeFromCart(productId) {
 
 // Áp dụng mã giảm giá
 function applyCoupon() {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thực hiện thao tác này', 'error');
+        return;
+    }
+    
     const couponCode = document.getElementById('coupon-code').value.trim();
     
     if (!couponCode) {
@@ -265,6 +298,13 @@ function applyCoupon() {
 
 // Thanh toán
 function checkout() {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thực hiện thanh toán', 'error');
+        return;
+    }
+    
     // Lấy giỏ hàng từ localStorage
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -332,6 +372,13 @@ function showCheckoutModal(cart) {
     const checkoutForm = document.getElementById('checkout-form');
     checkoutForm.onsubmit = function(e) {
         e.preventDefault();
+        
+        // Kiểm tra đăng nhập
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            showNotification('Vui lòng đăng nhập để thực hiện thanh toán', 'error');
+            return;
+        }
         
         // Lấy thông tin từ form
         const fullname = document.getElementById('fullname').value;
@@ -458,6 +505,10 @@ function createRecommendedProductCard(product) {
         'non': 'Nón'
     };
     
+    // Kiểm tra xem người dùng đã đăng nhập chưa
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const isLoggedIn = currentUser !== null;
+    
     card.innerHTML = `
         <div class="product-image">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
@@ -467,8 +518,8 @@ function createRecommendedProductCard(product) {
             <h3 class="product-name">${product.name}</h3>
             <div class="product-price">${formattedPrice}</div>
             <div class="product-actions">
-                <button class="btn-add-to-cart" data-product-id="${product.id}">
-                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                <button class="btn-add-to-cart" data-product-id="${product.id}" ${!isLoggedIn ? 'disabled' : ''}>
+                    <i class="fas fa-shopping-cart"></i> ${!isLoggedIn ? 'Vui lòng đăng nhập' : 'Thêm vào giỏ'}
                 </button>
             </div>
         </div>
@@ -477,6 +528,10 @@ function createRecommendedProductCard(product) {
     // Thêm sự kiện cho nút thêm vào giỏ
     const addToCartBtn = card.querySelector('.btn-add-to-cart');
     addToCartBtn.addEventListener('click', function() {
+        if (!isLoggedIn) {
+            showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'error');
+            return;
+        }
         addToCart(product.id);
     });
     
@@ -485,6 +540,13 @@ function createRecommendedProductCard(product) {
 
 // Thêm sản phẩm vào giỏ hàng (tương tự hàm trong main.js)
 function addToCart(productId) {
+    // Kiểm tra đăng nhập
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) {
+        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng', 'error');
+        return;
+    }
+    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
