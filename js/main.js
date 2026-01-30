@@ -1,3 +1,5 @@
+[file name]: main.js
+[file content begin]
 // Khởi tạo dữ liệu mẫu nếu chưa có
 function initializeSampleData() {
     // Khởi tạo người dùng mẫu
@@ -144,6 +146,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cập nhật header theo trạng thái đăng nhập
     updateUserHeader();
+    
+    // Thêm sự kiện cho các danh mục
+    initCategoryFilter();
 });
 
 // Khởi tạo menu mobile
@@ -170,6 +175,11 @@ function initProductFilter() {
             // Xóa active class khỏi tất cả các nút
             filterButtons.forEach(btn => btn.classList.remove('active'));
             
+            // Xóa active class khỏi tất cả các danh mục
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.classList.remove('category-active');
+            });
+            
             // Thêm active class cho nút được nhấn
             this.classList.add('active');
             
@@ -178,6 +188,67 @@ function initProductFilter() {
             filterProducts(filter);
         });
     });
+}
+
+// Khởi tạo lọc sản phẩm theo danh mục khi click vào danh mục
+function initCategoryFilter() {
+    const categoryCards = document.querySelectorAll('.category-card');
+    
+    categoryCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            
+            // Xóa active class khỏi tất cả các nút lọc
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Xóa active class khỏi tất cả các danh mục
+            categoryCards.forEach(c => {
+                c.classList.remove('category-active');
+            });
+            
+            // Thêm active class cho danh mục được click
+            this.classList.add('category-active');
+            
+            // Cuộn đến phần sản phẩm
+            const productsSection = document.getElementById('products');
+            if (productsSection) {
+                window.scrollTo({
+                    top: productsSection.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+            }
+            
+            // Kích hoạt bộ lọc sản phẩm tương ứng
+            activateCategoryFilter(category);
+        });
+    });
+}
+
+// Kích hoạt bộ lọc theo danh mục
+function activateCategoryFilter(category) {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    // Xóa active class khỏi tất cả các nút
+    filterButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // Tìm và kích hoạt nút lọc tương ứng
+    const targetButton = Array.from(filterButtons).find(btn => 
+        btn.getAttribute('data-filter') === category
+    );
+    
+    if (targetButton) {
+        targetButton.classList.add('active');
+        filterProducts(category);
+    } else {
+        // Nếu không tìm thấy nút tương ứng, kích hoạt nút "Tất cả"
+        const allButton = document.querySelector('.filter-btn[data-filter="all"]');
+        if (allButton) {
+            allButton.classList.add('active');
+            filterProducts('all');
+        }
+    }
 }
 
 // Lọc sản phẩm theo danh mục
@@ -796,3 +867,4 @@ function updateUserHeader() {
         initMobileMenu();
     }
 }
+[file content end]
