@@ -44,13 +44,20 @@ h1, h2, h3, h4, h5, h6 {
     padding: 0 20px;
 }
 
-/* Header & Navigation */
+/* Header & Navigation - ĐÃ SỬA */
 header {
     background-color: var(--light-color);
     box-shadow: var(--shadow);
-    position: sticky;
+    position: fixed; /* Đổi từ sticky sang fixed */
     top: 0;
+    left: 0;
+    width: 100%;
     z-index: 1000;
+}
+
+/* Thêm padding cho body để tránh bị header che nội dung */
+body {
+    padding-top: 80px; /* Chiều cao của header */
 }
 
 nav {
@@ -58,6 +65,7 @@ nav {
     justify-content: space-between;
     align-items: center;
     padding: 20px 0;
+    height: 80px; /* Chiều cao cố định cho nav */
 }
 
 .logo {
@@ -122,6 +130,7 @@ nav {
     text-decoration: none;
     font-weight: 500;
     transition: var(--transition);
+    white-space: nowrap; /* Ngăn chữ bị xuống dòng */
 }
 
 .btn-login {
@@ -155,9 +164,9 @@ nav {
     color: var(--dark-color);
 }
 
-/* Hero Section */
+/* Hero Section - Sửa padding top */
 .hero {
-    padding: 80px 0;
+    padding: 40px 0 80px; /* Giảm padding top vì header fixed */
     background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
@@ -1070,6 +1079,29 @@ footer {
     margin-bottom: 30px;
 }
 
+/* Empty Products Message */
+.empty-products {
+    text-align: center;
+    padding: 60px 20px;
+    grid-column: 1 / -1;
+}
+
+.empty-products i {
+    font-size: 60px;
+    color: var(--border-color);
+    margin-bottom: 20px;
+}
+
+.empty-products h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.empty-products p {
+    color: var(--gray-color);
+    margin-bottom: 30px;
+}
+
 /* Auth Pages */
 .auth-page {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1364,8 +1396,8 @@ footer {
 @media (max-width: 768px) {
     .nav-links {
         display: none;
-        position: absolute;
-        top: 100%;
+        position: fixed; /* Đổi từ absolute sang fixed */
+        top: 80px; /* Bắt đầu ngay dưới header */
         left: 0;
         right: 0;
         background-color: white;
@@ -1373,6 +1405,9 @@ footer {
         padding: 20px;
         box-shadow: var(--shadow);
         gap: 15px;
+        z-index: 999;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
     }
     
     .nav-links.active {
@@ -1437,6 +1472,16 @@ footer {
     .cart-item-actions {
         width: auto;
     }
+    
+    /* Responsive cho nút đăng ký/đăng nhập */
+    .nav-actions {
+        gap: 10px;
+    }
+    
+    .btn-login, .btn-register {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1470,6 +1515,24 @@ footer {
     .modal-header,
     .modal-body {
         padding: 20px;
+    }
+    
+    body {
+        padding-top: 70px; /* Giảm padding cho mobile */
+    }
+    
+    nav {
+        height: 70px; /* Giảm chiều cao cho mobile */
+    }
+    
+    /* Điều chỉnh nav-actions cho mobile */
+    .nav-actions {
+        gap: 5px;
+    }
+    
+    .btn-login, .btn-register {
+        padding: 5px 10px;
+        font-size: 12px;
     }
 }
 [file content end]
