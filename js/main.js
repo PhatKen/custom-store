@@ -1,4 +1,3 @@
-[file content begin]
 // Khởi tạo dữ liệu mẫu nếu chưa có
 function initializeSampleData() {
     // Khởi tạo người dùng mẫu
@@ -326,20 +325,6 @@ function displayProducts(products) {
         return;
     }
     
-    // Kiểm tra đăng nhập để hiển thị thông báo
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        const loginNotice = document.createElement('div');
-        loginNotice.className = 'login-notice';
-        loginNotice.innerHTML = `
-            <div class="notice-content">
-                <i class="fas fa-info-circle"></i>
-                <p>Vui lòng <a href="login.html">đăng nhập</a> hoặc <a href="register.html">đăng ký</a> để thêm sản phẩm vào giỏ hàng</p>
-            </div>
-        `;
-        productsContainer.appendChild(loginNotice);
-    }
-    
     products.forEach(product => {
         const productCard = createProductCard(product);
         productsContainer.appendChild(productCard);
@@ -400,17 +385,6 @@ function createProductCard(product) {
 
 // Thêm sản phẩm vào giỏ hàng
 function addToCart(productId) {
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'error');
-        // Chuyển hướng đến trang đăng nhập sau 1.5 giây
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
-        return;
-    }
-    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
@@ -570,19 +544,13 @@ function showProductDetailModal(product) {
 function updateCartCount() {
     const cartCountElements = document.querySelectorAll('#cart-count');
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     
     // Tính tổng số lượng sản phẩm trong giỏ
     const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
     
     // Cập nhật tất cả các phần tử hiển thị số lượng giỏ hàng
     cartCountElements.forEach(element => {
-        if (currentUser && totalItems > 0) {
-            element.textContent = totalItems;
-            element.style.display = 'inline';
-        } else {
-            element.style.display = 'none';
-        }
+        element.textContent = totalItems;
     });
 }
 

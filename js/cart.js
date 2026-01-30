@@ -1,17 +1,5 @@
-[file content begin]
 // Khởi tạo trang giỏ hàng
 document.addEventListener('DOMContentLoaded', function() {
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        showNotification('Vui lòng đăng nhập để xem giỏ hàng!', 'error');
-        // Chuyển hướng đến trang đăng nhập sau 1.5 giây
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
-        return;
-    }
-    
     // Tải giỏ hàng
     loadCart();
     
@@ -277,17 +265,6 @@ function applyCoupon() {
 
 // Thanh toán
 function checkout() {
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        showNotification('Vui lòng đăng nhập để thanh toán!', 'error');
-        // Chuyển hướng đến trang đăng nhập sau 1.5 giây
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
-        return;
-    }
-    
     // Lấy giỏ hàng từ localStorage
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -508,17 +485,6 @@ function createRecommendedProductCard(product) {
 
 // Thêm sản phẩm vào giỏ hàng (tương tự hàm trong main.js)
 function addToCart(productId) {
-    // Kiểm tra đăng nhập
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (!currentUser) {
-        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'error');
-        // Chuyển hướng đến trang đăng nhập sau 1.5 giây
-        setTimeout(() => {
-            window.location.href = 'login.html';
-        }, 1500);
-        return;
-    }
-    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
