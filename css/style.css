@@ -287,7 +287,6 @@ nav {
 /* Products Section */
 .products {
     padding: 80px 0;
-    background-color: var(--light-gray);
 }
 
 .filter-buttons {
