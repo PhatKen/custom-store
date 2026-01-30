@@ -1,3 +1,8 @@
+// Kiểm tra người dùng đã đăng nhập hay chưa
+function isUserLoggedIn() {
+    return JSON.parse(localStorage.getItem('currentUser')) !== null;
+}
+
 // Khởi tạo trang giỏ hàng
 document.addEventListener('DOMContentLoaded', function() {
     // Tải giỏ hàng
@@ -458,6 +463,9 @@ function createRecommendedProductCard(product) {
         'non': 'Nón'
     };
     
+    // Kiểm tra trạng thái đăng nhập
+    const loggedIn = isUserLoggedIn();
+    
     card.innerHTML = `
         <div class="product-image">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
@@ -467,24 +475,41 @@ function createRecommendedProductCard(product) {
             <h3 class="product-name">${product.name}</h3>
             <div class="product-price">${formattedPrice}</div>
             <div class="product-actions">
-                <button class="btn-add-to-cart" data-product-id="${product.id}">
-                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                </button>
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${product.id}">
+                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    </button>` 
+                    : 
+                    `<div class="btn-login-required">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </div>`
+                }
             </div>
         </div>
     `;
     
-    // Thêm sự kiện cho nút thêm vào giỏ
-    const addToCartBtn = card.querySelector('.btn-add-to-cart');
-    addToCartBtn.addEventListener('click', function() {
-        addToCart(product.id);
-    });
+    // Thêm sự kiện cho nút thêm vào giỏ nếu đã đăng nhập
+    if (loggedIn) {
+        const addToCartBtn = card.querySelector('.btn-add-to-cart');
+        addToCartBtn.addEventListener('click', function() {
+            addToCart(product.id);
+        });
+    }
     
     return card;
 }
 
 // Thêm sản phẩm vào giỏ hàng (tương tự hàm trong main.js)
 function addToCart(productId) {
+    // Kiểm tra người dùng đã đăng nhập chưa
+    if (!isUserLoggedIn()) {
+        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);

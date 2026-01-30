@@ -144,6 +144,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cập nhật header theo trạng thái đăng nhập
     updateUserHeader();
+    
+    // Cập nhật lại các nút thêm vào giỏ
+    updateProductButtons();
 });
 
 // Khởi tạo menu mobile
@@ -332,6 +335,11 @@ function displayProducts(products) {
 }
 
 // Tạo card sản phẩm
+// Kiểm tra người dùng đã đăng nhập hay chưa
+function isUserLoggedIn() {
+    return JSON.parse(localStorage.getItem('currentUser')) !== null;
+}
+
 function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -348,6 +356,9 @@ function createProductCard(product) {
         'non': 'Nón'
     };
     
+    // Kiểm tra trạng thái đăng nhập
+    const loggedIn = isUserLoggedIn();
+    
     card.innerHTML = `
         <div class="product-image">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
@@ -358,9 +369,15 @@ function createProductCard(product) {
             <p class="product-description">${product.description}</p>
             <div class="product-price">${formattedPrice}</div>
             <div class="product-actions">
-                <button class="btn-add-to-cart" data-product-id="${product.id}">
-                    <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                </button>
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${product.id}">
+                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    </button>` 
+                    : 
+                    `<div class="btn-login-required">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </div>`
+                }
                 <button class="btn-view" data-product-id="${product.id}">
                     <i class="fas fa-eye"></i> Xem chi tiết
                 </button>
@@ -368,11 +385,13 @@ function createProductCard(product) {
         </div>
     `;
     
-    // Thêm sự kiện cho nút thêm vào giỏ
-    const addToCartBtn = card.querySelector('.btn-add-to-cart');
-    addToCartBtn.addEventListener('click', function() {
-        addToCart(product.id);
-    });
+    // Thêm sự kiện cho nút thêm vào giỏ nếu đã đăng nhập
+    if (loggedIn) {
+        const addToCartBtn = card.querySelector('.btn-add-to-cart');
+        addToCartBtn.addEventListener('click', function() {
+            addToCart(product.id);
+        });
+    }
     
     // Thêm sự kiện cho nút xem chi tiết
     const viewBtn = card.querySelector('.btn-view');
@@ -385,6 +404,15 @@ function createProductCard(product) {
 
 // Thêm sản phẩm vào giỏ hàng
 function addToCart(productId) {
+    // Kiểm tra người dùng đã đăng nhập chưa
+    if (!isUserLoggedIn()) {
+        showNotification('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1500);
+        return;
+    }
+    
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
@@ -764,6 +792,8 @@ function updateUserHeader() {
                 localStorage.removeItem('currentUser');
                 updateUserHeader();
                 updateCartCount();
+                // Cập nhật lại các nút thêm vào giỏ
+                updateProductButtons();
                 showNotification('Đã đăng xuất thành công!', 'success');
                 setTimeout(() => {
                     window.location.href = 'index.html';
@@ -795,4 +825,49 @@ function updateUserHeader() {
         // Khởi tạo lại menu mobile
         initMobileMenu();
     }
+}
+
+// Cập nhật lại các nút thêm vào giỏ trong các thẻ sản phẩm
+function updateProductButtons() {
+    const productCards = document.querySelectorAll('.product-card');
+    const loggedIn = isUserLoggedIn();
+    
+    productCards.forEach(card => {
+        const productActions = card.querySelector('.product-actions');
+        if (!productActions) return;
+        
+        // Lấy ID sản phẩm
+        const viewBtn = card.querySelector('.btn-view');
+        const productId = viewBtn?.getAttribute('data-product-id');
+        
+        if (!productId) return;
+        
+        // Tìm phần tử nút thêm vào giỏ hoặc text "Hãy đăng nhập"
+        const existingButton = productActions.querySelector('.btn-add-to-cart, .btn-login-required');
+        
+        if (!existingButton) return;
+        
+        if (loggedIn) {
+            // Nếu đã đăng nhập, tạo nút "Thêm vào giỏ"
+            if (existingButton.classList.contains('btn-login-required')) {
+                const newButton = document.createElement('button');
+                newButton.className = 'btn-add-to-cart';
+                newButton.setAttribute('data-product-id', productId);
+                newButton.innerHTML = '<i class="fas fa-shopping-cart"></i> Thêm vào giỏ';
+                newButton.addEventListener('click', function() {
+                    addToCart(productId);
+                });
+                existingButton.replaceWith(newButton);
+            }
+        } else {
+            // Nếu chưa đăng nhập, tạo div "Hãy đăng nhập"
+            if (existingButton.classList.contains('btn-add-to-cart')) {
+                const newDiv = document.createElement('div');
+                newDiv.className = 'btn-login-required';
+                newDiv.setAttribute('data-product-id', productId);
+                newDiv.innerHTML = '<i class="fas fa-lock"></i> Hãy đăng nhập';
+                existingButton.replaceWith(newDiv);
+            }
+        }
+    });
 }
