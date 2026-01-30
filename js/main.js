@@ -129,6 +129,8 @@ initializeSampleData();
 
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM đã được tải xong');
+    
     // Khởi tạo menu mobile
     initMobileMenu();
     
@@ -159,8 +161,14 @@ function initMobileMenu() {
     if (menuToggle) {
         menuToggle.addEventListener('click', function() {
             navLinks.classList.toggle('active');
-            menuToggle.querySelector('i').classList.toggle('fa-bars');
-            menuToggle.querySelector('i').classList.toggle('fa-times');
+            const icon = menuToggle.querySelector('i');
+            if (icon.classList.contains('fa-bars')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
         });
     }
 }
@@ -168,7 +176,7 @@ function initMobileMenu() {
 // Khởi tạo bộ lọc sản phẩm
 function initProductFilter() {
     const filterButtons = document.querySelectorAll('.filter-btn');
-    const productsContainer = document.getElementById('products-container');
+    console.log('Tìm thấy', filterButtons.length, 'nút lọc');
     
     filterButtons.forEach(button => {
         button.addEventListener('click', function() {
@@ -185,6 +193,7 @@ function initProductFilter() {
             
             // Lọc sản phẩm
             const filter = this.getAttribute('data-filter');
+            console.log('Lọc sản phẩm theo:', filter);
             filterProducts(filter);
         });
     });
@@ -193,10 +202,12 @@ function initProductFilter() {
 // Khởi tạo lọc sản phẩm theo danh mục khi click vào danh mục
 function initCategoryFilter() {
     const categoryCards = document.querySelectorAll('.category-card');
+    console.log('Tìm thấy', categoryCards.length, 'danh mục');
     
     categoryCards.forEach(card => {
         card.addEventListener('click', function() {
             const category = this.getAttribute('data-category');
+            console.log('Danh mục được click:', category);
             
             // Xóa active class khỏi tất cả các nút lọc
             document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -254,6 +265,7 @@ function activateCategoryFilter(category) {
 // Lọc sản phẩm theo danh mục
 function filterProducts(category) {
     const productCards = document.querySelectorAll('.product-card');
+    console.log('Tìm thấy', productCards.length, 'sản phẩm để lọc');
     
     productCards.forEach(card => {
         const cardCategory = card.getAttribute('data-category');
@@ -277,14 +289,17 @@ function filterProducts(category) {
 // Tải sản phẩm từ localStorage hoặc tạo dữ liệu mẫu
 function loadProducts() {
     const productsContainer = document.getElementById('products-container');
+    console.log('Products container:', productsContainer);
     
     // Lấy sản phẩm từ localStorage
     let products = JSON.parse(localStorage.getItem('products')) || [];
+    console.log('Số lượng sản phẩm từ localStorage:', products.length);
     
     // Nếu không có sản phẩm trong localStorage, tạo dữ liệu mẫu
     if (products.length === 0) {
         products = getSampleProducts();
         localStorage.setItem('products', JSON.stringify(products));
+        console.log('Đã tạo dữ liệu sản phẩm mẫu');
     }
     
     // Hiển thị sản phẩm
@@ -381,8 +396,12 @@ function getSampleProducts() {
 function displayProducts(products) {
     const productsContainer = document.getElementById('products-container');
     
-    if (!productsContainer) return;
+    if (!productsContainer) {
+        console.error('Không tìm thấy products-container');
+        return;
+    }
     
+    console.log('Đang hiển thị', products.length, 'sản phẩm');
     productsContainer.innerHTML = '';
     
     if (products.length === 0) {
@@ -781,7 +800,12 @@ function updateUserHeader() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const navActions = document.getElementById('nav-actions');
     
-    if (!navActions) return;
+    if (!navActions) {
+        console.error('Không tìm thấy nav-actions');
+        return;
+    }
+    
+    console.log('Current user:', currentUser);
     
     if (currentUser) {
         // Người dùng đã đăng nhập
@@ -855,6 +879,7 @@ function updateUserHeader() {
         initMobileMenu();
     } else {
         // Người dùng chưa đăng nhập
+        console.log('Hiển thị nút đăng ký/đăng nhập');
         navActions.innerHTML = `
             <a href="register.html" class="btn-register">Đăng ký</a>
             <a href="login.html" class="btn-login">Đăng nhập</a>
