@@ -1,3 +1,5 @@
+[file name]: style.css
+[file content begin]
 /* style.css - Hoàn chỉnh */
 
 :root {
@@ -256,11 +258,52 @@ nav {
     box-shadow: var(--shadow);
     transition: var(--transition);
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+.category-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--primary-color);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.category-card:hover::after {
+    transform: scaleX(1);
+}
+
+.category-card.category-active::after {
+    transform: scaleX(1);
 }
 
 .category-card:hover {
     transform: translateY(-10px);
     box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.category-card.category-active {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.category-card.category-active .category-icon {
+    background-color: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.category-card.category-active h3 {
+    color: var(--primary-color);
+}
+
+.category-card:active {
+    transform: translateY(-5px);
 }
 
 .category-icon {
@@ -274,11 +317,13 @@ nav {
     margin: 0 auto 20px;
     font-size: 32px;
     color: var(--primary-color);
+    transition: var(--transition);
 }
 
 .category-card h3 {
     font-size: 22px;
     margin-bottom: 10px;
+    transition: var(--transition);
 }
 
 .category-card p {
@@ -328,7 +373,7 @@ nav {
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--shadow);
-    transition: var(--transition);
+    transition: all 0.3s ease;
     opacity: 1;
     transform: translateY(0);
     animation: fadeInUp 0.5s ease forwards;
@@ -1427,3 +1472,4 @@ footer {
         padding: 20px;
     }
 }
+[file content end]
