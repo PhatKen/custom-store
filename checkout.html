@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thanh toán - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="index.html#categories">Danh mục</a></li>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Checkout Section -->
+    <section class="checkout-section">
+        <div class="container">
+            <h1 class="page-title">Thanh Toán Đơn Hàng</h1>
+            
+            <div class="checkout-container">
+                <!-- Delivery Information -->
+                <div class="checkout-form-container">
+                    <h2>Thông Tin Giao Hàng</h2>
+                    
+                    <form id="checkout-form">
+                        <!-- Customer Info -->
+                        <div class="form-section">
+                            <div class="form-group">
+                                <label for="fullname">Họ và tên người nhận *</label>
+                                <input type="text" id="fullname" required placeholder="Nhập họ và tên">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="phone">Số điện thoại người nhận *</label>
+                                <input type="tel" id="phone" required placeholder="Nhập số điện thoại">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="address">Địa chỉ giao hàng *</label>
+                                <textarea id="address" rows="3" required placeholder="Nhập địa chỉ giao hàng"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Order Summary -->
+                        <div class="form-section">
+                            <h3>Tóm Tắt Đơn Hàng</h3>
+                            
+                            <div class="order-items" id="order-items">
+                                <!-- Items sẽ được thêm bằng JavaScript -->
+                            </div>
+                            
+                            <div class="order-summary-details">
+                                <div class="summary-row">
+                                    <span>Tạm tính:</span>
+                                    <span id="subtotal-checkout">0 VNĐ</span>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <span>Phí vận chuyển:</span>
+                                    <span id="shipping-fee-checkout">0 VNĐ</span>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <label for="discount-code">Mã giảm giá (nếu có):</label>
+                                    <div class="discount-input-group">
+                                        <input type="text" id="discount-code" placeholder="Nhập mã giảm giá">
+                                        <button type="button" id="apply-discount-btn" class="btn-apply-discount">Áp dụng</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="summary-row">
+                                    <span>Giảm giá:</span>
+                                    <span id="discount-checkout">0 VNĐ</span>
+                                </div>
+                                
+                                <div class="summary-row total">
+                                    <span>Tổng tiền phải trả:</span>
+                                    <span id="total-checkout">0 VNĐ</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions checkout-actions">
+                            <button type="button" id="back-btn" class="btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Quay lại
+                            </button>
+                            <button type="submit" class="btn-primary btn-checkout-submit">
+                                <i class="fas fa-credit-card"></i> Tiến Hành Thanh Toán
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Custom Store</h3>
+                    <p>Cửa hàng thời trang trực tuyến hàng đầu với các sản phẩm chất lượng cao.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên kết nhanh</h4>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên hệ</h4>
+                    <p>Email: info@customstore.com</p>
+                    <p>Điện thoại: 0123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Custom Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Payment Method Modal -->
+    <div id="payment-modal" class="modal">
+        <div class="modal-content payment-modal-content">
+            <div class="modal-header">
+                <h3>Chọn Phương Thức Thanh Toán</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="payment-methods">
+                    <button type="button" class="payment-method-option" data-method="cod">
+                        <div class="payment-method-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <h4>Thanh Toán Khi Nhận Hàng</h4>
+                            <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <button type="button" class="payment-method-option" data-method="online">
+                        <div class="payment-method-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <h4>Thanh Toán Online</h4>
+                            <p>Thanh toán qua ví điện tử hoặc ngân hàng</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Online Payment Options Modal -->
+    <div id="online-payment-modal" class="modal">
+        <div class="modal-content payment-modal-content">
+            <div class="modal-header">
+                <h3>Chọn Phương Thức Thanh Toán Online</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="payment-methods">
+                    <button type="button" class="payment-method-option" data-online-method="momo">
+                        <div class="payment-method-icon" style="background: linear-gradient(135deg, #a6192f, #c1272d);">
+                            <i class="fas fa-wallet" style="color: white;"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <h4>Ví Momo</h4>
+                            <p>Thanh toán qua ứng dụng Momo</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <button type="button" class="payment-method-option" data-online-method="bank">
+                        <div class="payment-method-icon">
+                            <i class="fas fa-university"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <h4>Chuyển Khoản Ngân Hàng</h4>
+                            <p>Thanh toán qua chuyển khoản ngân hàng</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <button type="button" class="payment-method-option" data-online-method="visa">
+                        <div class="payment-method-icon" style="background: linear-gradient(135deg, #1434CB, #0070f0);">
+                            <i class="fas fa-credit-card" style="color: white;"></i>
+                        </div>
+                        <div class="payment-method-info">
+                            <h4>Thẻ Visa/MasterCard</h4>
+                            <p>Thanh toán bằng thẻ tín dụng quốc tế</p>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/checkout.js"></script>
+</body>
+</html>
