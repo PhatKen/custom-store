@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao Hàng - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="index.html#categories">Danh mục</a></li>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Delivery Status Section -->
+    <section class="delivery-section">
+        <div class="container">
+            <h1 class="page-title">Trạng Thái Giao Hàng</h1>
+            
+            <div class="delivery-container">
+                <!-- Delivery Status Card -->
+                <div class="delivery-status-card">
+                    <div class="status-header">
+                        <div class="status-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h2>Đơn Hàng Đã Được Xác Nhận</h2>
+                    </div>
+                    
+                    <div class="order-info">
+                        <div class="info-row">
+                            <span class="info-label">Mã đơn hàng:</span>
+                            <span class="info-value" id="order-id-display">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Ngày đặt hàng:</span>
+                            <span class="info-value" id="order-date-display">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Tổng giá trị:</span>
+                            <span class="info-value" id="order-total-display">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Timeline -->
+                    <div class="delivery-timeline">
+                        <h3>Quá Trình Giao Hàng</h3>
+                        
+                        <div class="timeline">
+                            <div class="timeline-item completed">
+                                <div class="timeline-point">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Đơn hàng đã được xác nhận</h4>
+                                    <p id="confirmed-time">--</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item active">
+                                <div class="timeline-point">
+                                    <i class="fas fa-box"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Đơn hàng đang được chuẩn bị</h4>
+                                    <p>Cửa hàng đang chuẩn bị hàng hóa cho bạn</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-point">
+                                    <i class="fas fa-truck"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Đơn hàng đang được giao</h4>
+                                    <p>Hàng đang trong quá trình vận chuyển</p>
+                                </div>
+                            </div>
+
+                            <div class="timeline-item">
+                                <div class="timeline-point">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <h4>Đơn hàng đã được giao</h4>
+                                    <p>Giao hàng thành công</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Receiver Info -->
+                    <div class="receiver-info">
+                        <h3>Thông Tin Người Nhận</h3>
+                        <div class="info-row">
+                            <span class="info-label">Họ tên:</span>
+                            <span class="info-value" id="receiver-name">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Số điện thoại:</span>
+                            <span class="info-value" id="receiver-phone">--</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Địa chỉ:</span>
+                            <span class="info-value" id="receiver-address">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Order Items -->
+                    <div class="order-items-detail">
+                        <h3>Chi Tiết Đơn Hàng</h3>
+                        <div class="items-list" id="delivery-items-list">
+                            <!-- Items sẽ được thêm bằng JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="delivery-actions">
+                        <a href="index.html" class="btn-primary">
+                            <i class="fas fa-home"></i> Về Trang Chủ
+                        </a>
+                        <a href="products.html" class="btn-secondary">
+                            <i class="fas fa-shopping-bag"></i> Tiếp Tục Mua Sắm
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Custom Store</h3>
+                    <p>Cửa hàng thời trang trực tuyến hàng đầu với các sản phẩm chất lượng cao.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên kết nhanh</h4>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Liên hệ</h4>
+                    <p>Email: info@customstore.com</p>
+                    <p>Điện thoại: 0123 456 789</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Custom Store. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/delivery.js"></script>
+</body>
+</html>
