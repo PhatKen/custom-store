@@ -101,20 +101,45 @@ function updateCartSummary(cart) {
     // Tính tổng phụ
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
     
-    // Phí vận chuyển cố định
-    const shippingFee = 30000;
-    
-    // Giảm giá (tạm thời để 0)
-    const discount = 0;
-    
-    // Tổng cộng
-    const total = subtotal + shippingFee - discount;
-    
     // Cập nhật DOM
     document.getElementById('subtotal').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('shipping-fee').textContent = shippingFee.toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('discount').textContent = discount.toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('total').textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+    document.getElementById('total').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
+    
+    // Cập nhật các nút hành động
+    updateCartActions(cart);
+}
+
+// Cập nhật các nút hành động trong giỏ hàng
+function updateCartActions(cart) {
+    const cartActionsContainer = document.getElementById('cart-actions');
+    
+    if (!cartActionsContainer) return;
+    
+    cartActionsContainer.innerHTML = '';
+    
+    if (cart.length === 0) {
+        // Nếu giỏ hàng trống, hiển thị nút "Tiếp tục mua sắm"
+        cartActionsContainer.innerHTML = `
+            <a href="products.html" class="btn-primary btn-continue-shopping">
+                <i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm
+            </a>
+        `;
+    } else {
+        // Nếu có sản phẩm, hiển thị 2 nút "Thanh toán" và "Tiếp tục mua sắm"
+        cartActionsContainer.innerHTML = `
+            <button id="checkout-btn" class="btn-primary btn-checkout">
+                <i class="fas fa-credit-card"></i> Thanh toán
+            </button>
+            <a href="products.html" class="btn-secondary btn-continue-shopping">
+                <i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm
+            </a>
+        `;
+        
+        // Gán sự kiện cho nút thanh toán
+        document.getElementById('checkout-btn').addEventListener('click', function() {
+            goToCheckout();
+        });
+    }
 }
 
 // Khởi tạo các sự kiện giỏ hàng
@@ -143,17 +168,7 @@ function initCartEvents() {
         }
     });
     
-    // Sự kiện áp dụng mã giảm giá
-    const applyCouponBtn = document.getElementById('apply-coupon');
-    if (applyCouponBtn) {
-        applyCouponBtn.addEventListener('click', applyCoupon);
-    }
-    
-    // Sự kiện thanh toán
-    const checkoutBtn = document.getElementById('checkout-btn');
-    if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', checkout);
-    }
+    // Sự kiện áp dụng mã giảm giá (được cập nhật trong checkout.js)
     
     // Sự kiện đóng modal
     const closeModalButtons = document.querySelectorAll('.close-modal');
@@ -594,4 +609,17 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
+}
+
+// Chuyển hướng đến trang thanh toán
+function goToCheckout() {
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    if (cart.length === 0) {
+        showNotification('Giỏ hàng của bạn đang trống!', 'error');
+        return;
+    }
+    
+    // Chuyển hướng đến trang checkout
+    window.location.href = 'checkout.html';
 }
