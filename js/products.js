@@ -362,12 +362,19 @@ function addToCart(productId) {
     showNotification(`Đã thêm "${product.name}" vào giỏ hàng!`, 'success');
 }
 
-// Xem chi tiết sản phẩm
+// Xem chi tiết sản phẩm - Kế thừa chức năng từ main.js
 function viewProductDetail(productId) {
-    // Lưu ID sản phẩm vào sessionStorage
-    sessionStorage.setItem('selectedProductId', productId);
-    // Chuyển hướng đến trang chi tiết (hoặc hiển thị modal)
-    showNotification('Tính năng xem chi tiết sẽ được cập nhật sớm!', 'info');
+    // Lấy sản phẩm từ localStorage
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(p => p.id == productId);
+    
+    if (!product) {
+        showNotification('Sản phẩm không tồn tại!', 'error');
+        return;
+    }
+    
+    // Hiển thị modal chi tiết sản phẩm (giống trang chủ)
+    showProductDetailModal(product);
 }
 
 // Hiển thị thông báo
