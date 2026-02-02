@@ -23,32 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tạo tìm kiếm và lọc
     initSearchAndFilter();
-    
-    // Khởi tạo sự kiện modal
-    initModalEvents();
 });
-
-// Khởi tạo sự kiện modal
-function initModalEvents() {
-    // Đóng modal khi click vào nút đóng
-    document.querySelectorAll('.close-modal').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modal = this.closest('.modal');
-            if (modal) {
-                modal.style.display = 'none';
-            }
-        });
-    });
-    
-    // Đóng modal khi click ra ngoài modal
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.style.display = 'none';
-            }
-        });
-    });
-}
 
 // Khởi tạo navigation admin
 function initAdminNavigation() {
@@ -572,12 +547,9 @@ function displayOrdersTable(orders) {
         const orderDate = new Date(order.createdAt);
         const formattedDate = orderDate.toLocaleDateString('vi-VN');
         
-        // Lấy tên khách hàng từ deliveryInfo hoặc customerName
-        const customerName = order.deliveryInfo?.fullname || order.customerName || 'Khách hàng';
-        
         row.innerHTML = `
             <td>#${order.id}</td>
-            <td>${customerName}</td>
+            <td>${order.customerName}</td>
             <td>${formattedDate}</td>
             <td>${formattedTotal}</td>
             <td>
@@ -587,22 +559,14 @@ function displayOrdersTable(orders) {
             </td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-view view-order-btn" data-order-id="${order.id}">
-                        <i class="fas fa-eye"></i> Xem
+                    <button class="btn-view" data-order-id="${order.id}">
+                        <i class="fas fa-eye"></i>
                     </button>
                 </div>
             </td>
         `;
         
         tbody.appendChild(row);
-    });
-    
-    // Gán sự kiện click xem chi tiết
-    document.querySelectorAll('.view-order-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const orderId = this.getAttribute('data-order-id');
-            viewOrderDetail(orderId);
-        });
     });
 }
 
@@ -809,96 +773,4 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
-}
-
-// Xem chi tiết đơn hàng
-function viewOrderDetail(orderId) {
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    const order = orders.find(o => o.id === orderId);
-    
-    if (!order) {
-        showNotification('Không tìm thấy đơn hàng!', 'error');
-        return;
-    }
-    
-    // Hiển thị thông tin khách hàng
-    document.getElementById('modal-order-id').textContent = order.id;
-    document.getElementById('modal-customer-name').textContent = order.deliveryInfo?.fullname || '--';
-    document.getElementById('modal-customer-phone').textContent = order.deliveryInfo?.phone || '--';
-    document.getElementById('modal-customer-address').textContent = order.deliveryInfo?.address || '--';
-    
-    // Hiển thị thông tin đơn hàng
-    const orderDate = new Date(order.createdAt);
-    const formattedDate = orderDate.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-    document.getElementById('modal-order-date').textContent = formattedDate;
-    document.getElementById('modal-payment-method').textContent = order.paymentMethodName || 'Không xác định';
-    document.getElementById('modal-order-status').textContent = getOrderStatusText(order.status);
-    
-    // Hiển thị sản phẩm
-    const itemsContainer = document.getElementById('modal-order-items');
-    itemsContainer.innerHTML = '';
-    
-    order.items.forEach(item => {
-        const itemTotal = item.price * item.quantity;
-        const itemElement = document.createElement('div');
-        itemElement.className = 'order-item-detail';
-        itemElement.innerHTML = `
-            <div class="item-image">
-                <img src="${item.image}" alt="${item.name}">
-            </div>
-            <div class="item-info">
-                <h5>${item.name}</h5>
-                <p>Số lượng: ${item.quantity}</p>
-                <p>Đơn giá: ${item.price.toLocaleString('vi-VN')} ₫</p>
-            </div>
-            <div class="item-total">
-                ${itemTotal.toLocaleString('vi-VN')} ₫
-            </div>
-        `;
-        itemsContainer.appendChild(itemElement);
-    });
-    
-    // Hiển thị tóm tắt thanh toán
-    document.getElementById('modal-subtotal').textContent = order.subtotal.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('modal-shipping').textContent = order.shippingFee.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('modal-discount').textContent = order.discount.toLocaleString('vi-VN') + ' ₫';
-    document.getElementById('modal-total').textContent = order.total.toLocaleString('vi-VN') + ' ₫';
-    
-    // Gán sự kiện xóa đơn hàng
-    const deleteBtn = document.getElementById('delete-order-btn');
-    if (deleteBtn) {
-        deleteBtn.onclick = function() {
-            deleteOrder(orderId);
-        };
-    }
-    
-    // Hiển thị modal
-    document.getElementById('order-detail-modal').style.display = 'flex';
-}
-
-// Xóa đơn hàng
-function deleteOrder(orderId) {
-    // Xác nhận xóa
-    if (!confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?')) {
-        return;
-    }
-    
-    let orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders = orders.filter(o => o.id !== orderId);
-    
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    // Đóng modal
-    document.getElementById('order-detail-modal').style.display = 'none';
-    
-    // Reload danh sách đơn hàng
-    loadOrders();
-    
-    showNotification('Xóa đơn hàng thành công!', 'success');
 }
