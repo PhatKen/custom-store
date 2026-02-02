@@ -1247,7 +1247,7 @@ footer {
 }
 
 .user-btn {
-    background: none;
+    background-color: rgba(255, 255, 255, 0.1);
     border: none;
     padding: 8px 15px;
     border-radius: var(--border-radius);
@@ -1257,7 +1257,6 @@ footer {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--dark-color);
     transition: var(--transition);
 }
 
