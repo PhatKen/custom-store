@@ -1258,6 +1258,7 @@ footer {
     align-items: center;
     gap: 8px;
     transition: var(--transition);
+    color: white;
 }
 
 .user-btn:hover {
