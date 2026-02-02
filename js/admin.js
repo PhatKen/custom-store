@@ -563,8 +563,11 @@ function displayOrdersTable(orders) {
             </td>
             <td>
                 <div class="action-buttons">
-                    <button class="btn-view" data-order-id="${order.id}">
+                    <button class="btn-view" data-order-id="${order.id}" title="Xem chi tiết">
                         <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-delete-order" data-order-id="${order.id}" title="Xóa đơn hàng">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
@@ -792,6 +795,13 @@ function initOrderDetailsModal() {
             const orderId = viewBtn.getAttribute('data-order-id');
             showOrderDetails(orderId);
         }
+        
+        // Thêm event listener cho nút xóa đơn hàng
+        const deleteBtn = e.target.closest('.btn-delete-order[data-order-id]');
+        if (deleteBtn) {
+            const orderId = deleteBtn.getAttribute('data-order-id');
+            deleteOrder(orderId);
+        }
     });
     
     // Đóng modal
@@ -877,6 +887,54 @@ function showOrderDetails(orderId) {
     document.getElementById('modal-discount').textContent = (order.discount || 0).toLocaleString('vi-VN') + ' ₫';
     document.getElementById('modal-total').textContent = (order.total || 0).toLocaleString('vi-VN') + ' ₫';
     
+    // Thêm event listener cho nút xóa trong modal
+    const deleteBtn = document.getElementById('delete-order-modal-btn');
+    if (deleteBtn) {
+        deleteBtn.onclick = function() {
+            deleteOrder(orderId);
+        };
+    }
+    
     // Hiển thị modal
     modal.style.display = 'flex';
+}
+
+// Xóa đơn hàng
+function deleteOrder(orderId) {
+    // Xác nhận trước khi xóa
+    if (!confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${orderId} không?\n\nHành động này không thể hoàn tác!`)) {
+        return;
+    }
+    
+    // Lấy danh sách đơn hàng
+    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+    
+    // Tìm vị trí đơn hàng
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+    
+    if (orderIndex === -1) {
+        showNotification('Không tìm thấy đơn hàng', 'error');
+        return;
+    }
+    
+    // Xóa đơn hàng
+    orders.splice(orderIndex, 1);
+    
+    // Lưu lại danh sách
+    localStorage.setItem('orders', JSON.stringify(orders));
+    
+    // Hiển thị thông báo thành công
+    showNotification('Xóa đơn hàng thành công', 'success');
+    
+    // Đóng modal chi tiết nếu đang mở
+    const modal = document.getElementById('order-details-modal');
+    if (modal && modal.style.display === 'flex') {
+        modal.style.display = 'none';
+    }
+    
+    // Tải lại danh sách đơn hàng
+    loadOrders();
+    
+    // Cập nhật dashboard
+    loadDashboardData();
 }
