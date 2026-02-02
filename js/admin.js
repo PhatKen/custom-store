@@ -518,6 +518,7 @@ function generateProductId() {
 function loadOrders() {
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
     displayOrdersTable(orders);
+    initOrderDetailsModal();
 }
 
 // Hiển thị bảng đơn hàng
@@ -547,9 +548,12 @@ function displayOrdersTable(orders) {
         const orderDate = new Date(order.createdAt);
         const formattedDate = orderDate.toLocaleDateString('vi-VN');
         
+        // Lấy tên người nhận từ deliveryInfo hoặc customerName (để tương thích cũ)
+        const customerName = order.deliveryInfo?.fullname || order.customerName || 'N/A';
+        
         row.innerHTML = `
             <td>#${order.id}</td>
-            <td>${order.customerName}</td>
+            <td>${customerName}</td>
             <td>${formattedDate}</td>
             <td>${formattedTotal}</td>
             <td>
@@ -773,4 +777,106 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
+}
+
+// Khởi tạo modal chi tiết đơn hàng
+function initOrderDetailsModal() {
+    const modal = document.getElementById('order-details-modal');
+    
+    if (!modal) return;
+    
+    // Thêm event listener cho nút xem chi tiết
+    document.addEventListener('click', function(e) {
+        const viewBtn = e.target.closest('.btn-view[data-order-id]');
+        if (viewBtn) {
+            const orderId = viewBtn.getAttribute('data-order-id');
+            showOrderDetails(orderId);
+        }
+    });
+    
+    // Đóng modal
+    const closeButtons = modal.querySelectorAll('.close-modal');
+    closeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    });
+    
+    // Click ra ngoài để đóng
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+        }
+    });
+}
+
+// Hiển thị chi tiết đơn hàng
+function showOrderDetails(orderId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const order = orders.find(o => o.id === orderId);
+    
+    if (!order) {
+        showNotification('Không tìm thấy đơn hàng', 'error');
+        return;
+    }
+    
+    const modal = document.getElementById('order-details-modal');
+    
+    // Hiển thị thông tin chung
+    const orderDate = new Date(order.createdAt);
+    const formattedDate = orderDate.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    document.getElementById('modal-order-id').textContent = order.id;
+    document.getElementById('modal-order-date').textContent = formattedDate;
+    document.getElementById('modal-order-status').textContent = getOrderStatusText(order.status);
+    document.getElementById('modal-payment-method').textContent = order.paymentMethodName || 'N/A';
+    
+    // Hiển thị thông tin giao hàng
+    if (order.deliveryInfo) {
+        document.getElementById('modal-customer-name').textContent = order.deliveryInfo.fullname || 'N/A';
+        document.getElementById('modal-customer-phone').textContent = order.deliveryInfo.phone || 'N/A';
+        document.getElementById('modal-customer-address').textContent = order.deliveryInfo.address || 'N/A';
+    } else {
+        document.getElementById('modal-customer-name').textContent = 'N/A';
+        document.getElementById('modal-customer-phone').textContent = 'N/A';
+        document.getElementById('modal-customer-address').textContent = 'N/A';
+    }
+    
+    // Hiển thị sản phẩm
+    const itemsContainer = document.getElementById('modal-order-items');
+    itemsContainer.innerHTML = '';
+    
+    if (order.items && order.items.length > 0) {
+        order.items.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            const itemElement = document.createElement('div');
+            itemElement.className = 'order-item-detail';
+            itemElement.innerHTML = `
+                <div class="item-info">
+                    <span class="item-name">${item.name}</span>
+                    <span class="item-qty">Số lượng: ${item.quantity}</span>
+                </div>
+                <div class="item-price">
+                    <span class="unit-price">${item.price.toLocaleString('vi-VN')} ₫</span>
+                    <span class="total-price">${itemTotal.toLocaleString('vi-VN')} ₫</span>
+                </div>
+            `;
+            itemsContainer.appendChild(itemElement);
+        });
+    }
+    
+    // Hiển thị tổng tiền
+    document.getElementById('modal-subtotal').textContent = (order.subtotal || 0).toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('modal-shipping').textContent = (order.shippingFee || 0).toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('modal-discount').textContent = (order.discount || 0).toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('modal-total').textContent = (order.total || 0).toLocaleString('vi-VN') + ' ₫';
+    
+    // Hiển thị modal
+    modal.style.display = 'flex';
 }
