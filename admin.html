@@ -285,6 +285,88 @@
         </div>
     </div>
 
+    <!-- Order Details Modal -->
+    <div id="order-details-modal" class="modal">
+        <div class="modal-content order-details-modal">
+            <div class="modal-header">
+                <h3>Chi Tiết Đơn Hàng</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="order-details">
+                    <!-- Thông tin chung -->
+                    <div class="details-section">
+                        <h4>Thông Tin Đơn Hàng</h4>
+                        <div class="detail-row">
+                            <span class="label">Mã đơn hàng:</span>
+                            <span class="value" id="modal-order-id">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Ngày đặt:</span>
+                            <span class="value" id="modal-order-date">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Trạng thái:</span>
+                            <span class="value" id="modal-order-status">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Phương thức thanh toán:</span>
+                            <span class="value" id="modal-payment-method">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin người nhận -->
+                    <div class="details-section">
+                        <h4>Thông Tin Giao Hàng</h4>
+                        <div class="detail-row">
+                            <span class="label">Họ tên người nhận:</span>
+                            <span class="value" id="modal-customer-name">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Số điện thoại:</span>
+                            <span class="value" id="modal-customer-phone">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Địa chỉ:</span>
+                            <span class="value" id="modal-customer-address">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Sản phẩm -->
+                    <div class="details-section">
+                        <h4>Sản Phẩm</h4>
+                        <div class="order-items-detail" id="modal-order-items">
+                            <!-- Items sẽ được thêm bằng JavaScript -->
+                        </div>
+                    </div>
+
+                    <!-- Tổng tiền -->
+                    <div class="details-section summary">
+                        <div class="detail-row">
+                            <span class="label">Tạm tính:</span>
+                            <span class="value" id="modal-subtotal">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Phí vận chuyển:</span>
+                            <span class="value" id="modal-shipping">--</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">Giảm giá:</span>
+                            <span class="value" id="modal-discount">--</span>
+                        </div>
+                        <div class="detail-row total">
+                            <span class="label">Tổng cộng:</span>
+                            <span class="value" id="modal-total">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary close-modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/admin.js"></script>
     <script>
         // Cập nhật header cho trang admin
