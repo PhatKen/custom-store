@@ -1247,7 +1247,7 @@ footer {
 }
 
 .user-btn {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(109, 93, 252, 0.1);
     border: none;
     padding: 8px 15px;
     border-radius: var(--border-radius);
@@ -1258,11 +1258,11 @@ footer {
     align-items: center;
     gap: 8px;
     transition: var(--transition);
-    color: white;
+    color: var(--dark-color);
 }
 
 .user-btn:hover {
-    background-color: var(--light-gray);
+    background-color: rgba(109, 93, 252, 0.2);
 }
 
 .user-dropdown {
