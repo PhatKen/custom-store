@@ -63,27 +63,15 @@
                             <span>Tạm tính</span>
                             <span id="subtotal">0 VNĐ</span>
                         </div>
-                        <div class="summary-row">
-                            <span>Phí vận chuyển</span>
-                            <span id="shipping-fee">30,000 VNĐ</span>
-                        </div>
-                        <div class="summary-row">
-                            <span>Giảm giá</span>
-                            <span id="discount">0 VNĐ</span>
-                        </div>
                         <div class="summary-row total">
                             <span>Tổng cộng</span>
-                            <span id="total">30,000 VNĐ</span>
+                            <span id="total">0 VNĐ</span>
                         </div>
                     </div>
                     
-                    <div class="coupon-section">
-                        <input type="text" id="coupon-code" placeholder="Mã giảm giá">
-                        <button id="apply-coupon">Áp dụng</button>
+                    <div class="cart-actions" id="cart-actions">
+                        <!-- Các nút sẽ được thêm bằng JavaScript khi có sản phẩm -->
                     </div>
-                    
-                    <button id="checkout-btn" class="btn-checkout">Tiến hành thanh toán</button>
-                    <a href="index.html#products" class="continue-shopping">Tiếp tục mua sắm</a>
                 </div>
             </div>
             
@@ -95,110 +83,6 @@
             </div>
         </div>
     </section>
-
-    <!-- Checkout Modal -->
-    <div id="checkout-modal" class="modal">
-        <div class="modal-content checkout-modal">
-            <div class="modal-header">
-                <h3>Thanh toán đơn hàng</h3>
-                <span class="close-modal">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="checkout-form">
-                    <div class="form-section">
-                        <h4>Thông tin giao hàng</h4>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="fullname">Họ và tên *</label>
-                                <input type="text" id="fullname" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Số điện thoại *</label>
-                                <input type="tel" id="phone" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="address">Địa chỉ giao hàng *</label>
-                            <textarea id="address" rows="2" required></textarea>
-                        </div>
-                    </div>
-                    
-                    <div class="form-section">
-                        <h4>Phương thức thanh toán</h4>
-                        <div class="payment-methods">
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="cod" checked>
-                                <div class="payment-content">
-                                    <i class="fas fa-money-bill-wave"></i>
-                                    <div>
-                                        <h5>Thanh toán khi nhận hàng (COD)</h5>
-                                        <p>Thanh toán bằng tiền mặt khi nhận hàng</p>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="banking">
-                                <div class="payment-content">
-                                    <i class="fas fa-university"></i>
-                                    <div>
-                                        <h5>Chuyển khoản ngân hàng</h5>
-                                        <p>Chuyển khoản qua tài khoản ngân hàng</p>
-                                    </div>
-                                </div>
-                            </label>
-                            <label class="payment-option">
-                                <input type="radio" name="payment" value="momo">
-                                <div class="payment-content">
-                                    <i class="fas fa-mobile-alt"></i>
-                                    <div>
-                                        <h5>Ví điện tử Momo</h5>
-                                        <p>Thanh toán qua ứng dụng Momo</p>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="order-summary">
-                        <h4>Tóm tắt đơn hàng</h4>
-                        <div class="summary-items" id="checkout-summary">
-                            <!-- Tóm tắt đơn hàng sẽ được thêm bằng JavaScript -->
-                        </div>
-                        <div class="summary-total">
-                            <span>Tổng cộng:</span>
-                            <span id="checkout-total">0 VNĐ</span>
-                        </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Xác nhận đơn hàng</button>
-                        <button type="button" class="btn-secondary close-modal">Hủy</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div id="success-modal" class="modal">
-        <div class="modal-content success-modal">
-            <div class="success-icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3>Đặt hàng thành công!</h3>
-            <p>Cảm ơn bạn đã mua sắm tại Custom Store. Đơn hàng của bạn đã được xác nhận.</p>
-            <p>Mã đơn hàng: <strong id="order-id">#ORD-12345</strong></p>
-            <p>Chúng tôi sẽ liên hệ với bạn trong thời gian sớm nhất để xác nhận đơn hàng.</p>
-            <div class="success-actions">
-                <a href="index.html" class="btn-primary">Tiếp tục mua sắm</a>
-                <button id="view-order-details" class="btn-secondary">Xem chi tiết đơn hàng</button>
-            </div>
-        </div>
-    </div>
 
     <!-- Footer -->
     <footer>
