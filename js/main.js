@@ -524,7 +524,7 @@ function showProductDetailModal(product) {
                             <span class="stock-quantity">${product.quantity}</span>
                         </div>
                         <div class="product-actions">
-                            <button class="btn-add-to-cart-detail" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
+                            <button class="btn-add-to-cart-detail btn-add-to-cart" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
                                 <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                             </button>
                             <button class="btn-secondary close-modal">Đóng</button>
