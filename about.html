@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Về Chúng Tôi - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* About Page Specific Styles */
+        .breadcrumb {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .breadcrumb-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+
+        .breadcrumb a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .about-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .about-hero h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .about-hero p {
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .about-text h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+        }
+
+        .about-text p {
+            font-size: 16px;
+            color: var(--gray-color);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .about-image {
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        .about-image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+
+        .about-values {
+            background-color: #f8f9fa;
+            padding: 60px 0;
+            margin: 60px 0;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .value-card {
+            background: white;
+            padding: 30px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .value-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .value-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        .value-card p {
+            color: var(--gray-color);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .team-section {
+            margin: 80px 0;
+        }
+
+        .team-section h2 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 50px;
+            color: var(--dark-color);
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+        }
+
+        .team-member {
+            text-align: center;
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .team-member:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-member-image {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px;
+            color: white;
+        }
+
+        .team-member-info {
+            padding: 20px;
+        }
+
+        .team-member h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: var(--dark-color);
+        }
+
+        .team-member p {
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .contact-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            border-radius: var(--border-radius);
+            margin: 80px 0;
+        }
+
+        .contact-section h2 {
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .contact-section p {
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .contact-info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        .contact-info-item i {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .contact-info-item h3 {
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .contact-info-item p {
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .team-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+
+            .about-hero h1 {
+                font-size: 32px;
+            }
+
+            .about-text h2 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="index.html#categories">Danh mục</a></li>
+                    <li><a href="about.html" class="active">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-content">
+                <a href="index.html">Trang chủ</a>
+                <span><i class="fas fa-chevron-right"></i></span>
+                <span>Về chúng tôi</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Hero Section -->
+    <section class="about-hero">
+        <div class="container">
+            <h1>Về Custom Store</h1>
+            <p>Chúng tôi là một trong những nhà bán lẻ thời trang hàng đầu, cung cấp các sản phẩm chất lượng cao với giá cả hợp lý</p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- About Content -->
+        <section class="about-content">
+            <div class="about-text">
+                <h2>Câu Chuyện Của Chúng Tôi</h2>
+                <p>Custom Store được thành lập vào năm 2020 với sứ mệnh đơn giản: mang thời trang chất lượng cao đến cho mọi người. Chúng tôi bắt đầu như một cửa hàng nhỏ với chỉ một vài dòng sản phẩm, nhưng nhanh chóng phát triển thành một thương hiệu được yêu thích.</p>
+                <p>Hôm nay, chúng tôi tự hào có hàng ngàn khách hàng hài lòng trên khắp đất nước. Mỗi sản phẩm trong cửa hàng của chúng tôi đều được chọn lọc kỹ lưỡng để đảm bảo chất lượng tốt nhất và phong cách thời thượng nhất.</p>
+                <p>Chúng tôi tin rằng thời trang không chỉ là về quần áo, mà là về sự tự tin, sáng tạo và cách bạn thể hiện bản thân.</p>
+            </div>
+            <div class="about-image">
+                <img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Custom Store">
+            </div>
+        </section>
+
+        <!-- Values Section -->
+        <section class="about-values">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 36px; margin-bottom: 50px; color: var(--dark-color);">Giá Trị Của Chúng Tôi</h2>
+                <div class="values-grid">
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <h3>Chất Lượng</h3>
+                        <p>Chúng tôi chỉ sử dụng các chất liệu tốt nhất và quy trình sản xuất chuyên nghiệp để đảm bảo mỗi sản phẩm đều hoàn hảo.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Chăm Sóc Khách Hàng</h3>
+                        <p>Sự hài lòng của khách hàng là ưu tiên hàng đầu của chúng tôi. Chúng tôi luôn sẵn sàng hỗ trợ bạn 24/7.</p>
+                    </div>
+                    <div class="value-card">
+                        <div class="value-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h3>Bền Vững</h3>
+                        <p>Chúng tôi cam kết sử dụng các phương pháp thân thiện với môi trường trong mọi hoạt động của mình.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team Section -->
+        <section class="team-section">
+            <h2>Đội Ngũ Của Chúng Tôi</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3>Nguyễn Văn A</h3>
+                        <p>Nhà Sáng Lập & CEO</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3>Trần Thị B</h3>
+                        <p>Giám Đốc Thiết Kế</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3>Phạm Văn C</h3>
+                        <p>Quản Lý Tiếp Thị</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="team-member-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="team-member-info">
+                        <h3>Lê Thị D</h3>
+                        <p>Trưởng Bộ Phận Bán Hàng</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact-section">
+            <h2>Liên Hệ Với Chúng Tôi</h2>
+            <p>Chúng tôi rất vui được nghe từ bạn. Hãy liên hệ với chúng tôi qua bất kỳ kênh nào dưới đây.</p>
+            <div class="contact-info">
+                <div class="contact-info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Địa Chỉ</h3>
+                    <p>123 Đường Thời Trang<br>Hà Nội, Việt Nam</p>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fas fa-phone"></i>
+                    <h3>Điện Thoại</h3>
+                    <p>+84 (0) 12 345 6789<br>Hỗ trợ: 8AM - 9PM</p>
+                </div>
+                <div class="contact-info-item">
+                    <i class="fas fa-envelope"></i>
+                    <h3>Email</h3>
+                    <p>info@customstore.com<br>support@customstore.com</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Về Custom Store</h3>
+                    <p>Custom Store là nơi cung cấp thời trang chất lượng cao với giá cả hợp lý cho tất cả mọi người.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên Kết Nhanh</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                        <li><a href="about.html">Về chúng tôi</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Hỗ Trợ</h3>
+                    <ul>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a href="#">Điều khoản sử dụng</a></li>
+                        <li><a href="#">Chính sách hoàn trả</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Theo Dõi Chúng Tôi</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Custom Store. Tất cả các quyền được bảo vệ.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
