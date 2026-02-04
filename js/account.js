@@ -50,7 +50,24 @@ function displayUserInfo(user) {
 function fillEditForm(user) {
     document.getElementById('edit-fullname').value = user.fullName || '';
     document.getElementById('edit-phone').value = user.phone || '';
-    document.getElementById('edit-address').value = user.address || '';
+    
+    // Nếu người dùng chưa có địa chỉ, lấy từ đơn hàng gần nhất
+    let address = user.address || '';
+    
+    if (!address) {
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+        const userOrders = orders.filter(order => order.userId === user.id);
+        
+        if (userOrders.length > 0) {
+            // Lấy đơn hàng gần nhất
+            const lastOrder = userOrders[userOrders.length - 1];
+            if (lastOrder.deliveryInfo && lastOrder.deliveryInfo.address) {
+                address = lastOrder.deliveryInfo.address;
+            }
+        }
+    }
+    
+    document.getElementById('edit-address').value = address;
 }
 
 // Thiết lập event listeners
