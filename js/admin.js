@@ -871,12 +871,19 @@ function showOrderDetails(orderId) {
     
     // Hiển thị thông tin giao hàng
     if (order.deliveryInfo) {
-        document.getElementById('modal-customer-name').textContent = order.deliveryInfo.fullname || 'N/A';
-        document.getElementById('modal-customer-phone').textContent = order.deliveryInfo.phone || 'N/A';
-        document.getElementById('modal-customer-address').textContent = order.deliveryInfo.address || 'N/A';
+        const d = order.deliveryInfo;
+        document.getElementById('modal-customer-name').textContent = d.fullname || 'N/A';
+        document.getElementById('modal-customer-phone').textContent = d.phone || 'N/A';
+        document.getElementById('modal-customer-province').textContent = d.province || (d.country === 'vietnam' ? 'N/A' : (d.country || 'N/A'));
+        document.getElementById('modal-customer-district').textContent = d.district || 'N/A';
+        document.getElementById('modal-customer-ward').textContent = d.ward || 'N/A';
+        document.getElementById('modal-customer-address').textContent = d.address || 'N/A';
     } else {
         document.getElementById('modal-customer-name').textContent = 'N/A';
         document.getElementById('modal-customer-phone').textContent = 'N/A';
+        document.getElementById('modal-customer-province').textContent = 'N/A';
+        document.getElementById('modal-customer-district').textContent = 'N/A';
+        document.getElementById('modal-customer-ward').textContent = 'N/A';
         document.getElementById('modal-customer-address').textContent = 'N/A';
     }
     
