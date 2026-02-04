@@ -19,7 +19,41 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('filter-category').value = category;
         applyFilters();
     }
+    
+    // Khởi tạo listener để theo dõi thay đổi sản phẩm từ admin
+    initProductsChangeListener();
 });
+
+// Listener để theo dõi thay đổi sản phẩm từ các tab/cửa sổ khác
+function initProductsChangeListener() {
+    // Listener cho storage event (khi thay đổi từ tab/cửa sổ khác)
+    window.addEventListener('storage', function(e) {
+        // Kiểm tra nếu có thay đổi trong products
+        if (e.key === 'products' && e.newValue) {
+            // Tải lại sản phẩm và cập nhật giao diện
+            const oldProducts = e.oldValue ? JSON.parse(e.oldValue) : [];
+            const newProducts = JSON.parse(e.newValue);
+            
+            // Nếu số lượng sản phẩm hoặc nội dung thay đổi, tải lại trang
+            if (JSON.stringify(oldProducts) !== JSON.stringify(newProducts)) {
+                // Giữ nguyên các giá trị filter hiện tại
+                applyFilters();
+                
+                // Hiển thị thông báo cập nhật
+                showProductsUpdateNotification();
+            }
+        }
+    });
+    
+    // Listener cho custom event (khi thay đổi từ cùng tab)
+    window.addEventListener('productsUpdated', function() {
+        // Tải lại sản phẩm và giữ nguyên filter
+        applyFilters();
+        
+        // Hiển thị thông báo cập nhật
+        showProductsUpdateNotification();
+    });
+}
 
 // Tải và hiển thị sản phẩm
 function loadProductsPage() {
@@ -464,6 +498,93 @@ function showNotification(message, type = 'info') {
                 }
                 to {
                     opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Thêm thông báo vào body
+    document.body.appendChild(notification);
+    
+    // Tự động xóa thông báo sau 3 giây
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// Hiển thị thông báo khi sản phẩm được cập nhật
+function showProductsUpdateNotification() {
+    const notification = document.createElement('div');
+    notification.className = 'notification notification-info';
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-sync-alt"></i>
+            <span>Sản phẩm đã được cập nhật từ quản lý</span>
+        </div>
+    `;
+    
+    // Kiểm tra nếu style chưa được thêm
+    if (!document.getElementById('notification-styles')) {
+        const style = document.createElement('style');
+        style.id = 'notification-styles';
+        style.innerHTML = `
+            .notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background-color: white;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                z-index: 9999;
+                animation: slideInRight 0.3s ease-out;
+                border-left: 4px solid;
+                max-width: 400px;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .notification-content {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            
+            .notification-info {
+                border-left-color: var(--primary-color);
+            }
+            
+            .notification-content i {
+                font-size: 18px;
+                animation: spin 2s linear infinite;
+            }
+            
+            .notification-info .notification-content i {
+                color: var(--primary-color);
+            }
+            
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
                 }
             }
         `;

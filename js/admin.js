@@ -339,6 +339,9 @@ function editProduct(productId) {
             // Lưu vào localStorage
             localStorage.setItem('products', JSON.stringify(products));
             
+            // Phát sự kiện tùy chỉnh để thông báo cho các trang khác
+            window.dispatchEvent(new Event('productsUpdated'));
+            
             // Cập nhật bảng
             displayProductsTable(products);
             
@@ -368,6 +371,9 @@ function deleteProduct(productId) {
     
     // Lưu vào localStorage
     localStorage.setItem('products', JSON.stringify(products));
+    
+    // Phát sự kiện tùy chỉnh để thông báo cho các trang khác
+    window.dispatchEvent(new Event('productsUpdated'));
     
     // Cập nhật bảng
     displayProductsTable(products);
@@ -476,6 +482,9 @@ function initAddProductForm() {
             let products = JSON.parse(localStorage.getItem('products')) || [];
             products.push(newProduct);
             localStorage.setItem('products', JSON.stringify(products));
+            
+            // Phát sự kiện tùy chỉnh để thông báo cho các trang khác
+            window.dispatchEvent(new Event('productsUpdated'));
             
             // Reset form
             form.reset();
