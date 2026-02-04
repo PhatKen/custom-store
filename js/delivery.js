@@ -96,11 +96,11 @@ function displayOrderSummary(order) {
     document.getElementById('summary-shipping').textContent = shippingFee.toLocaleString('vi-VN') + ' ₫';
     document.getElementById('summary-total').textContent = total.toLocaleString('vi-VN') + ' ₫';
     
-    // Nếu có giảm giá, hiển thị giá gốc bị gạch bỏ
+    // Nếu có giảm giá, hiển thị giá gốc
     if (discount > 0) {
         document.getElementById('discount-row').style.display = 'flex';
         document.getElementById('original-price-row').style.display = 'flex';
         document.getElementById('summary-discount').textContent = discount.toLocaleString('vi-VN') + ' ₫';
-        document.getElementById('summary-original-total').innerHTML = `<s>${originalTotal.toLocaleString('vi-VN')} ₫</s>`;
+        document.getElementById('summary-original-total').textContent = originalTotal.toLocaleString('vi-VN') + ' ₫';
     }
 }
