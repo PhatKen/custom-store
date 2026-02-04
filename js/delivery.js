@@ -76,4 +76,31 @@ function displayOrderItems(order) {
         
         itemsList.appendChild(itemElement);
     });
+    
+    // Hiển thị tóm tắt đơn hàng
+    displayOrderSummary(order);
+}
+
+// Hiển thị tóm tắt chi phí đơn hàng
+function displayOrderSummary(order) {
+    const subtotal = order.subtotal || order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const shippingFee = order.shippingFee || 0;
+    const discount = order.discount || 0;
+    const total = order.total;
+    
+    // Tính giá gốc (trước khi giảm)
+    const originalTotal = subtotal + shippingFee;
+    
+    // Hiển thị các mục
+    document.getElementById('summary-subtotal').textContent = subtotal.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('summary-shipping').textContent = shippingFee.toLocaleString('vi-VN') + ' ₫';
+    document.getElementById('summary-total').textContent = total.toLocaleString('vi-VN') + ' ₫';
+    
+    // Nếu có giảm giá, hiển thị giá gốc bị gạch bỏ
+    if (discount > 0) {
+        document.getElementById('discount-row').style.display = 'flex';
+        document.getElementById('original-price-row').style.display = 'flex';
+        document.getElementById('summary-discount').textContent = discount.toLocaleString('vi-VN') + ' ₫';
+        document.getElementById('summary-original-total').innerHTML = `<s>${originalTotal.toLocaleString('vi-VN')} ₫</s>`;
+    }
 }
