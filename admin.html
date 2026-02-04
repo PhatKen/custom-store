@@ -271,6 +271,13 @@
                             <label for="edit-product-quantity">Số lượng</label>
                             <input type="number" id="edit-product-quantity" min="0" required>
                         </div>
+                        <div class="form-group">
+                            <label for="edit-product-status">Trạng thái</label>
+                            <select id="edit-product-status" required>
+                                <option value="in-stock">Còn hàng</option>
+                                <option value="out-of-stock">Hết hàng</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="edit-product-description">Mô tả</label>
@@ -307,7 +314,16 @@
                         </div>
                         <div class="detail-row">
                             <span class="label">Trạng thái:</span>
-                            <span class="value" id="modal-order-status">--</span>
+                            <div class="order-status-editor">
+                                <select id="modal-order-status-select" class="order-status-select">
+                                    <option value="pending">Chờ xử lý</option>
+                                    <option value="packing">Đang đóng gói</option>
+                                    <option value="shipping">Đang vận chuyển</option>
+                                    <option value="delivered">Đã giao hàng</option>
+                                    <option value="cancelled">Đã hủy</option>
+                                </select>
+                                <button id="save-order-status-btn" class="btn-save-status">Lưu</button>
+                            </div>
                         </div>
                         <div class="detail-row">
                             <span class="label">Phương thức thanh toán:</span>
