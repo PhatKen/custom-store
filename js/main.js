@@ -527,7 +527,9 @@ function showProductDetailModal(product) {
                             <button class="btn-add-to-cart-detail btn-add-to-cart" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
                                 <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                             </button>
-                            <button class="btn-secondary close-modal">Đóng</button>
+                            <button class="btn-buy-now" data-product-id="${product.id}" ${product.quantity === 0 ? 'disabled' : ''}>
+                                <i class="fas fa-credit-card"></i> Mua ngay
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -557,6 +559,26 @@ function showProductDetailModal(product) {
             
             addToCart(product.id);
             document.getElementById('product-detail-modal').remove();
+        });
+    }
+    
+    // Thêm sự kiện cho nút mua ngay
+    const buyNowBtn = document.querySelector('.btn-buy-now');
+    if (buyNowBtn) {
+        buyNowBtn.addEventListener('click', function() {
+            if (product.quantity === 0) {
+                showNotification('Sản phẩm đã hết hàng!', 'error');
+                return;
+            }
+            
+            // Thêm sản phẩm vào giỏ hàng
+            addToCart(product.id);
+            
+            // Đóng modal và chuyển hướng đến trang checkout
+            document.getElementById('product-detail-modal').remove();
+            setTimeout(() => {
+                window.location.href = 'checkout.html';
+            }, 300);
         });
     }
     
