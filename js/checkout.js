@@ -184,9 +184,11 @@ function applyDiscountCode() {
     
     // Kiểm tra mã giảm giá (mô phỏng)
     const discountCodes = {
-        'SAVE10': 0.1,  // Giảm 10%
-        'SAVE20': 0.2,  // Giảm 20%
-        'SAVE5K': -5000  // Giảm 5000đ
+        'SAVE10': { type: 'percent', value: 0.1 },      // Giảm 10%
+        'GIFT10': { type: 'percent', value: 0.1 },      // Giảm 10%
+        'SAVE30': { type: 'percent', value: 0.3 },      // Giảm 30%
+        'FREESHIP': { type: 'freeship', value: 0 },     // Free ship
+        'SHIPFREE': { type: 'freeship', value: 0 }      // Free ship
     };
     
     if (!discountCodes[discountCode]) {
@@ -195,14 +197,16 @@ function applyDiscountCode() {
     }
     
     const subtotal = parseInt(sessionStorage.getItem('checkoutSubtotal'));
+    const shippingFee = parseInt(sessionStorage.getItem('checkoutShipping')) || 30000;
     let discount = 0;
     
-    if (typeof discountCodes[discountCode] === 'number' && discountCodes[discountCode] < 0) {
-        // Giảm tiền cố định
-        discount = Math.abs(discountCodes[discountCode]);
-    } else {
+    if (discountCodes[discountCode].type === 'percent') {
         // Giảm theo phần trăm
-        discount = Math.floor(subtotal * discountCodes[discountCode]);
+        discount = Math.floor(subtotal * discountCodes[discountCode].value);
+    } else if (discountCodes[discountCode].type === 'freeship') {
+        // Free ship - giảm bằng tiền ship
+        discount = shippingFee;
+        sessionStorage.setItem('checkoutShipping', '0');
     }
     
     updateCheckoutSummary(subtotal, discount);
