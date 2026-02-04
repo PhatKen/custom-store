@@ -804,7 +804,7 @@ function updateUserHeader() {
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="user-dropdown" id="user-dropdown">
-                    <a href="#" class="dropdown-item" id="edit-profile-btn">
+                    <a href="account.html" class="dropdown-item" id="edit-profile-btn">
                         <i class="fas fa-user-edit"></i> Chỉnh sửa tài khoản
                     </a>
                     ${currentUser.role === 'admin' ? 
