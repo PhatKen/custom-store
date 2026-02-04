@@ -564,7 +564,7 @@ function addToCart(productId) {
         // Kiểm tra xem số lượng mới có vượt quá số lượng còn lại không
         const newQuantity = cart[existingItemIndex].quantity + 1;
         if (newQuantity > product.quantity) {
-            showNotification(`Số lượng sản phẩm không được vượt quá ${product.quantity}`, 'error');
+            showNotification(`Xin lỗi, chỉ còn lại ${product.quantity} sản phẩm trong kho!`, 'error');
             return;
         }
         // Tăng số lượng nếu sản phẩm đã có trong giỏ
