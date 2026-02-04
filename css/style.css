@@ -629,6 +629,15 @@ footer {
 .cart-item-category {
     font-size: 12px;
     color: var(--gray-color);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.cart-item-stock {
+    font-size: 12px;
+    color: var(--success-color);
+    display: block;
+    font-weight: 500;
 }
 
 .cart-item-price, .cart-item-total {
