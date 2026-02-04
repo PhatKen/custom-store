@@ -552,6 +552,16 @@ function showProductDetailModal(product) {
     const addToCartBtn = document.querySelector('.btn-add-to-cart-detail');
     if (addToCartBtn) {
         addToCartBtn.addEventListener('click', function() {
+            // Kiểm tra đăng nhập
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                showNotification('Vui lòng đăng nhập để tiếp tục!', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+                return;
+            }
+            
             if (product.quantity === 0) {
                 showNotification('Sản phẩm đã hết hàng!', 'error');
                 return;
@@ -566,6 +576,16 @@ function showProductDetailModal(product) {
     const buyNowBtn = document.querySelector('.btn-buy-now');
     if (buyNowBtn) {
         buyNowBtn.addEventListener('click', function() {
+            // Kiểm tra đăng nhập
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                showNotification('Vui lòng đăng nhập để tiếp tục!', 'error');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+                return;
+            }
+            
             if (product.quantity === 0) {
                 showNotification('Sản phẩm đã hết hàng!', 'error');
                 return;
