@@ -318,14 +318,7 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
     
     // Lưu thông tin đơn hàng để hiển thị trên trang delivery
     sessionStorage.setItem('lastOrder', JSON.stringify(newOrder));
-
-    // Gửi hóa đơn qua email (không chặn luồng)
-    try {
-        sendInvoiceEmail(newOrder);
-    } catch (e) {
-        console.warn('sendInvoiceEmail error', e);
-    }
-
+    
     // Chuyển hướng đến trang delivery
     window.location.href = 'delivery.html';
 }
@@ -353,67 +346,6 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
-}
-
-// Gửi hóa đơn (invoice) tới email người dùng
-async function sendInvoiceEmail(order) {
-    try {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || {};
-        const to = currentUser.email;
-        if (!to) {
-            console.warn('No user email available to send invoice');
-            return;
-        }
-
-        const subject = `Hóa đơn ${order.id} - Custom Store`;
-
-        // Xây dựng nội dung email
-        let body = `Hóa đơn: ${order.id}%0D%0A`;
-        body += `Ngày: ${new Date(order.createdAt).toLocaleString('vi-VN')}%0D%0A%0D%0A`;
-        body += `Sản phẩm:%0D%0A`;
-        order.items.forEach(item => {
-            const itemTotal = (item.price * item.quantity).toLocaleString('vi-VN');
-            body += `- ${item.name} x${item.quantity} : ${itemTotal} VNĐ%0D%0A`;
-        });
-        body += `%0D%0ATạm tính: ${order.subtotal.toLocaleString('vi-VN')} VNĐ%0D%0A`;
-        body += `Phí vận chuyển: ${order.shippingFee.toLocaleString('vi-VN')} VNĐ%0D%0A`;
-        body += `Giảm giá: ${order.discount.toLocaleString('vi-VN')} VNĐ%0D%0A`;
-        body += `Tổng: ${order.total.toLocaleString('vi-VN')} VNĐ%0D%0A%0D%0A`;
-        body += `Thông tin giao hàng:%0D%0A`;
-        const d = order.deliveryInfo || {};
-        body += `- Người nhận: ${d.fullname || ''}%0D%0A`;
-        body += `- SĐT: ${d.phone || ''}%0D%0A`;
-        if (d.country) body += `- Quốc gia: ${d.country}%0D%0A`;
-        if (d.province) body += `- Tỉnh/TP: ${d.province}%0D%0A`;
-        if (d.district) body += `- Quận/Huyện: ${d.district}%0D%0A`;
-        if (d.ward) body += `- Phường/Xã: ${d.ward}%0D%0A`;
-        if (d.address) body += `- Địa chỉ chi tiết: ${d.address}%0D%0A`;
-
-        // Thử gửi tới endpoint server nếu có
-        try {
-            const resp = await fetch('/api/send-invoice', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ to, subject, body: decodeURIComponent(body) })
-            });
-
-            if (resp.ok) {
-                showNotification('Hóa đơn đã được gửi tới email của bạn', 'success');
-                return;
-            }
-            // nếu không ok, fallback xuống mailto
-            console.warn('Server respond not ok for send-invoice', resp.status);
-        } catch (err) {
-            console.warn('send-invoice endpoint failed, falling back to mailto', err);
-        }
-
-        // Fallback: mở mail client người dùng với nội dung email (người dùng phải bấm gửi)
-        const mailto = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${body}`;
-        window.open(mailto, '_blank');
-        showNotification('Không thể gửi tự động. Đã mở email client để bạn kiểm tra và gửi hóa đơn.', 'warning');
-    } catch (err) {
-        console.error('sendInvoiceEmail error', err);
-    }
 }
 
 // Dữ liệu địa chỉ Việt Nam
