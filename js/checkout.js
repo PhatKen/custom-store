@@ -78,6 +78,9 @@ function updateCheckoutSummary(subtotal, discount) {
 
 // Khởi tạo sự kiện checkout
 function initCheckoutEvents() {
+    // Khởi tạo địa chỉ combobox
+    initAddressSelectors();
+    
     // Nút quay lại
     const backBtn = document.getElementById('back-btn');
     if (backBtn) {
@@ -111,6 +114,10 @@ function initCheckoutEvents() {
 function validateAndSubmitCheckout() {
     const fullname = document.getElementById('fullname').value.trim();
     const phone = document.getElementById('phone').value.trim();
+    const country = document.getElementById('country').value.trim();
+    const province = document.getElementById('province').value.trim();
+    const district = document.getElementById('district').value.trim();
+    const ward = document.getElementById('ward').value.trim();
     const address = document.getElementById('address').value.trim();
     
     // Xác thực dữ liệu
@@ -124,8 +131,28 @@ function validateAndSubmitCheckout() {
         return;
     }
     
+    if (!country) {
+        showNotification('Vui lòng chọn quốc gia', 'error');
+        return;
+    }
+    
+    if (!province) {
+        showNotification('Vui lòng chọn tỉnh/thành phố', 'error');
+        return;
+    }
+    
+    if (!district) {
+        showNotification('Vui lòng chọn quận/huyện', 'error');
+        return;
+    }
+    
+    if (!ward) {
+        showNotification('Vui lòng chọn phường/xã', 'error');
+        return;
+    }
+    
     if (!address) {
-        showNotification('Vui lòng nhập địa chỉ', 'error');
+        showNotification('Vui lòng nhập địa chỉ chi tiết', 'error');
         return;
     }
     
@@ -133,6 +160,10 @@ function validateAndSubmitCheckout() {
     const deliveryInfo = {
         fullname: fullname,
         phone: phone,
+        country: country,
+        province: province,
+        district: district,
+        ward: ward,
         address: address
     };
     
@@ -315,4 +346,105 @@ function showNotification(message, type = 'info') {
             notification.remove();
         }
     }, 3000);
+}
+
+// Dữ liệu địa chỉ Việt Nam
+const vietnamAddressData = {
+    'Ha Noi': {
+        name: 'Hà Nội',
+        districts: {
+            'Ba Dinh': { name: 'Ba Đình', wards: ['Phúc Tân', 'Quán Thánh', 'Nguyễn Hữu Thọ', 'Kim Mã', 'Trúc Bạch', 'Cầu Giấy', 'Vĩnh Phúc'] },
+            'Hai Ba Trung': { name: 'Hai Bà Trưng', wards: ['Bách Khoa', 'Giáp Bát', 'Hàng Bông', 'Hàng Giai', 'Lý Thái Tổ', 'Tràng Tây', 'Tràng Tiền'] },
+            'Hoan Kiem': { name: 'Hoàn Kiếm', wards: ['Cửa Đông', 'Cửa Nam', 'Cửa Bắc', 'Hàng Bạc', 'Hàng Buồm', 'Thanh Nê'] },
+            'Dong Da': { name: 'Đống Đa', wards: ['Hàng Bột', 'Lê Đại Hành', 'Phương Liên', 'Quỳnh Mai', 'Quỳnh Lôi', 'Thổ Quan', 'Nguyễn Du'] }
+        }
+    },
+    'Ho Chi Minh': {
+        name: 'Thành phố Hồ Chí Minh',
+        districts: {
+            'District 1': { name: 'Quận 1', wards: ['Bến Nghé', 'Bến Thành', 'Cầu Kè', 'Cầu Ông Lãnh', 'Đa Kao', 'Nguyễn Hữu Cảnh', 'Phạm Ngũ Lão', 'Tân Định'] },
+            'District 3': { name: 'Quận 3', wards: ['Võ Thị Sáu', 'Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10', 'Phường 11', 'Phường 12', 'Phường 13'] },
+            'District 5': { name: 'Quận 5', wards: ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10', 'Phường 11', 'Phường 12', 'Phường 13', 'Phường 14', 'Phường 15', 'Phường 16'] },
+            'District 7': { name: 'Quận 7', wards: ['Phú Mỹ', 'Tân Hưng', 'Tân Kiểng', 'Tân Phong', 'Tân Quy'] }
+        }
+    },
+    'Da Nang': {
+        name: 'Đà Nẵng',
+        districts: {
+            'Hai Chau': { name: 'Hải Châu', wards: ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10'] },
+            'Thanh Khe': { name: 'Thanh Khê', wards: ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5', 'Phường 6', 'Phường 7', 'Phường 8', 'Phường 9', 'Phường 10', 'Phường 11', 'Phường 12'] },
+            'Cam Le': { name: 'Cẩm Lệ', wards: ['Phường 1', 'Phường 2', 'Phường 3', 'Phường 4', 'Phường 5'] }
+        }
+    }
+};
+
+// Khởi tạo combobox địa chỉ
+function initAddressSelectors() {
+    const countrySelect = document.getElementById('country');
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+    
+    if (!countrySelect) return;
+    
+    // Sự kiện thay đổi quốc gia
+    countrySelect.addEventListener('change', function() {
+        const selectedCountry = this.value;
+        
+        // Xóa các lựa chọn cũ
+        provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố</option>';
+        districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+        wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+        
+        if (selectedCountry === 'vietnam') {
+            // Thêm các tỉnh/thành phố của Việt Nam
+            Object.keys(vietnamAddressData).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = vietnamAddressData[key].name;
+                provinceSelect.appendChild(option);
+            });
+        }
+    });
+    
+    // Sự kiện thay đổi tỉnh/thành phố
+    provinceSelect.addEventListener('change', function() {
+        const selectedProvince = this.value;
+        
+        // Xóa các lựa chọn cũ
+        districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+        wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+        
+        if (selectedProvince && vietnamAddressData[selectedProvince]) {
+            const province = vietnamAddressData[selectedProvince];
+            Object.keys(province.districts).forEach(key => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = province.districts[key].name;
+                districtSelect.appendChild(option);
+            });
+        }
+    });
+    
+    // Sự kiện thay đổi quận/huyện
+    districtSelect.addEventListener('change', function() {
+        const selectedProvince = provinceSelect.value;
+        const selectedDistrict = this.value;
+        
+        // Xóa các lựa chọn cũ
+        wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+        
+        if (selectedProvince && selectedDistrict && vietnamAddressData[selectedProvince]) {
+            const province = vietnamAddressData[selectedProvince];
+            if (province.districts[selectedDistrict]) {
+                const wards = province.districts[selectedDistrict].wards;
+                wards.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward;
+                    option.textContent = ward;
+                    wardSelect.appendChild(option);
+                });
+            }
+        }
+    });
 }
