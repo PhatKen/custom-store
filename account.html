@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tài Khoản Của Tôi - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Account Page Styles */
+        .account-section {
+            padding: 40px 0;
+            min-height: 70vh;
+        }
+
+        .account-container {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+        }
+
+        .account-sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+        }
+
+        .account-avatar {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .avatar-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .avatar-upload input[type="file"] {
+            display: none;
+        }
+
+        .avatar-upload label {
+            display: block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .avatar-upload label:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .account-info-display {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-display-item {
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .info-display-item.active {
+            display: block;
+        }
+
+        .info-display-label {
+            font-weight: 600;
+            color: var(--gray-color);
+            font-size: 13px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .info-display-value {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .account-edit-form {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            display: none;
+        }
+
+        .account-edit-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(82, 200, 126, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-save {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-save:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            background-color: #f0f0f0;
+            color: #333;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-cancel:hover {
+            background-color: #e0e0e0;
+        }
+
+        .account-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn-edit {
+            flex: 1;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-edit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-delete {
+            flex: 1;
+            background-color: #dc3545;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-delete:hover {
+            background-color: #c82333;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .modal-content p {
+            color: var(--gray-color);
+            margin-bottom: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .modal-btn-confirm {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .modal-btn-confirm:hover {
+            background-color: #c82333;
+        }
+
+        .modal-btn-cancel {
+            background-color: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .account-container {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .account-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="news.html">Tin tức</a></li>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Account Section -->
+    <section class="account-section">
+        <div class="container">
+            <h1 class="page-title">Tài Khoản Của Tôi</h1>
+
+            <div class="account-container">
+                <!-- Sidebar với Avatar -->
+                <div class="account-sidebar">
+                    <div class="account-avatar">
+                        <img src="https://ui-avatars.com/api/?name=User&background=52c87e&color=fff&size=120" alt="Avatar" class="avatar-image" id="avatar-display">
+                        <div class="avatar-upload">
+                            <input type="file" id="avatar-input" accept="image/*">
+                            <label for="avatar-input">
+                                <i class="fas fa-camera"></i> Thay Avatar
+                            </label>
+                        </div>
+                    </div>
+                    <div id="user-email-display" style="text-align: center; color: var(--gray-color); margin-bottom: 15px;"></div>
+                </div>
+
+                <!-- Main Content -->
+                <div>
+                    <!-- Display Mode -->
+                    <div class="account-info-display active" id="display-mode">
+                        <div class="info-display-item active">
+                            <div class="info-display-label">Họ Tên</div>
+                            <div class="info-display-value" id="display-fullname">--</div>
+                        </div>
+                        <div class="info-display-item active">
+                            <div class="info-display-label">Số Điện Thoại</div>
+                            <div class="info-display-value" id="display-phone">--</div>
+                        </div>
+                        <div class="info-display-item active">
+                            <div class="info-display-label">Địa Chỉ</div>
+                            <div class="info-display-value" id="display-address">--</div>
+                        </div>
+
+                        <div class="account-actions">
+                            <button class="btn-edit" id="btn-edit">
+                                <i class="fas fa-edit"></i> Chỉnh Sửa
+                            </button>
+                            <button class="btn-delete" id="btn-delete">
+                                <i class="fas fa-trash"></i> Xóa Tài Khoản
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Edit Mode -->
+                    <form class="account-edit-form" id="edit-form">
+                        <div class="form-group">
+                            <label for="edit-fullname">Họ Tên <span style="color: red;">*</span></label>
+                            <input type="text" id="edit-fullname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-phone">Số Điện Thoại</label>
+                            <input type="tel" id="edit-phone">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-address">Địa Chỉ</label>
+                            <textarea id="edit-address" placeholder="Nhập địa chỉ của bạn"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">
+                                <i class="fas fa-save"></i> Lưu Thay Đổi
+                            </button>
+                            <button type="button" class="btn-cancel" id="btn-cancel-edit">
+                                <i class="fas fa-times"></i> Hủy
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal" id="delete-modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-exclamation-circle" style="color: #dc3545;"></i> Xác Nhận Xóa Tài Khoản</h3>
+            <p>Bạn có chắc chắn muốn xóa tài khoản này? Hành động này không thể hoàn tác.</p>
+            <div class="modal-actions">
+                <button class="modal-btn modal-btn-confirm" id="confirm-delete">Xóa</button>
+                <button class="modal-btn modal-btn-cancel" id="cancel-delete">Hủy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CustomStore</h3>
+                    <p>Cửa hàng thời trang trực tuyến chuyên cung cấp các sản phẩm chất lượng cao với giá cả cạnh tranh.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên Kết</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                        <li><a href="news.html">Tin tức</a></li>
+                        <li><a href="about.html">Về chúng tôi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Hỗ Trợ Khách Hàng</h3>
+                    <ul>
+                        <li><a href="#">Liên hệ chúng tôi</a></li>
+                        <li><a href="#">Chính sách hoàn trả</a></li>
+                        <li><a href="#">Điều khoản dịch vụ</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Theo Dõi Chúng Tôi</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Custom Store. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/account.js"></script>
+</body>
+</html>
