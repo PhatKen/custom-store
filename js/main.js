@@ -854,15 +854,6 @@ function updateUserHeader() {
             });
         }
         
-        // Thêm sự kiện chỉnh sửa profile
-        const editProfileBtn = document.getElementById('edit-profile-btn');
-        if (editProfileBtn) {
-            editProfileBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                showNotification('Tính năng đang được phát triển!', 'info');
-            });
-        }
-        
         // Khởi tạo lại menu mobile
         initMobileMenu();
     } else {
