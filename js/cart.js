@@ -63,6 +63,11 @@ function createCartItemElement(item) {
     const formattedPrice = item.price.toLocaleString('vi-VN') + ' VNĐ';
     const itemTotal = (item.price * item.quantity).toLocaleString('vi-VN') + ' VNĐ';
     
+    // Lấy sản phẩm để kiểm tra số lượng còn lại
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(p => p.id == item.id);
+    const availableQuantity = product ? product.quantity : 0;
+    
     // Lấy tên danh mục
     const categoryNames = {
         'ao': 'Áo',
@@ -78,6 +83,7 @@ function createCartItemElement(item) {
         <div class="cart-item-details">
             <h4>${item.name}</h4>
             <span class="cart-item-category">${categoryNames[item.category]}</span>
+            <span class="cart-item-stock">Có ${availableQuantity} sản phẩm trong kho</span>
         </div>
         <div class="cart-item-price">${formattedPrice}</div>
         <div class="cart-item-quantity">
@@ -199,12 +205,20 @@ function updateQuantity(productId, change) {
     
     if (itemIndex === -1) return;
     
+    // Lấy sản phẩm từ localStorage để kiểm tra số lượng còn lại
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const product = products.find(p => p.id == productId);
+    
     // Cập nhật số lượng
     const newQuantity = cart[itemIndex].quantity + change;
     
     // Nếu số lượng mới là 0 hoặc nhỏ hơn, xóa sản phẩm khỏi giỏ hàng
     if (newQuantity <= 0) {
         cart.splice(itemIndex, 1);
+    } else if (product && newQuantity > product.quantity) {
+        // Kiểm tra xem số lượng mới có vượt quá số lượng còn lại không
+        showNotification(`Số lượng sản phẩm không được vượt quá ${product.quantity}`, 'error');
+        return;
     } else {
         // Cập nhật số lượng
         cart[itemIndex].quantity = newQuantity;
@@ -534,6 +548,12 @@ function addToCart(productId) {
         return;
     }
     
+    // Kiểm tra xem sản phẩm có còn hàng không
+    if (product.quantity <= 0) {
+        showNotification('Sản phẩm này hiện đã hết hàng!', 'error');
+        return;
+    }
+    
     // Lấy giỏ hàng từ localStorage
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
     
@@ -541,8 +561,14 @@ function addToCart(productId) {
     const existingItemIndex = cart.findIndex(item => item.id == productId);
     
     if (existingItemIndex !== -1) {
+        // Kiểm tra xem số lượng mới có vượt quá số lượng còn lại không
+        const newQuantity = cart[existingItemIndex].quantity + 1;
+        if (newQuantity > product.quantity) {
+            showNotification(`Số lượng sản phẩm không được vượt quá ${product.quantity}`, 'error');
+            return;
+        }
         // Tăng số lượng nếu sản phẩm đã có trong giỏ
-        cart[existingItemIndex].quantity += 1;
+        cart[existingItemIndex].quantity = newQuantity;
     } else {
         // Thêm sản phẩm mới vào giỏ
         cart.push({
