@@ -218,9 +218,9 @@ function displayProductsTable(products) {
             'non': 'Nón'
         };
         
-        // Xác định trạng thái
-        const status = product.quantity > 0 ? 'active' : 'out-of-stock';
-        const statusText = product.quantity > 0 ? 'Còn hàng' : 'Hết hàng';
+        // Xác định trạng thái dựa trên trường status hoặc số lượng
+        const status = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
+        const statusText = status === 'out-of-stock' ? 'Hết hàng' : 'Còn hàng';
         
         row.innerHTML = `
             <td>${product.id}</td>
@@ -295,6 +295,10 @@ function editProduct(productId) {
     document.getElementById('edit-product-quantity').value = product.quantity;
     document.getElementById('edit-product-description').value = product.description;
     
+    // Thiết lập trạng thái sản phẩm dựa trên số lượng hoặc trạng thái được lưu
+    const productStatus = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
+    document.getElementById('edit-product-status').value = productStatus;
+    
     // Hiển thị modal
     const modal = document.getElementById('edit-product-modal');
     modal.style.display = 'flex';
@@ -327,6 +331,7 @@ function editProduct(productId) {
             price: parseInt(document.getElementById('edit-product-price').value),
             quantity: parseInt(document.getElementById('edit-product-quantity').value),
             description: document.getElementById('edit-product-description').value,
+            status: document.getElementById('edit-product-status').value,
             image: product.image, // Giữ nguyên hình ảnh cũ
             createdAt: product.createdAt
         };
@@ -590,8 +595,9 @@ function displayOrdersTable(orders) {
 function getOrderStatusText(status) {
     const statusMap = {
         'pending': 'Chờ xử lý',
-        'processing': 'Đang xử lý',
-        'completed': 'Hoàn thành',
+        'packing': 'Đang đóng gói',
+        'shipping': 'Đang vận chuyển',
+        'delivered': 'Đã giao hàng',
         'cancelled': 'Đã hủy'
     };
     
@@ -853,7 +859,11 @@ function showOrderDetails(orderId) {
     
     document.getElementById('modal-order-id').textContent = order.id;
     document.getElementById('modal-order-date').textContent = formattedDate;
-    document.getElementById('modal-order-status').textContent = getOrderStatusText(order.status);
+    
+    // Thiết lập giá trị hiện tại cho dropdown trạng thái
+    const statusSelect = document.getElementById('modal-order-status-select');
+    statusSelect.value = order.status || 'pending';
+    
     document.getElementById('modal-payment-method').textContent = order.paymentMethodName || 'N/A';
     
     // Hiển thị thông tin giao hàng
@@ -904,8 +914,43 @@ function showOrderDetails(orderId) {
         };
     }
     
+    // Thêm event listener cho nút lưu trạng thái đơn hàng
+    const saveStatusBtn = document.getElementById('save-order-status-btn');
+    if (saveStatusBtn) {
+        saveStatusBtn.onclick = function() {
+            const newStatus = document.getElementById('modal-order-status-select').value;
+            saveOrderStatus(orderId, newStatus);
+        };
+    }
+    
     // Hiển thị modal
     modal.style.display = 'flex';
+}
+
+// Lưu trạng thái đơn hàng
+function saveOrderStatus(orderId, newStatus) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const orderIndex = orders.findIndex(o => o.id === orderId);
+    
+    if (orderIndex === -1) {
+        showNotification('Không tìm thấy đơn hàng', 'error');
+        return;
+    }
+    
+    // Cập nhật trạng thái
+    orders[orderIndex].status = newStatus;
+    
+    // Lưu vào localStorage
+    localStorage.setItem('orders', JSON.stringify(orders));
+    
+    // Cập nhật bảng đơn hàng
+    loadOrders();
+    
+    // Cập nhật dashboard
+    loadDashboardData();
+    
+    // Hiển thị thông báo
+    showNotification('Cập nhật trạng thái đơn hàng thành công!', 'success');
 }
 
 // Xóa đơn hàng

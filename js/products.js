@@ -268,9 +268,13 @@ function createProductCardForPage(product) {
     // Kiểm tra trạng thái đăng nhập
     const loggedIn = isUserLoggedIn();
     
+    // Kiểm tra trạng thái hàng
+    const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
+    
     card.innerHTML = `
         <div class="product-image">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
         </div>
         <div class="product-info">
             <span class="product-category">${categoryNames[product.category]}</span>
@@ -279,8 +283,8 @@ function createProductCardForPage(product) {
             <div class="product-price">${formattedPrice}</div>
             <div class="product-actions">
                 ${loggedIn ? 
-                    `<button class="btn-add-to-cart" data-product-id="${product.id}">
-                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    `<button class="btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
                     </button>` 
                     : 
                     `<div class="btn-login-required">
@@ -294,8 +298,8 @@ function createProductCardForPage(product) {
         </div>
     `;
     
-    // Thêm sự kiện cho nút thêm vào giỏ nếu đã đăng nhập
-    if (loggedIn) {
+    // Thêm sự kiện cho nút thêm vào giỏ nếu đã đăng nhập và sản phẩm còn hàng
+    if (loggedIn && !isOutOfStock) {
         const addToCartBtn = card.querySelector('.btn-add-to-cart');
         addToCartBtn.addEventListener('click', function() {
             addToCart(product.id);
