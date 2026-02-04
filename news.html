@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tin Tức - Custom Store</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* News Page Specific Styles */
+        .news-breadcrumb {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .breadcrumb-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: var(--gray-color);
+        }
+
+        .breadcrumb-content a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .breadcrumb-content a:hover {
+            text-decoration: underline;
+        }
+
+        .news-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .news-hero h1 {
+            font-size: 44px;
+            margin-bottom: 15px;
+        }
+
+        .news-hero p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .news-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: all var(--transition);
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .news-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .news-content {
+            padding: 25px;
+        }
+
+        .news-category {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .news-date {
+            color: var(--gray-color);
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .news-card h3 {
+            font-size: 20px;
+            margin-bottom: 12px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .news-excerpt {
+            color: var(--gray-color);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .news-read-more {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+
+        .news-read-more:hover {
+            border-bottom-color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .news-hero h1 {
+                font-size: 32px;
+            }
+
+            .news-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header/Navigation -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">Custom<span>Store</span></a>
+                <ul class="nav-links">
+                    <li><a href="index.html">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="news.html" class="active">Tin tức</a></li>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <section class="news-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-content">
+                <a href="index.html"><i class="fas fa-home"></i></a>
+                <i class="fas fa-chevron-right"></i>
+                <span>Tin tức</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- News Hero Section -->
+    <section class="news-hero">
+        <div class="container">
+            <h1>Tin Tức Thời Trang</h1>
+            <p>Cập nhật những xu hướng thời trang mới nhất và tư vấn phối đồ từ các chuyên gia</p>
+        </div>
+    </section>
+
+    <!-- News Articles Container -->
+    <main class="container">
+        <div class="news-container">
+            <!-- Article 1: T-Shirts -->
+            <article class="news-card">
+                <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=300&fit=crop" alt="5 Kiểu Áo Phông Trendy" class="news-image">
+                <div class="news-content">
+                    <span class="news-category">Áo</span>
+                    <p class="news-date"><i class="fas fa-calendar"></i> 04 Tháng 2, 2026</p>
+                    <h3>5 Kiểu Áo Phông Trendy Năm 2026</h3>
+                    <p class="news-excerpt">Khám phá những kiểu áo phông đang thịnh hành nhất năm nay. Từ kiểu oversized thoải mái đến áo phông cổ điển với những chi tiết độc đáo, chúng tôi giới thiệu những lựa chọn tốt nhất để bạn nâng tầm phong cách của mình.</p>
+                    <a href="#" class="news-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Article 2: Jeans -->
+            <article class="news-card">
+                <img src="https://images.unsplash.com/photo-1542272604-787c62d465d1?w=500&h=300&fit=crop" alt="Quần Jeans Slimfit" class="news-image">
+                <div class="news-content">
+                    <span class="news-category">Quần</span>
+                    <p class="news-date"><i class="fas fa-calendar"></i> 02 Tháng 2, 2026</p>
+                    <h3>Quần Jeans Slimfit - Lựa Chọn Hoàn Hảo Cho Mọi Dáng Người</h3>
+                    <p class="news-excerpt">Quần jeans slimfit không chỉ tôn dáng mà còn tạo nên một vẻ ngoài hiện đại và lịch sự. Tìm hiểu cách chọn size phù hợp, những cách phối đồ thông minh và cách bảo quản quần jeans để kéo dài tuổi thọ của chúng.</p>
+                    <a href="#" class="news-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Article 3: Shoes -->
+            <article class="news-card">
+                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=300&fit=crop" alt="Giày Thể Thao Nike" class="news-image">
+                <div class="news-content">
+                    <span class="news-category">Giày</span>
+                    <p class="news-date"><i class="fas fa-calendar"></i> 31 Tháng 1, 2026</p>
+                    <h3>Giày Thể Thao Nike - Thoải Mái Và Phong Cách</h3>
+                    <p class="news-excerpt">Giày thể thao Nike nổi tiếng với công nghệ đệm tốt nhất và thiết kế hiện đại. Từ những mẫu cổ điển đến những phiên bản mới nhất, giày thể thao Nike là lựa chọn hoàn hảo cho những ai yêu thích sự thoải mái và phong cách đồng thời.</p>
+                    <a href="#" class="news-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Article 4: Hats -->
+            <article class="news-card">
+                <img src="https://images.unsplash.com/photo-1564864572226-2bbd89f654ac?w=500&h=300&fit=crop" alt="Nón Snapback" class="news-image">
+                <div class="news-content">
+                    <span class="news-category">Nón</span>
+                    <p class="news-date"><i class="fas fa-calendar"></i> 29 Tháng 1, 2026</p>
+                    <h3>Nón Snapback - Phụ Kiện Hoàn Hảo Cho Cả Nam Lẫn Nữ</h3>
+                    <p class="news-excerpt">Nón snapback là một phụ kiện không thể thiếu trong tủ quần áo của bất kỳ ai. Với nhiều màu sắc và thiết kế đa dạng, nó có thể dễ dàng kết hợp với nhiều trang phục khác nhau. Tìm hiểu cách chọn nón snapback phù hợp với khuôn mặt của bạn.</p>
+                    <a href="#" class="news-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+
+            <!-- Article 5: Fashion Tips -->
+            <article class="news-card">
+                <img src="https://images.unsplash.com/photo-1479967265313-46d7afb687ee?w=500&h=300&fit=crop" alt="Cách Phối Đồ" class="news-image">
+                <div class="news-content">
+                    <span class="news-category">Tư Vấn</span>
+                    <p class="news-date"><i class="fas fa-calendar"></i> 27 Tháng 1, 2026</p>
+                    <h3>Cách Phối Đồ Chuẩn Với Áo, Quần, Giày Và Nón</h3>
+                    <p class="news-excerpt">Phối đồ không chỉ là sự kết hợp ngẫu nhiên các bộ trang phục mà còn là một nghệ thuật. Tìm hiểu các nguyên tắc cơ bản để phối đồ thành công, từ việc chọn màu sắc phù hợp đến cách kết hợp các chi tiết để tạo nên một bộ trang phục hoàn chỉnh và thu hút.</p>
+                    <a href="#" class="news-read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>CustomStore</h3>
+                    <p>Cửa hàng thời trang trực tuyến chuyên cung cấp các sản phẩm chất lượng cao với giá cả cạnh tranh.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Liên Kết</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="products.html">Sản phẩm</a></li>
+                        <li><a href="news.html">Tin tức</a></li>
+                        <li><a href="about.html">Về chúng tôi</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Hỗ Trợ Khách Hàng</h3>
+                    <ul>
+                        <li><a href="#">Liên hệ chúng tôi</a></li>
+                        <li><a href="#">Chính sách hoàn trả</a></li>
+                        <li><a href="#">Điều khoản dịch vụ</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Theo Dõi Chúng Tôi</h3>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Custom Store. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
