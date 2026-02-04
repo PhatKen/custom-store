@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Đồng bộ sản phẩm</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            background-color: #f0f0f0;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Đồng bộ Sản phẩm</h1>
+    
+    <div class="test-section">
+        <h2>1. Kiểm tra dữ liệu</h2>
+        <button onclick="checkStorageData()">Kiểm tra localStorage</button>
+        <div id="storage-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Cập nhật sản phẩm</h2>
+        <button onclick="updateProductPrice()">Cập nhật giá sản phẩm ID 1</button>
+        <div id="update-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Hướng dẫn kiểm tra</h2>
+        <p>
+            1. Mở trang này trong tab 1<br>
+            2. Mở products.html trong tab 2 (cửa sổ khác)<br>
+            3. Mở admin.html trong tab 3<br>
+            4. Trong tab 3 (admin), thực hiện: Quản lý sản phẩm → Chỉnh sửa sản phẩm → Thay đổi thông tin → Cập nhật<br>
+            5. Kiểm tra tab 2 (products.html) xem sản phẩm đã cập nhật chưa<br>
+            6. Hoặc nhấn nút "Cập nhật giá sản phẩm ID 1" ở trên để kiểm tra
+        </p>
+    </div>
+    
+    <script>
+        function checkStorageData() {
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const resultDiv = document.getElementById('storage-result');
+            
+            if (products.length === 0) {
+                resultDiv.innerHTML = '<span class="error">Không có sản phẩm trong localStorage</span>';
+                return;
+            }
+            
+            resultDiv.innerHTML = `<span class="success">Có ${products.length} sản phẩm</span>\n\nSản phẩm đầu tiên:\n${JSON.stringify(products[0], null, 2)}`;
+        }
+        
+        function updateProductPrice() {
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            const resultDiv = document.getElementById('update-result');
+            
+            if (products.length === 0) {
+                resultDiv.innerHTML = '<span class="error">Không có sản phẩm để cập nhật</span>';
+                return;
+            }
+            
+            // Cập nhật giá sản phẩm đầu tiên
+            const oldPrice = products[0].price;
+            products[0].price = oldPrice + 10000;
+            
+            localStorage.setItem('products', JSON.stringify(products));
+            
+            // Phát sự kiện
+            window.dispatchEvent(new Event('productsUpdated'));
+            
+            resultDiv.innerHTML = `<span class="success">✓ Đã cập nhật giá sản phẩm "${products[0].name}"</span>\n\nGiá cũ: ${oldPrice.toLocaleString('vi-VN')} VNĐ\nGiá mới: ${products[0].price.toLocaleString('vi-VN')} VNĐ\n\nHãy kiểm tra tab products.html để xem có thông báo cập nhật không`;
+        }
+    </script>
+</body>
+</html>
