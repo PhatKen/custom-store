@@ -222,6 +222,9 @@ function displayProductsTable(products) {
         const status = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
         const statusText = status === 'out-of-stock' ? 'Hết hàng' : 'Còn hàng';
         
+        // Số lượng hiển thị (hiển thị 0 khi hết hàng)
+        const displayQuantity = status === 'out-of-stock' ? 0 : product.quantity;
+        
         row.innerHTML = `
             <td>${product.id}</td>
             <td class="product-image-cell">
@@ -234,7 +237,7 @@ function displayProductsTable(products) {
                 </span>
             </td>
             <td>${formattedPrice}</td>
-            <td>${product.quantity}</td>
+            <td>${displayQuantity}</td>
             <td>
                 <span class="status-badge status-${status}">${statusText}</span>
             </td>

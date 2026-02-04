@@ -500,6 +500,9 @@ function showProductDetailModal(product) {
     // Kiểm tra trạng thái hàng
     const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
     
+    // Số lượng hiển thị (hiển thị 0 khi hết hàng)
+    const displayQuantity = isOutOfStock ? 0 : product.quantity;
+    
     // Tạo modal HTML
     const modalHTML = `
         <div class="modal active" id="product-detail-modal">
@@ -529,7 +532,7 @@ function showProductDetailModal(product) {
                         </div>
                         <div class="product-stock">
                             <span class="stock-label">Số lượng còn lại:</span>
-                            <span class="stock-quantity">${product.quantity}</span>
+                            <span class="stock-quantity">${displayQuantity}</span>
                         </div>
                         <div class="product-actions">
                             <button class="btn-add-to-cart-detail btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
