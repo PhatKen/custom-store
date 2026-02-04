@@ -128,6 +128,30 @@
                         <div class="items-list" id="delivery-items-list">
                             <!-- Items sẽ được thêm bằng JavaScript -->
                         </div>
+
+                        <!-- Order Summary -->
+                        <div class="order-summary">
+                            <div class="summary-row">
+                                <span>Tổng tiền hàng:</span>
+                                <span id="summary-subtotal">0 ₫</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Phí giao hàng:</span>
+                                <span id="summary-shipping">0 ₫</span>
+                            </div>
+                            <div class="summary-row discount-row" id="discount-row" style="display:none;">
+                                <span>Giảm giá:</span>
+                                <span id="summary-discount" class="discount-text">0 ₫</span>
+                            </div>
+                            <div class="summary-row original-price" id="original-price-row" style="display:none;">
+                                <span>Giá gốc:</span>
+                                <span id="summary-original-total"><s>0 ₫</s></span>
+                            </div>
+                            <div class="summary-row total-row">
+                                <span>Tổng cộng:</span>
+                                <span id="summary-total">0 ₫</span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Actions -->
