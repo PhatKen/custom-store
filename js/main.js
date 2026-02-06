@@ -337,10 +337,10 @@ function loadProducts() {
         localStorage.setItem('products', JSON.stringify(products));
     }
     
-    // Sắp xếp theo số bán giảm dần và lấy 6 sản phẩm bán chạy nhất
+    // Sắp xếp theo số bán giảm dần và lấy 8 sản phẩm bán chạy nhất
     const topSellingProducts = products
         .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-        .slice(0, 6);
+        .slice(0, 8);
     
     // Hiển thị sản phẩm
     displayProducts(topSellingProducts);
