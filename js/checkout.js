@@ -80,6 +80,7 @@ function updateCheckoutSummary(subtotal, discount) {
 function initCheckoutEvents() {
     // Khởi tạo địa chỉ combobox
     initAddressSelectors();
+    prefillAddressFromUser();
     
     // Nút quay lại
     const backBtn = document.getElementById('back-btn');
@@ -108,6 +109,66 @@ function initCheckoutEvents() {
     
     // Sự kiện cho modal
     setupPaymentModals();
+}
+
+// Tự động điền địa chỉ từ tài khoản người dùng nếu có
+function prefillAddressFromUser() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+    
+    const fullnameEl = document.getElementById('fullname');
+    const phoneEl = document.getElementById('phone');
+    const countrySelect = document.getElementById('country');
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
+    const addressEl = document.getElementById('address');
+    
+    if (fullnameEl && currentUser.fullName) fullnameEl.value = currentUser.fullName;
+    if (phoneEl && currentUser.phone) phoneEl.value = currentUser.phone;
+    
+    const hasAddressData = currentUser.province || currentUser.district || currentUser.ward || currentUser.addressDetail || currentUser.address;
+    if (!hasAddressData) return;
+    
+    if (countrySelect) {
+        countrySelect.value = 'vietnam';
+        countrySelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Xác định key tỉnh/thành phố
+    let provinceKey = currentUser.province || '';
+    if (provinceSelect && provinceKey) {
+        if (!vietnamAddressData[provinceKey]) {
+            provinceKey = Object.keys(vietnamAddressData).find(key => vietnamAddressData[key].name === currentUser.province) || '';
+        }
+        if (provinceKey) {
+            provinceSelect.value = provinceKey;
+            provinceSelect.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    // Xác định key quận/huyện
+    if (districtSelect && provinceSelect && provinceSelect.value) {
+        let districtKey = currentUser.district || '';
+        const province = vietnamAddressData[provinceSelect.value];
+        if (province && districtKey && !province.districts[districtKey]) {
+            districtKey = Object.keys(province.districts).find(key => province.districts[key].name === currentUser.district) || '';
+        }
+        if (districtKey) {
+            districtSelect.value = districtKey;
+            districtSelect.dispatchEvent(new Event('change'));
+        }
+    }
+    
+    // Phường/xã
+    if (wardSelect && currentUser.ward) {
+        wardSelect.value = currentUser.ward;
+    }
+    
+    // Địa chỉ chi tiết
+    if (addressEl) {
+        addressEl.value = currentUser.addressDetail || currentUser.address || '';
+    }
 }
 
 // Xác thực và gửi checkout
