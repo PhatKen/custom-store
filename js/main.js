@@ -247,19 +247,31 @@ function getSampleNews() {
 
 let homeNewsIndex = 0;
 let homeNewsTimer = null;
+let homeNewsData = [];
 
 function initHomeNews() {
     const container = document.getElementById('home-news-item');
     if (!container) return;
-    const news = getSampleNews();
-    renderHomeNewsItem(container, news[homeNewsIndex]);
+    homeNewsData = getSampleNews();
+    renderHomeNewsItem(container, homeNewsData[homeNewsIndex]);
     if (homeNewsTimer) {
         clearInterval(homeNewsTimer);
     }
-    homeNewsTimer = setInterval(() => {
-        homeNewsIndex = (homeNewsIndex + 1) % news.length;
-        renderHomeNewsItem(container, news[homeNewsIndex]);
-    }, 10000);
+    scheduleHomeNewsRotation();
+    const prevBtn = document.getElementById('home-news-prev');
+    const nextBtn = document.getElementById('home-news-next');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function() {
+            updateHomeNewsIndex(-1);
+            scheduleHomeNewsRotation();
+        });
+    }
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            updateHomeNewsIndex(1);
+            scheduleHomeNewsRotation();
+        });
+    }
 }
 
 function renderHomeNewsItem(container, item) {
@@ -277,6 +289,23 @@ function renderHomeNewsItem(container, item) {
             </div>
         </div>
     `;
+}
+
+function updateHomeNewsIndex(delta) {
+    const container = document.getElementById('home-news-item');
+    if (!container || homeNewsData.length === 0) return;
+    const len = homeNewsData.length;
+    homeNewsIndex = (homeNewsIndex + delta + len) % len;
+    renderHomeNewsItem(container, homeNewsData[homeNewsIndex]);
+}
+
+function scheduleHomeNewsRotation() {
+    if (homeNewsTimer) {
+        clearInterval(homeNewsTimer);
+    }
+    homeNewsTimer = setInterval(() => {
+        updateHomeNewsIndex(1);
+    }, 10000);
 }
 
 // Tải sản phẩm từ localStorage hoặc tạo dữ liệu mẫu
