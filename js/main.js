@@ -219,8 +219,13 @@ function loadProducts() {
         localStorage.setItem('products', JSON.stringify(products));
     }
     
+    // Sắp xếp theo số bán giảm dần và lấy 6 sản phẩm bán chạy nhất
+    const topSellingProducts = products
+        .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+        .slice(0, 6);
+    
     // Hiển thị sản phẩm
-    displayProducts(products);
+    displayProducts(topSellingProducts);
 }
 
 // Tạo dữ liệu sản phẩm mẫu
@@ -234,6 +239,7 @@ function getSampleProducts() {
             description: 'Áo thun basic chất liệu cotton thoáng mát, dễ phối đồ',
             image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 50,
+            sold: 152,
             createdAt: new Date().toISOString()
         },
         {
@@ -244,6 +250,7 @@ function getSampleProducts() {
             description: 'Quần jeans slimfit chất liệu denim cao cấp, form ôm vừa vặn',
             image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 30,
+            sold: 98,
             createdAt: new Date().toISOString()
         },
         {
@@ -254,6 +261,7 @@ function getSampleProducts() {
             description: 'Giày thể thao Nike chính hãng, êm ái và bền đẹp',
             image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 20,
+            sold: 45,
             createdAt: new Date().toISOString()
         },
         {
@@ -264,6 +272,7 @@ function getSampleProducts() {
             description: 'Nón lưỡi trai unisex, nhiều màu sắc, chất liệu vải cao cấp',
             image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 45,
+            sold: 189,
             createdAt: new Date().toISOString()
         },
         {
@@ -274,6 +283,7 @@ function getSampleProducts() {
             description: 'Áo sơ mi nam form regular, chất liệu vải lụa mát mẻ',
             image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 25,
+            sold: 67,
             createdAt: new Date().toISOString()
         },
         {
@@ -284,6 +294,7 @@ function getSampleProducts() {
             description: 'Quần short kaki nam nữ, chất liệu thấm hút tốt, thoáng mát',
             image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 40,
+            sold: 134,
             createdAt: new Date().toISOString()
         },
         {
@@ -294,6 +305,7 @@ function getSampleProducts() {
             description: 'Giày sandal nữ quai ngang, đế bằng êm ái, nhiều màu sắc',
             image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 35,
+            sold: 76,
             createdAt: new Date().toISOString()
         },
         {
@@ -304,6 +316,7 @@ function getSampleProducts() {
             description: 'Nón rộng vành nữ đi biển, chất liệu cói tự nhiên, nhẹ nhàng',
             image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 28,
+            sold: 53,
             createdAt: new Date().toISOString()
         }
     ];
