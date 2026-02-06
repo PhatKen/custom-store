@@ -669,6 +669,7 @@ nav {
     color: var(--warning-color);
     border: 1px solid var(--warning-color);
     cursor: not-allowed;
+    padding: 10px 14px;
 }
 
 .btn-login-required:hover {
