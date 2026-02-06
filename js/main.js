@@ -185,6 +185,22 @@ function initProductFilter() {
     });
 }
 
+function initHeaderSearch() {
+    const input = document.getElementById('header-search-input');
+    const btn = document.getElementById('header-search-btn');
+    if (!input || !btn) return;
+    btn.addEventListener('click', function() {
+        const q = input.value.trim();
+        window.location.href = q ? `products.html?q=${encodeURIComponent(q)}` : 'products.html';
+    });
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const q = input.value.trim();
+            window.location.href = q ? `products.html?q=${encodeURIComponent(q)}` : 'products.html';
+        }
+    });
+}
+
 // Lọc sản phẩm theo danh mục
 function filterProducts(category) {
     const productCards = document.querySelectorAll('.product-card');
@@ -1004,6 +1020,10 @@ function updateUserHeader() {
         // Người dùng đã đăng nhập
         const userName = currentUser.fullName || currentUser.email.split('@')[0];
         navActions.innerHTML = `
+            <div class="header-search">
+                <input type="text" id="header-search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button id="header-search-btn"><i class="fas fa-search"></i></button>
+            </div>
             <div class="user-menu">
                 <button class="user-btn" id="user-menu-btn">
                     <i class="fas fa-user"></i>
@@ -1066,6 +1086,10 @@ function updateUserHeader() {
     } else {
         // Người dùng chưa đăng nhập
         navActions.innerHTML = `
+            <div class="header-search">
+                <input type="text" id="header-search-input" placeholder="Tìm kiếm sản phẩm...">
+                <button id="header-search-btn"><i class="fas fa-search"></i></button>
+            </div>
             <a href="register.html" class="btn-register">Đăng ký</a>
             <a href="login.html" class="btn-login">Đăng nhập</a>
             <div class="menu-toggle">
@@ -1076,6 +1100,7 @@ function updateUserHeader() {
         // Khởi tạo lại menu mobile
         initMobileMenu();
     }
+    initHeaderSearch();
 }
 
 // Cập nhật lại các nút thêm vào giỏ trong các thẻ sản phẩm

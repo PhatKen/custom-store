@@ -19,6 +19,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('filter-category').value = category;
         applyFilters();
     }
+    const q = urlParams.get('q');
+    if (q) {
+        const nameInput = document.getElementById('search-name');
+        if (nameInput) {
+            nameInput.value = q;
+            applyFilters();
+        }
+    }
     
     // Khởi tạo listener để theo dõi thay đổi sản phẩm từ admin
     initProductsChangeListener();
