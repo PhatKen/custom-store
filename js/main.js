@@ -403,6 +403,18 @@ function createProductCard(product) {
         viewProductDetail(product.id);
     });
     
+    // Thêm sự kiện cho hình ảnh sản phẩm
+    const productImage = card.querySelector('.product-image');
+    productImage.addEventListener('click', function() {
+        viewProductDetail(product.id);
+    });
+    
+    // Thêm sự kiện cho tên sản phẩm
+    const productName = card.querySelector('.product-name');
+    productName.addEventListener('click', function() {
+        viewProductDetail(product.id);
+    });
+    
     return card;
 }
 
