@@ -113,6 +113,42 @@ nav {
     gap: 15px;
 }
 
+.header-search {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #f8f9fa;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border-color);
+}
+
+.header-search input {
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    min-width: 180px;
+}
+
+.header-search button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.header-search button:hover {
+    background: var(--primary-dark);
+}
+
 .btn-login, .btn-register {
     padding: 8px 20px;
     border-radius: var(--border-radius);
