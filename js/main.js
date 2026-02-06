@@ -569,6 +569,12 @@ function showProductDetailModal(product) {
                         </div>
                     </div>
                 </div>
+                <div class="modal-body">
+                    <div class="recommended-products">
+                        <h3>Có thể bạn quan tâm</h3>
+                        <div class="recommended-grid" id="product-recommended-products"></div>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -644,8 +650,82 @@ function showProductDetailModal(product) {
             this.remove();
         }
     });
+
+    const recoContainer = document.getElementById('product-recommended-products');
+    if (recoContainer) {
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        const sameCategory = products.filter(p => p.category === product.category && p.id !== product.id);
+        const sortedSame = sameCategory.sort((a, b) => (b.sold || 0) - (a.sold || 0)).slice(0, 4);
+        let recommendations = sortedSame;
+        if (recommendations.length < 4) {
+            const others = products.filter(p => p.category !== product.category && p.id !== product.id);
+            const fill = others.sort(() => 0.5 - Math.random()).slice(0, 4 - recommendations.length);
+            recommendations = recommendations.concat(fill);
+        }
+        recoContainer.innerHTML = '';
+        recommendations.forEach(reco => {
+            const card = createRecommendedCardForModal(reco, product.id);
+            recoContainer.appendChild(card);
+        });
+    }
 }
 
+function createRecommendedCardForModal(recoProduct, currentProductId) {
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + ' VNĐ';
+    const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón' };
+    const loggedIn = JSON.parse(localStorage.getItem('currentUser')) !== null;
+    card.innerHTML = `
+        <div class="product-image">
+            <img src="${recoProduct.image}" alt="${recoProduct.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+        </div>
+        <div class="product-info">
+            <span class="product-category">${categoryNames[recoProduct.category]}</span>
+            <h3 class="product-name">${recoProduct.name}</h3>
+            <div class="product-price">${formattedPrice}</div>
+            <div class="product-actions">
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${recoProduct.id}">
+                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
+                    </button>` 
+                    : 
+                    `<div class="btn-login-required">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </div>`
+                }
+                <button class="btn-view" data-product-id="${recoProduct.id}">
+                    <i class="fas fa-eye"></i> Xem chi tiết
+                </button>
+            </div>
+        </div>
+    `;
+    const viewBtn = card.querySelector('.btn-view');
+    viewBtn.addEventListener('click', function() {
+        const existing = document.getElementById('product-detail-modal');
+        if (existing) existing.remove();
+        viewProductDetail(recoProduct.id);
+    });
+    const img = card.querySelector('.product-image');
+    img.addEventListener('click', function() {
+        const existing = document.getElementById('product-detail-modal');
+        if (existing) existing.remove();
+        viewProductDetail(recoProduct.id);
+    });
+    const nameEl = card.querySelector('.product-name');
+    nameEl.addEventListener('click', function() {
+        const existing = document.getElementById('product-detail-modal');
+        if (existing) existing.remove();
+        viewProductDetail(recoProduct.id);
+    });
+    if (loggedIn) {
+        const addBtn = card.querySelector('.btn-add-to-cart');
+        addBtn.addEventListener('click', function() {
+            addToCart(recoProduct.id);
+        });
+    }
+    return card;
+}
 // Cập nhật số lượng giỏ hàng
 function updateCartCount() {
     const cartCountElements = document.querySelectorAll('#cart-count');
