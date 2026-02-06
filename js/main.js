@@ -147,6 +147,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Cập nhật lại các nút thêm vào giỏ
     updateProductButtons();
+
+    initHomeNews();
 });
 
 // Khởi tạo menu mobile
@@ -204,6 +206,77 @@ function filterProducts(category) {
             }, 300);
         }
     });
+}
+
+function getSampleNews() {
+    return [
+        {
+            id: 1,
+            category: 'Áo',
+            date: '04 Tháng 2, 2026',
+            title: '5 Kiểu Áo Phông Trendy Năm 2026',
+            image: 'https://images.pexels.com/photos/3622622/pexels-photo-3622622.jpeg?w=800&h=500&fit=crop',
+            excerpt: 'Khám phá những kiểu áo phông đang thịnh hành nhất năm nay từ oversized thoải mái đến cổ điển với chi tiết độc đáo.'
+        },
+        {
+            id: 2,
+            category: 'Quần',
+            date: '02 Tháng 2, 2026',
+            title: 'Quần Jeans Slimfit - Lựa Chọn Hoàn Hảo',
+            image: 'https://images.pexels.com/photos/2220294/pexels-photo-2220294.jpeg?w=800&h=500&fit=crop',
+            excerpt: 'Slimfit tôn dáng, hiện đại và lịch sự. Cách chọn size, phối đồ thông minh và bảo quản để bền đẹp.'
+        },
+        {
+            id: 3,
+            category: 'Giày',
+            date: '31 Tháng 1, 2026',
+            title: 'Giày Thể Thao Nike - Thoải Mái Và Phong Cách',
+            image: 'https://images.pexels.com/photos/3622622/pexels-photo-3622622.jpeg?w=800&h=500&fit=crop',
+            excerpt: 'Công nghệ đệm tốt, thiết kế hiện đại. Từ mẫu cổ điển đến phiên bản mới, phù hợp cả phong cách và hiệu năng.'
+        },
+        {
+            id: 4,
+            category: 'Nón',
+            date: '29 Tháng 1, 2026',
+            title: 'Nón Snapback - Phụ Kiện Hoàn Hảo',
+            image: 'https://images.pexels.com/photos/3622627/pexels-photo-3622627.jpeg?w=800&h=500&fit=crop',
+            excerpt: 'Đa dạng màu sắc và thiết kế, dễ phối với nhiều trang phục. Mẹo chọn nón hợp với khuôn mặt.'
+        }
+    ];
+}
+
+let homeNewsIndex = 0;
+let homeNewsTimer = null;
+
+function initHomeNews() {
+    const container = document.getElementById('home-news-item');
+    if (!container) return;
+    const news = getSampleNews();
+    renderHomeNewsItem(container, news[homeNewsIndex]);
+    if (homeNewsTimer) {
+        clearInterval(homeNewsTimer);
+    }
+    homeNewsTimer = setInterval(() => {
+        homeNewsIndex = (homeNewsIndex + 1) % news.length;
+        renderHomeNewsItem(container, news[homeNewsIndex]);
+    }, 10000);
+}
+
+function renderHomeNewsItem(container, item) {
+    container.innerHTML = `
+        <div class="home-news-content">
+            <img class="home-news-image" src="${item.image}" alt="${item.title}" onerror="this.src='https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'">
+            <div class="home-news-info">
+                <span class="news-badge">${item.category}</span>
+                <h3 class="home-news-title">${item.title}</h3>
+                <div class="home-news-date"><i class="fas fa-calendar"></i> ${item.date}</div>
+                <p class="home-news-excerpt">${item.excerpt}</p>
+                <div class="home-news-actions">
+                    <a href="news.html" class="home-news-readmore">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // Tải sản phẩm từ localStorage hoặc tạo dữ liệu mẫu
