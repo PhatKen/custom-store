@@ -885,17 +885,22 @@ footer {
 }
 
 .cart-header {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr 120px 120px 120px 60px;
     align-items: center;
+    gap: 20px;
     padding: 20px;
     background-color: #f8f9fa;
     border-bottom: 1px solid var(--border-color);
 }
 
 .cart-header-details {
-    display: flex;
-    gap: 60px;
+    display: contents;
+}
+.cart-header-details span {
+    text-align: center;
+    font-weight: 600;
+    color: var(--gray-color);
 }
 
 .cart-items {
@@ -1868,12 +1873,12 @@ footer {
     
     
     .cart-header {
-        flex-direction: column;
-        align-items: flex-start;
+        display: block;
         gap: 15px;
     }
     
     .cart-header-details {
+        display: flex;
         width: 100%;
         justify-content: space-between;
         gap: 20px;
