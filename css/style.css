@@ -665,13 +665,14 @@ nav {
 }
 
 .btn-login-required {
-    background-color: #e9ecef;
-    color: var(--gray-color);
+    background-color: rgba(255, 193, 7, 0.12);
+    color: var(--warning-color);
+    border: 1px solid var(--warning-color);
     cursor: not-allowed;
 }
 
 .btn-login-required:hover {
-    background-color: #dee2e6;
+    background-color: rgba(255, 193, 7, 0.18);
 }
 
 .btn-view {
