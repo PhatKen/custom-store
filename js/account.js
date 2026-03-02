@@ -5,6 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     loadAccountInfo();
     setupEventListeners();
     initAddressSelectors();
+    initOrdersSectionRouting();
+    loadUserOrders();
 });
 
 // Tải thông tin tài khoản
@@ -118,6 +120,108 @@ function setupEventListeners() {
     
     // Upload avatar
     document.getElementById('avatar-input').addEventListener('change', handleAvatarUpload);
+}
+
+// Hiển thị/ẩn phần "Đơn hàng của tôi" dựa theo hash
+function initOrdersSectionRouting() {
+    function applyRoute() {
+        const hash = window.location.hash;
+        const ordersSection = document.getElementById('orders-section');
+        const displayMode = document.getElementById('display-mode');
+        const editForm = document.getElementById('edit-form');
+        if (!ordersSection || !displayMode || !editForm) return;
+        if (hash === '#my-orders') {
+            ordersSection.style.display = 'block';
+            displayMode.classList.remove('active');
+            editForm.classList.remove('active');
+        } else {
+            ordersSection.style.display = 'none';
+            displayMode.classList.add('active');
+            editForm.classList.remove('active');
+        }
+    }
+    window.addEventListener('hashchange', applyRoute);
+    applyRoute();
+}
+
+// Tải đơn hàng của người dùng và hiển thị
+function loadUserOrders() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const ordersList = document.getElementById('orders-list');
+    const ordersEmpty = document.getElementById('orders-empty');
+    if (!currentUser || !ordersList || !ordersEmpty) return;
+    
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const userOrders = orders.filter(o => o.userId === currentUser.id);
+    
+    ordersList.innerHTML = '';
+    if (userOrders.length === 0) {
+        ordersEmpty.style.display = 'block';
+        return;
+    }
+    ordersEmpty.style.display = 'none';
+    
+    userOrders.slice().reverse().forEach(order => {
+        const container = document.createElement('div');
+        container.className = 'order-card';
+        const itemsHTML = (order.items || []).map(item => {
+            const itemTotal = (item.price || 0) * (item.quantity || 0);
+            return `
+                <div class="order-item">
+                    <div class="order-item-image">
+                        <img src="${item.image}" alt="${item.name}">
+                    </div>
+                    <div class="order-item-info">
+                        <h4>${item.name}</h4>
+                        <p class="order-item-quantity">Số lượng: ${item.quantity}</p>
+                    </div>
+                    <div class="order-item-price">
+                        <p class="unit-price">${(item.price || 0).toLocaleString('vi-VN')} ₫</p>
+                        <p class="total-price">${itemTotal.toLocaleString('vi-VN')} ₫</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        const delivery = order.deliveryInfo || {};
+        container.innerHTML = `
+            <div class="order-card-header">
+                <div class="order-card-head-left">
+                    <div class="order-id">Mã đơn: ${order.id}</div>
+                    <div class="order-date">Ngày đặt: ${new Date(order.createdAt || Date.now()).toLocaleString('vi-VN')}</div>
+                </div>
+                <div class="order-card-head-right">
+                    <div class="order-total">${(order.total || 0).toLocaleString('vi-VN')} VNĐ</div>
+                    <div class="order-ship">Phí ship: ${(order.shippingFee || 0).toLocaleString('vi-VN')} VNĐ</div>
+                </div>
+            </div>
+            <div class="order-card-status">
+                Trạng thái: <span class="order-status">${order.status || 'confirmed'}</span>
+            </div>
+            <button class="order-toggle">Xem chi tiết đơn hàng</button>
+            <div class="order-card-detail" style="display:none;">
+                <div class="order-items">${itemsHTML}</div>
+                <div class="order-delivery">
+                    <div class="order-delivery-title">Thông tin giao hàng</div>
+                    <div class="order-delivery-grid">
+                        <div><span>Người nhận:</span> <strong>${delivery.fullname || ''}</strong></div>
+                        <div><span>Số điện thoại:</span> <strong>${delivery.phone || ''}</strong></div>
+                        <div class="order-delivery-address"><span>Địa chỉ:</span> <strong>${delivery.address || ''}${delivery.ward ? ', ' + delivery.ward : ''}${delivery.district ? ', ' + delivery.district : ''}${delivery.province ? ', ' + delivery.province : ''}</strong></div>
+                    </div>
+                </div>
+                <div class="order-detail-actions">
+                    <a href="delivery.html" class="btn-secondary">Xem trạng thái giao hàng</a>
+                </div>
+            </div>
+        `;
+        const toggleBtn = container.querySelector('.order-toggle');
+        const detail = container.querySelector('.order-card-detail');
+        toggleBtn.addEventListener('click', function() {
+            const isOpen = detail.style.display !== 'none';
+            detail.style.display = isOpen ? 'none' : 'block';
+            this.textContent = isOpen ? 'Xem chi tiết đơn hàng' : 'Ẩn chi tiết đơn hàng';
+        });
+        ordersList.appendChild(container);
+    });
 }
 
 // Chuyển đổi chế độ chỉnh sửa

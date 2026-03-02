@@ -1034,6 +1034,9 @@ function updateUserHeader() {
                     <a href="account.html" class="dropdown-item" id="edit-profile-btn">
                         <i class="fas fa-user-edit"></i> Chỉnh sửa tài khoản
                     </a>
+                    <a href="account.html#my-orders" class="dropdown-item">
+                        <i class="fas fa-receipt"></i> Đơn hàng của tôi
+                    </a>
                     ${currentUser.role === 'admin' ? 
                         `<a href="admin.html" class="dropdown-item">
                             <i class="fas fa-cog"></i> Quản lý admin
