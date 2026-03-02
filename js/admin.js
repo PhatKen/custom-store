@@ -970,7 +970,7 @@ function initOrderDetailsModal() {
 // Hiển thị chi tiết đơn hàng
 function showOrderDetails(orderId) {
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    const order = orders.find(o => o.id === orderId);
+    const order = orders.find(o => String(o.id) === String(orderId));
     
     if (!order) {
         showNotification('Không tìm thấy đơn hàng', 'error');
@@ -1086,7 +1086,7 @@ function showOrderDetails(orderId) {
 // Lưu trạng thái đơn hàng
 function saveOrderStatus(orderId, newStatus) {
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    const orderIndex = orders.findIndex(o => o.id === orderId);
+    const orderIndex = orders.findIndex(o => String(o.id) === String(orderId));
     
     if (orderIndex === -1) {
         showNotification('Không tìm thấy đơn hàng', 'error');
@@ -1120,7 +1120,7 @@ function deleteOrder(orderId) {
     let orders = JSON.parse(localStorage.getItem('orders')) || [];
     
     // Tìm vị trí đơn hàng
-    const orderIndex = orders.findIndex(o => o.id === orderId);
+    const orderIndex = orders.findIndex(o => String(o.id) === String(orderId));
     
     if (orderIndex === -1) {
         showNotification('Không tìm thấy đơn hàng', 'error');
