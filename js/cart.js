@@ -376,7 +376,7 @@ function showCheckoutModal(cart) {
         
         // Tạo đơn hàng
         const order = {
-            id: generateOrderId(),
+            id: generateOrderId(phone),
             customerName: fullname,
             customerPhone: phone,
             customerEmail: email,
@@ -407,12 +407,17 @@ function showCheckoutModal(cart) {
 }
 
 // Tạo ID đơn hàng mới
-function generateOrderId() {
-    const orders = JSON.parse(localStorage.getItem('orders')) || [];
-    if (orders.length === 0) return 1001;
-    
-    const maxId = Math.max(...orders.map(o => o.id));
-    return maxId + 1;
+function generateOrderId(phone) {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const ms = String(now.getMilliseconds());
+    const digits = (phone || '').replace(/\D/g, '');
+    const last2 = digits.slice(-2) || '00';
+    const dd = String(now.getDate()).padStart(2, '0');
+    const MM = String(now.getMonth() + 1).padStart(2, '0');
+    return `${hh}${mm}${ss}${ms}${last2}${dd}${MM}`;
 }
 
 // Lưu đơn hàng

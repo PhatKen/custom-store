@@ -95,10 +95,11 @@ function loadRecentActivity(products, orders, users) {
     
     // Thêm hoạt động từ đơn hàng
     orders.slice(-5).forEach(order => {
+        const customerName = order.customerName || (order.deliveryInfo && order.deliveryInfo.fullname) || 'Khách hàng';
         activities.push({
             type: 'order-placed',
             title: 'Đơn hàng mới',
-            description: `Đơn hàng #${order.id} từ ${order.customerName}`,
+            description: `Đơn hàng #${order.id} từ ${customerName}`,
             time: formatTimeAgo(new Date(order.createdAt || Date.now())),
             ts: new Date(order.createdAt || Date.now()).getTime()
         });

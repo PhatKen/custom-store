@@ -358,7 +358,16 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
     // Tạo đơn hàng
     let orders = JSON.parse(localStorage.getItem('orders')) || [];
     
-    const orderId = 'ORD-' + Date.now();
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    const ms = String(now.getMilliseconds());
+    const phoneDigits = (deliveryInfo?.phone || '').replace(/\D/g, '');
+    const last2 = phoneDigits.slice(-2) || '00';
+    const dd = String(now.getDate()).padStart(2, '0');
+    const MM = String(now.getMonth() + 1).padStart(2, '0');
+    const orderId = `${hh}${mm}${ss}${ms}${last2}${dd}${MM}`;
     const newOrder = {
         id: orderId,
         userId: currentUser.id,
