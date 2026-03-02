@@ -88,7 +88,8 @@ function loadRecentActivity(products, orders, users) {
             type: 'product-added',
             title: 'Sản phẩm mới được thêm',
             description: `"${product.name}" đã được thêm vào cửa hàng`,
-            time: formatTimeAgo(new Date(product.createdAt))
+            time: formatTimeAgo(new Date(product.createdAt || Date.now())),
+            ts: new Date(product.createdAt || Date.now()).getTime()
         });
     });
     
@@ -98,7 +99,8 @@ function loadRecentActivity(products, orders, users) {
             type: 'order-placed',
             title: 'Đơn hàng mới',
             description: `Đơn hàng #${order.id} từ ${order.customerName}`,
-            time: formatTimeAgo(new Date(order.createdAt))
+            time: formatTimeAgo(new Date(order.createdAt || Date.now())),
+            ts: new Date(order.createdAt || Date.now()).getTime()
         });
     });
     
@@ -108,15 +110,13 @@ function loadRecentActivity(products, orders, users) {
             type: 'user-registered',
             title: 'Người dùng mới',
             description: `${user.fullName} đã đăng ký tài khoản`,
-            time: formatTimeAgo(new Date(user.createdAt))
+            time: formatTimeAgo(new Date(user.createdAt || Date.now())),
+            ts: new Date(user.createdAt || Date.now()).getTime()
         });
     });
     
     // Sắp xếp theo thời gian (mới nhất trước)
-    activities.sort((a, b) => {
-        // Đây là một cách đơn giản, trong thực tế nên so sánh bằng timestamp
-        return Math.random() - 0.5; // Giả lập sắp xếp ngẫu nhiên
-    });
+    activities.sort((a, b) => (b.ts || 0) - (a.ts || 0));
     
     // Giới hạn số lượng hoạt động
     activities = activities.slice(0, 10);
