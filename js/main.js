@@ -40,6 +40,24 @@ function initializeSampleData() {
                 role: 'user',
                 status: 'inactive',
                 createdAt: new Date().toISOString()
+            },
+            {
+                id: 5,
+                fullName: 'Nhân viên Sản phẩm',
+                email: 'staff.products@customstore.com',
+                phone: '0900000001',
+                role: 'staff_products',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            },
+            {
+                id: 6,
+                fullName: 'Nhân viên Đơn hàng',
+                email: 'staff.orders@customstore.com',
+                phone: '0900000002',
+                role: 'staff_orders',
+                status: 'active',
+                createdAt: new Date().toISOString()
             }
         ];
         
