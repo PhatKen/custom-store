@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo navigation
     initAdminNavigation();
     
+    applyRoleRestrictions();
+    
     // Khởi tạo tải dữ liệu dashboard
     loadDashboardData();
     
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tải người dùng
     loadUsers();
+    initUserTableEvents();
     
     // Khởi tạo chức năng đăng xuất
     initLogout();
@@ -24,6 +27,46 @@ document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo tìm kiếm và lọc
     initSearchAndFilter();
 });
+
+function applyRoleRestrictions() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (!currentUser) return;
+    const role = currentUser.role;
+    const menuItem = sel => document.querySelector(`.admin-menu a[data-section="${sel}"]`)?.closest('li');
+    const hideSection = id => {
+        const sec = document.getElementById(id);
+        if (sec) sec.classList.remove('active');
+    };
+    if (role === 'staff_products') {
+        menuItem('add-product') && (menuItem('add-product').style.display = 'none');
+        menuItem('orders') && (menuItem('orders').style.display = 'none');
+        menuItem('users') && (menuItem('users').style.display = 'none');
+        hideSection('add-product');
+        hideSection('orders');
+        hideSection('users');
+        const prodLink = document.querySelector('.admin-menu a[data-section="products-management"]');
+        if (prodLink) prodLink.click();
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.products-table .btn-edit') || e.target.closest('.products-table .btn-delete')) {
+                e.preventDefault();
+            }
+        });
+    } else if (role === 'staff_orders') {
+        menuItem('products-management') && (menuItem('products-management').style.display = 'none');
+        menuItem('add-product') && (menuItem('add-product').style.display = 'none');
+        menuItem('users') && (menuItem('users').style.display = 'none');
+        hideSection('products-management');
+        hideSection('add-product');
+        hideSection('users');
+        const ordersLink = document.querySelector('.admin-menu a[data-section="orders"]');
+        if (ordersLink) ordersLink.click();
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.btn-delete-order')) {
+                e.preventDefault();
+            }
+        });
+    }
+}
 
 // Khởi tạo navigation admin
 function initAdminNavigation() {
@@ -259,6 +302,16 @@ function displayProductsTable(products) {
     
     // Thêm sự kiện cho các nút
     addProductTableEvents();
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.role === 'staff_products') {
+        document.querySelectorAll('.products-table .btn-edit, .products-table .btn-delete').forEach(btn => {
+            btn.setAttribute('disabled', 'true');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        });
+    }
 }
 
 // Thêm sự kiện cho bảng sản phẩm
@@ -593,6 +646,16 @@ function displayOrdersTable(orders) {
         
         tbody.appendChild(row);
     });
+    
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser && currentUser.role === 'staff_orders') {
+        document.querySelectorAll('.orders-table .btn-delete-order').forEach(btn => {
+            btn.setAttribute('disabled', 'true');
+            btn.style.pointerEvents = 'none';
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        });
+    }
 }
 
 // Lấy văn bản trạng thái đơn hàng
@@ -656,6 +719,22 @@ function getSampleUsers() {
             role: 'user',
             status: 'inactive',
             createdAt: new Date('2023-09-10').toISOString()
+        },
+        {
+            id: 5,
+            fullName: 'Nhân viên Sản phẩm',
+            email: 'staff.products@customstore.com',
+            role: 'staff_products',
+            status: 'active',
+            createdAt: new Date('2024-02-01').toISOString()
+        },
+        {
+            id: 6,
+            fullName: 'Nhân viên Đơn hàng',
+            email: 'staff.orders@customstore.com',
+            role: 'staff_orders',
+            status: 'active',
+            createdAt: new Date('2024-02-01').toISOString()
         }
     ];
 }
@@ -688,7 +767,7 @@ function displayUsersTable(users) {
             <td>${user.id}</td>
             <td>${user.fullName}</td>
             <td>${user.email}</td>
-            <td>${user.role === 'admin' ? 'Quản trị viên' : 'Người dùng'}</td>
+            <td>${user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff_products' ? 'Nhân viên (xem sản phẩm)' : user.role === 'staff_orders' ? 'Nhân viên (xem đơn hàng)' : 'Người dùng'}</td>
             <td>${formattedDate}</td>
             <td>
                 <span class="status-badge status-${user.status}-user">
@@ -708,6 +787,51 @@ function displayUsersTable(users) {
         `;
         
         tbody.appendChild(row);
+    });
+    
+    initUserTableEvents();
+}
+
+function initUserTableEvents() {
+    const modal = document.getElementById('edit-user-modal');
+    const form = document.getElementById('edit-user-form');
+    if (!modal || !form) return;
+    document.querySelectorAll('.users-table .btn-edit[data-user-id]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = parseInt(this.getAttribute('data-user-id'));
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            document.getElementById('edit-user-id').value = user.id;
+            document.getElementById('edit-user-status').value = user.status || 'active';
+            document.getElementById('edit-user-role').value = user.role || 'user';
+            modal.style.display = 'flex';
+        });
+    });
+    modal.querySelectorAll('.close-modal').forEach(btn => {
+        btn.addEventListener('click', function() {
+            modal.style.display = 'none';
+        });
+    });
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = parseInt(document.getElementById('edit-user-id').value);
+        const status = document.getElementById('edit-user-status').value;
+        const role = document.getElementById('edit-user-role').value;
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const idx = users.findIndex(u => u.id === id);
+        if (idx !== -1) {
+            users[idx].status = status;
+            users[idx].role = role;
+            localStorage.setItem('users', JSON.stringify(users));
+            displayUsersTable(users);
+            loadDashboardData();
+        }
+        modal.style.display = 'none';
+        showNotification('Cập nhật người dùng thành công!', 'success');
     });
 }
 
@@ -818,6 +942,10 @@ function initOrderDetailsModal() {
         // Thêm event listener cho nút xóa đơn hàng
         const deleteBtn = e.target.closest('.btn-delete-order[data-order-id]');
         if (deleteBtn) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser && currentUser.role === 'staff_orders') {
+                return;
+            }
             const orderId = deleteBtn.getAttribute('data-order-id');
             deleteOrder(orderId);
         }
@@ -920,18 +1048,40 @@ function showOrderDetails(orderId) {
     // Thêm event listener cho nút xóa trong modal
     const deleteBtn = document.getElementById('delete-order-modal-btn');
     if (deleteBtn) {
-        deleteBtn.onclick = function() {
-            deleteOrder(orderId);
-        };
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.role === 'staff_orders') {
+            deleteBtn.setAttribute('disabled', 'true');
+            deleteBtn.style.pointerEvents = 'none';
+            deleteBtn.style.opacity = '0.5';
+            deleteBtn.style.cursor = 'not-allowed';
+            deleteBtn.onclick = null;
+        } else {
+            deleteBtn.onclick = function() {
+                deleteOrder(orderId);
+            };
+        }
     }
     
     // Thêm event listener cho nút lưu trạng thái đơn hàng
     const saveStatusBtn = document.getElementById('save-order-status-btn');
     if (saveStatusBtn) {
-        saveStatusBtn.onclick = function() {
-            const newStatus = document.getElementById('modal-order-status-select').value;
-            saveOrderStatus(orderId, newStatus);
-        };
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.role === 'staff_orders') {
+            saveStatusBtn.setAttribute('disabled', 'true');
+            saveStatusBtn.style.pointerEvents = 'none';
+            saveStatusBtn.style.opacity = '0.5';
+            saveStatusBtn.style.cursor = 'not-allowed';
+            const statusSelect = document.getElementById('modal-order-status-select');
+            if (statusSelect) {
+                statusSelect.setAttribute('disabled', 'true');
+            }
+            saveStatusBtn.onclick = null;
+        } else {
+            saveStatusBtn.onclick = function() {
+                const newStatus = document.getElementById('modal-order-status-select').value;
+                saveOrderStatus(orderId, newStatus);
+            };
+        }
     }
     
     // Hiển thị modal
