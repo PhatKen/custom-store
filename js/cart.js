@@ -394,6 +394,26 @@ function showCheckoutModal(cart) {
         // Lưu đơn hàng vào localStorage
         saveOrder(order);
         
+        // Giảm số lượng tồn kho theo đơn hàng
+        try {
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            let changed = false;
+            (cart || []).forEach(item => {
+                const idx = products.findIndex(p => p.id == item.id);
+                if (idx !== -1) {
+                    const currentQty = parseInt(products[idx].quantity) || 0;
+                    const reduceBy = parseInt(item.quantity) || 0;
+                    const newQty = Math.max(0, currentQty - reduceBy);
+                    products[idx].quantity = newQty;
+                    products[idx].status = newQty <= 0 ? 'out-of-stock' : 'in-stock';
+                    changed = true;
+                }
+            });
+            if (changed) {
+                localStorage.setItem('products', JSON.stringify(products));
+            }
+        } catch (err) {}
+        
         // Xóa giỏ hàng
         localStorage.removeItem('cart');
         localStorage.removeItem('appliedCoupon');
