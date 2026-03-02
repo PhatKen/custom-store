@@ -1065,23 +1065,18 @@ function showOrderDetails(orderId) {
     // Thêm event listener cho nút lưu trạng thái đơn hàng
     const saveStatusBtn = document.getElementById('save-order-status-btn');
     if (saveStatusBtn) {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser && currentUser.role === 'staff_orders') {
-            saveStatusBtn.setAttribute('disabled', 'true');
-            saveStatusBtn.style.pointerEvents = 'none';
-            saveStatusBtn.style.opacity = '0.5';
-            saveStatusBtn.style.cursor = 'not-allowed';
-            const statusSelect = document.getElementById('modal-order-status-select');
-            if (statusSelect) {
-                statusSelect.setAttribute('disabled', 'true');
-            }
-            saveStatusBtn.onclick = null;
-        } else {
-            saveStatusBtn.onclick = function() {
-                const newStatus = document.getElementById('modal-order-status-select').value;
-                saveOrderStatus(orderId, newStatus);
-            };
+        const statusSelect = document.getElementById('modal-order-status-select');
+        if (statusSelect) {
+            statusSelect.removeAttribute('disabled');
         }
+        saveStatusBtn.removeAttribute('disabled');
+        saveStatusBtn.style.pointerEvents = '';
+        saveStatusBtn.style.opacity = '';
+        saveStatusBtn.style.cursor = '';
+        saveStatusBtn.onclick = function() {
+            const newStatus = document.getElementById('modal-order-status-select').value;
+            saveOrderStatus(orderId, newStatus);
+        };
     }
     
     // Hiển thị modal
