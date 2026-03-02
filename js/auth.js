@@ -36,7 +36,7 @@ function checkLoggedIn() {
     
     if (currentUser) {
         // Nếu đã đăng nhập, chuyển hướng
-        if (currentUser.role === 'admin') {
+        if (currentUser.role === 'admin' || currentUser.role === 'staff_products' || currentUser.role === 'staff_orders') {
             window.location.href = 'admin.html';
         } else {
             window.location.href = 'index.html';
@@ -119,7 +119,7 @@ function authenticateUser(email, password, rememberMe) {
         }
         
         // Chuyển hướng dựa trên vai trò
-        if (user.role === 'admin') {
+        if (user.role === 'admin' || user.role === 'staff_products' || user.role === 'staff_orders') {
             window.location.href = 'admin.html';
         } else {
             window.location.href = 'index.html';
