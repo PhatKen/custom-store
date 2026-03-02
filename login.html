@@ -162,6 +162,10 @@
         }
         
         function authenticateUser(email, password, rememberMe) {
+            // Khởi tạo dữ liệu mẫu nếu chưa có
+            if (typeof initializeSampleData === 'function') {
+                initializeSampleData();
+            }
             // Lấy người dùng từ localStorage
             const users = JSON.parse(localStorage.getItem('users')) || [];
             
@@ -180,7 +184,9 @@
                 'admin@customstore.com': 'admin123',
                 'user@example.com': 'user123',
                 'tranthi.b@example.com': 'password123',
-                'levan.c@example.com': 'password123'
+                'levan.c@example.com': 'password123',
+                'staff.products@customstore.com': 'staff123',
+                'staff.orders@customstore.com': 'staff123'
             };
             
             // Kiểm tra mật khẩu
