@@ -186,6 +186,11 @@
 
     <!-- News Articles Container -->
     <main class="container">
+        <h2 class="section-title">Bài Viết Mới</h2>
+        <div class="news-container" id="dynamic-posts">
+            <!-- Bài viết động sẽ được hiển thị bằng JavaScript -->
+        </div>
+        
         <div class="news-container">
             <!-- Article 1: T-Shirts -->
             <article class="news-card">
@@ -248,6 +253,20 @@
             </article>
         </div>
     </main>
+    
+    <!-- Post View Modal -->
+    <div id="post-view-modal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 id="post-view-title"></h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="news-date" id="post-view-meta"></div>
+                <div id="post-view-content" style="background:#fff;border-radius:8px;padding:16px;"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Footer -->
     <footer>
@@ -294,5 +313,69 @@
     </footer>
 
     <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.getElementById('dynamic-posts');
+            const modal = document.getElementById('post-view-modal');
+            const closeBtns = modal ? modal.querySelectorAll('.close-modal') : [];
+            function getPosts() {
+                return JSON.parse(localStorage.getItem('posts')) || [];
+            }
+            function extractThumb(html) {
+                const div = document.createElement('div');
+                div.innerHTML = html || '';
+                const img = div.querySelector('img');
+                return img ? img.src : 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop';
+            }
+            function render() {
+                const posts = getPosts().filter(p => p.status !== 'hidden');
+                container.innerHTML = '';
+                if (posts.length === 0) {
+                    container.innerHTML = '<p>Chưa có bài viết nào.</p>';
+                    return;
+                }
+                posts.slice().reverse().forEach(post => {
+                    const card = document.createElement('article');
+                    card.className = 'news-card';
+                    const thumb = extractThumb(post.content);
+                    const date = new Date(post.createdAt);
+                    const dateText = `${date.toLocaleDateString('vi-VN')} • ${post.author}`;
+                    card.innerHTML = `
+                        <img src="${thumb}" alt="${post.title}" class="news-image">
+                        <div class="news-content">
+                            <span class="news-category">Bài viết</span>
+                            <p class="news-date"><i class="fas fa-calendar"></i> ${dateText}</p>
+                            <h3>${post.title}</h3>
+                            <p class="news-excerpt">${post.content.replace(/<[^>]+>/g,' ').slice(0,160)}...</p>
+                            <a href="#" class="news-read-more" data-post-id="${post.id}">Đọc thêm <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            render();
+            document.addEventListener('click', function(e) {
+                const read = e.target.closest('.news-read-more[data-post-id]');
+                if (read) {
+                    e.preventDefault();
+                    const id = read.getAttribute('data-post-id');
+                    const posts = getPosts();
+                    const post = posts.find(p => String(p.id) === String(id));
+                    if (!post) return;
+                    document.getElementById('post-view-title').textContent = post.title;
+                    const date = new Date(post.createdAt);
+                    document.getElementById('post-view-meta').textContent = `${date.toLocaleDateString('vi-VN')} • ${post.author}`;
+                    document.getElementById('post-view-content').innerHTML = post.content || '';
+                    modal.style.display = 'flex';
+                }
+            });
+            closeBtns.forEach(btn => btn.addEventListener('click', function() {
+                modal.style.display = 'none';
+            }));
+            window.addEventListener('click', function(e) {
+                if (e.target === modal) modal.style.display = 'none';
+            });
+        });
+    </script>
 </body>
 </html>
