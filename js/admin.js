@@ -21,6 +21,10 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     initUserTableEvents();
     
+    // Khởi tải bài viết
+    loadPosts();
+    initPostEvents();
+    
     // Khởi tạo chức năng đăng xuất
     initLogout();
     
@@ -1147,4 +1151,188 @@ function deleteOrder(orderId) {
     
     // Cập nhật dashboard
     loadDashboardData();
+}
+
+// Bài viết
+function getPosts() {
+    return JSON.parse(localStorage.getItem('posts')) || [];
+}
+function savePosts(posts) {
+    localStorage.setItem('posts', JSON.stringify(posts));
+}
+function loadPosts() {
+    const posts = getPosts();
+    displayPostsTable(posts);
+}
+function displayPostsTable(posts) {
+    const tbody = document.getElementById('posts-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (posts.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center">Chưa có bài viết nào</td>
+            </tr>
+        `;
+        return;
+    }
+    posts.slice().reverse().forEach(post => {
+        const date = new Date(post.createdAt);
+        const formattedDate = date.toLocaleDateString('vi-VN');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${post.id}</td>
+            <td>${post.title}</td>
+            <td>${post.author}</td>
+            <td>${formattedDate}</td>
+            <td>
+                <span class="status-badge ${post.status === 'visible' ? 'status-in-stock' : 'status-out-of-stock'}">
+                    ${post.status === 'visible' ? 'Công khai' : 'Ẩn'}
+                </span>
+            </td>
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-edit" data-post-id="${post.id}" title="Sửa"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" data-post-id="${post.id}" title="Xóa"><i class="fas fa-trash"></i></button>
+                    <button class="btn-secondary btn-toggle" data-post-id="${post.id}" title="Ẩn/Hiện">
+                        <i class="fas fa-eye${post.status === 'hidden' ? '-slash' : ''}"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+function initPostEvents() {
+    const addBtn = document.getElementById('add-post-btn');
+    const modal = document.getElementById('post-editor-modal');
+    const form = document.getElementById('post-editor-form');
+    const closeBtns = modal ? modal.querySelectorAll('.close-modal') : [];
+    if (!addBtn || !modal || !form) return;
+    document.querySelectorAll('.editor-toolbar [data-cmd]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cmd = this.getAttribute('data-cmd');
+            document.execCommand(cmd, false, null);
+        });
+    });
+    const colorInput = document.getElementById('editor-color');
+    if (colorInput) {
+        colorInput.addEventListener('input', function() {
+            document.execCommand('foreColor', false, this.value);
+        });
+    }
+    const sizeSelect = document.getElementById('editor-fontsize');
+    if (sizeSelect) {
+        sizeSelect.addEventListener('change', function() {
+            document.execCommand('fontSize', false, this.value);
+        });
+    }
+    const imageInput = document.getElementById('editor-image');
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100%';
+                img.style.margin = '8px 0';
+                const editor = document.getElementById('post-content');
+                editor.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+            imageInput.value = '';
+        });
+    }
+    addBtn.addEventListener('click', function() {
+        document.getElementById('post-editor-title').textContent = 'Thêm bài viết';
+        document.getElementById('post-id').value = '';
+        document.getElementById('post-title').value = '';
+        document.getElementById('post-author').value = '';
+        document.getElementById('post-status').value = 'visible';
+        document.getElementById('post-content').innerHTML = '';
+        modal.style.display = 'flex';
+    });
+    closeBtns.forEach(btn => btn.addEventListener('click', function() {
+        modal.style.display = 'none';
+    }));
+    window.addEventListener('click', function(e) {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const id = document.getElementById('post-id').value;
+        const title = document.getElementById('post-title').value.trim();
+        const author = document.getElementById('post-author').value.trim();
+        const status = document.getElementById('post-status').value;
+        const content = document.getElementById('post-content').innerHTML;
+        if (!title || !author || !content) {
+            showNotification('Vui lòng nhập đầy đủ tiêu đề, tác giả và nội dung', 'error');
+            return;
+        }
+        const posts = getPosts();
+        if (id) {
+            const idx = posts.findIndex(p => String(p.id) === String(id));
+            if (idx !== -1) {
+                posts[idx].title = title;
+                posts[idx].author = author;
+                posts[idx].status = status;
+                posts[idx].content = content;
+                posts[idx].updatedAt = new Date().toISOString();
+            }
+        } else {
+            const now = new Date();
+            const newPost = {
+                id: String(now.getTime()),
+                title,
+                author,
+                status,
+                content,
+                createdAt: now.toISOString()
+            };
+            posts.push(newPost);
+        }
+        savePosts(posts);
+        displayPostsTable(posts);
+        modal.style.display = 'none';
+        showNotification('Lưu bài viết thành công!', 'success');
+    });
+    document.addEventListener('click', function(e) {
+        const editBtn = e.target.closest('.btn-edit[data-post-id]');
+        const deleteBtn = e.target.closest('.btn-delete[data-post-id]');
+        const toggleBtn = e.target.closest('.btn-toggle[data-post-id]');
+        if (editBtn) {
+            const postId = editBtn.getAttribute('data-post-id');
+            const posts = getPosts();
+            const post = posts.find(p => String(p.id) === String(postId));
+            if (!post) return;
+            document.getElementById('post-editor-title').textContent = 'Sửa bài viết';
+            document.getElementById('post-id').value = post.id;
+            document.getElementById('post-title').value = post.title;
+            document.getElementById('post-author').value = post.author;
+            document.getElementById('post-status').value = post.status || 'visible';
+            document.getElementById('post-content').innerHTML = post.content || '';
+            modal.style.display = 'flex';
+        }
+        if (deleteBtn) {
+            const postId = deleteBtn.getAttribute('data-post-id');
+            if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return;
+            let posts = getPosts();
+            posts = posts.filter(p => String(p.id) !== String(postId));
+            savePosts(posts);
+            displayPostsTable(posts);
+            showNotification('Đã xóa bài viết', 'success');
+        }
+        if (toggleBtn) {
+            const postId = toggleBtn.getAttribute('data-post-id');
+            const posts = getPosts();
+            const idx = posts.findIndex(p => String(p.id) === String(postId));
+            if (idx !== -1) {
+                posts[idx].status = posts[idx].status === 'visible' ? 'hidden' : 'visible';
+                savePosts(posts);
+                displayPostsTable(posts);
+            }
+        }
+    });
 }
