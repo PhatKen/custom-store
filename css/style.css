@@ -2564,6 +2564,115 @@ footer {
     box-shadow: var(--shadow);
 }
 
+/* Chatbot */
+.chat-fab {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    z-index: 1000;
+}
+.chat-panel {
+    position: fixed;
+    right: 20px;
+    bottom: 90px;
+    width: 360px;
+    max-height: 70vh;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 1000;
+}
+.chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--primary-color);
+    color: #fff;
+}
+.chat-body {
+    padding: 12px;
+    overflow-y: auto;
+    flex: 1;
+    background: #f8f9fa;
+}
+.chat-message {
+    display: inline-block;
+    max-width: 80%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    margin: 6px 0;
+    font-size: 14px;
+    line-height: 1.4;
+}
+.chat-message.user {
+    background: #e8e9ff;
+    color: #333;
+    margin-left: auto;
+}
+.chat-message.bot {
+    background: #fff;
+    color: #333;
+    border: 1px solid var(--border-color);
+}
+.chat-input {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid var(--border-color);
+    background: #fff;
+}
+.chat-input input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-family: 'Poppins', sans-serif;
+}
+.chat-input button {
+    padding: 10px 14px;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 600;
+}
+.chat-quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+.chat-chip {
+    padding: 6px 10px;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+}
+@media (max-width: 480px) {
+    .chat-panel {
+        right: 10px;
+        left: 10px;
+        width: auto;
+    }
+}
+
 .status-header {
     text-align: center;
     margin-bottom: 40px;
