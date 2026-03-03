@@ -244,7 +244,12 @@ function initChatbot() {
         quick.className = 'chat-quick';
         const chips = [
             {t:'Tra cứu đơn hàng',q:'tra cứu đơn hàng'},
-            {t:'Tồn kho sản phẩm',q:'tồn kho'},
+            {t:'Sản phẩm rẻ nhất',q:'sản phẩm rẻ nhất'},
+            {t:'Sản phẩm mắc nhất',q:'sản phẩm mắc nhất'},
+            {t:'Danh mục Áo',q:'xem sản phẩm áo'},
+            {t:'Danh mục Quần',q:'xem sản phẩm quần'},
+            {t:'Danh mục Giày',q:'xem sản phẩm giày'},
+            {t:'Danh mục Nón',q:'xem sản phẩm nón'},
             {t:'Phí vận chuyển',q:'phí vận chuyển'},
             {t:'Chính sách đổi trả',q:'chính sách đổi trả'},
             {t:'Liên hệ',q:'liên hệ cửa hàng'}
@@ -281,19 +286,40 @@ function initChatbot() {
             }
             return;
         }
-        if (t.includes('tồn kho') || t.includes('sản phẩm')) {
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const summary = products.slice(0,5).map(p=>`${p.name}: ${p.quantity}`).join('<br>');
-            addMsg(`Một số sản phẩm và tồn kho:<br>${summary}<br>Bạn có thể hỏi tên sản phẩm cụ thể.`, 'bot');
+        const products = JSON.parse(localStorage.getItem('products')) || [];
+        if (t.includes('rẻ nhất')) {
+            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+            const cheapest = products.reduce((min,p)=>p.price<min.price?p:min,products[0]);
+            addMsg(`Sản phẩm rẻ nhất: ${cheapest.name} • ${cheapest.price.toLocaleString('vi-VN')} VNĐ.`, 'bot');
+            return;
+        }
+        if (t.includes('mắc nhất') || t.includes('đắt nhất')) {
+            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+            const mostExpensive = products.reduce((max,p)=>p.price>max.price?p:max,products[0]);
+            addMsg(`Sản phẩm mắc nhất: ${mostExpensive.name} • ${mostExpensive.price.toLocaleString('vi-VN')} VNĐ.`, 'bot');
+            return;
+        }
+        if (t.includes('còn không')) {
+            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+            const found = products.find(p=>t.includes(p.name.toLowerCase()));
+            if (!found) {
+                addMsg('Bạn vui lòng nói rõ tên sản phẩm để tôi kiểm tra tồn kho.', 'bot');
+            } else {
+                addMsg(`${found.name}: ${found.quantity > 0 ? 'Còn hàng' : 'Hết hàng'} (Số lượng: ${found.quantity}).`, 'bot');
+            }
             return;
         }
         const prodMatch = t.match(/(áo|quần|giày|nón)/);
         if (prodMatch) {
             const catMap = { 'áo':'ao', 'quần':'quan', 'giày':'giay', 'nón':'non' };
             const cat = catMap[prodMatch[1]];
-            const products = JSON.parse(localStorage.getItem('products')) || [];
-            const list = products.filter(p=>p.category===cat).map(p=>`${p.name}: ${p.quantity}`).join('<br>');
-            addMsg(list ? `Tồn kho danh mục ${prodMatch[1]}:<br>${list}` : `Chưa có dữ liệu danh mục ${prodMatch[1]}.`, 'bot');
+            const listItems = products.filter(p=>p.category===cat);
+            if (listItems.length === 0) {
+                addMsg(`Chưa có sản phẩm trong danh mục ${prodMatch[1]}.`, 'bot');
+            } else {
+                const list = listItems.map(p=>`${p.name} • ${p.price.toLocaleString('vi-VN')} VNĐ • Còn ${p.quantity}`).join('<br>');
+                addMsg(`Các sản phẩm ${prodMatch[1]}:<br>${list}`, 'bot');
+            }
             return;
         }
         if (t.includes('phí vận chuyển') || t.includes('vận chuyển') || t.includes('ship')) {
