@@ -317,7 +317,7 @@ function initChatbot() {
             if (listItems.length === 0) {
                 addMsg(`Chưa có sản phẩm trong danh mục ${prodMatch[1]}.`, 'bot');
             } else {
-                const list = listItems.map(p=>`${p.name} • ${p.price.toLocaleString('vi-VN')} VNĐ • Còn ${p.quantity}`).join('<br>');
+                const list = listItems.map(p=>`${p.name} • ${p.price.toLocaleString('vi-VN')} VNĐ`).join('<br>');
                 addMsg(`Các sản phẩm ${prodMatch[1]}:<br>${list}`, 'bot');
             }
             return;
