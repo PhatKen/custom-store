@@ -86,6 +86,54 @@
             height: auto;
             object-fit: cover;
         }
+        
+        .about-image-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 16px;
+        }
+        
+        .about-image-grid .image-large,
+        .about-image-grid .image-small {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: #fff;
+        }
+        
+        .about-image-grid .image-large {
+            min-height: 380px;
+        }
+        
+        .about-image-grid .image-large img,
+        .about-image-grid .image-small img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .4s ease;
+            display: block;
+        }
+        
+        .about-image-grid .image-large:hover img,
+        .about-image-grid .image-small:hover img {
+            transform: scale(1.05);
+        }
+        
+        .about-image-grid .image-stack {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .about-image-grid {
+                grid-template-columns: 1fr;
+            }
+            .about-image-grid .image-large {
+                min-height: 260px;
+            }
+        }
 
         .about-values {
             background-color: #f8f9fa;
@@ -314,8 +362,18 @@
                 <p>Hôm nay, chúng tôi tự hào có hàng ngàn khách hàng hài lòng trên khắp đất nước. Mỗi sản phẩm trong cửa hàng của chúng tôi đều được chọn lọc kỹ lưỡng để đảm bảo chất lượng tốt nhất và phong cách thời thượng nhất.</p>
                 <p>Chúng tôi tin rằng thời trang không chỉ là về quần áo, mà là về sự tự tin, sáng tạo và cách bạn thể hiện bản thân.</p>
             </div>
-            <div class="about-image">
-                <img src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Custom Store">
+            <div class="about-image-grid">
+                <div class="image-large">
+                    <img src="https://images.unsplash.com/photo-1520975922360-0814a2623f77?q=80&w=1400&auto=format&fit=crop" alt="Cửa hàng thời trang">
+                </div>
+                <div class="image-stack">
+                    <div class="image-small">
+                        <img src="https://images.unsplash.com/photo-1520975842226-5d2a5cb860f9?q=80&w=1200&auto=format&fit=crop" alt="BST mới">
+                    </div>
+                    <div class="image-small">
+                        <img src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=1200&auto=format&fit=crop" alt="Chi tiết chất liệu">
+                    </div>
+                </div>
             </div>
         </section>
 
