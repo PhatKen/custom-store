@@ -472,7 +472,7 @@ function loadProducts() {
 
 // Tạo dữ liệu sản phẩm mẫu
 function getSampleProducts() {
-    const products = [
+    return [
         {
             id: 1,
             name: 'Áo thun basic nam nữ',
@@ -562,107 +562,6 @@ function getSampleProducts() {
             createdAt: new Date().toISOString()
         }
     ];
-    
-    products.forEach(p => {
-        const keywordsBase = `${p.name} ${p.description}`.toLowerCase();
-        const queryBase = encodeURIComponent(keywordsBase);
-        p.image = `https://source.unsplash.com/600x600/?${queryBase}&sig=${p.id}`;
-    });
-    
-    const categories = [
-        {
-            key: 'ao',
-            label: 'Áo',
-            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            minPrice: 150000,
-            maxPrice: 600000
-        },
-        {
-            key: 'quan',
-            label: 'Quần',
-            image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            minPrice: 250000,
-            maxPrice: 800000
-        },
-        {
-            key: 'giay',
-            label: 'Giày',
-            image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            minPrice: 400000,
-            maxPrice: 1500000
-        },
-        {
-            key: 'non',
-            label: 'Nón',
-            image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            minPrice: 80000,
-            maxPrice: 300000
-        }
-    ];
-    
-    const extraPerCategory = 18;
-    const colors = ['Đen', 'Trắng', 'Be', 'Xám', 'Xanh navy', 'Nâu', 'Xanh lá', 'Đỏ gạch'];
-    const nameTemplates = {
-        ao: ['Áo thun basic', 'Áo polo cổ bẻ', 'Áo sơ mi tay dài', 'Áo sơ mi caro', 'Áo hoodie oversize', 'Áo khoác bomber', 'Áo sweater len'],
-        quan: ['Quần jeans slimfit', 'Quần jeans ống rộng', 'Quần tây công sở', 'Quần jogger thể thao', 'Quần short kaki', 'Quần jogger nỉ'],
-        giay: ['Giày sneaker lifestyle', 'Giày chạy bộ', 'Giày da lười', 'Giày boots cổ thấp', 'Giày sneaker cổ cao'],
-        non: ['Nón lưỡi trai', 'Nón bucket', 'Nón rộng vành', 'Nón len', 'Nón snapback']
-    };
-    const descTemplates = {
-        ao: [
-            'Chất liệu cotton thoáng mát, dễ phối với quần jeans hoặc quần short.',
-            'Phom regular fit, phù hợp đi học, đi làm và dạo phố.',
-            'Vải mềm, ít nhăn, giữ form tốt sau nhiều lần giặt.'
-        ],
-        quan: [
-            'Chất liệu denim co giãn nhẹ, thoải mái vận động cả ngày.',
-            'Thiết kế ống đứng hiện đại, phù hợp nhiều dáng người.',
-            'Cạp vừa, dễ phối với áo thun, sơ mi và giày sneaker.'
-        ],
-        giay: [
-            'Đế cao su êm ái, bám đường tốt khi di chuyển.',
-            'Phù hợp đi làm, đi học và dạo phố hằng ngày.',
-            'Lót giày thoáng khí, hạn chế mùi khó chịu.'
-        ],
-        non: [
-            'Form ôm đầu vừa vặn, đội lâu không bị đau.',
-            'Dễ phối với nhiều kiểu trang phục streetwear.',
-            'Phù hợp che nắng nhẹ khi đi chơi, dạo phố.'
-        ]
-    };
-    let nextId = products.length + 1;
-    
-    categories.forEach(cfg => {
-        for (let i = 1; i <= extraPerCategory; i++) {
-            const step = 10000;
-            const priceRandom = cfg.minPrice + Math.random() * (cfg.maxPrice - cfg.minPrice);
-            const price = Math.round(priceRandom / step) * step;
-            const quantity = 10 + Math.floor(Math.random() * 91); // 10 - 100
-            const baseNames = nameTemplates[cfg.key] || [cfg.label];
-            const baseDescs = descTemplates[cfg.key] || [`Sản phẩm ${cfg.label.toLowerCase()} dễ phối đồ.`];
-            const baseName = baseNames[(i - 1) % baseNames.length];
-            const color = colors[(i - 1) % colors.length];
-            const name = `${baseName} ${color}`;
-            const baseDesc = baseDescs[(i - 1) % baseDescs.length];
-            const description = `${baseDesc} Màu ${color.toLowerCase()} phù hợp nhiều phong cách.`;
-            const keywords = `${name} ${description}`.toLowerCase();
-            const query = encodeURIComponent(keywords);
-            const imageUrl = `https://source.unsplash.com/600x600/?${query}&sig=${nextId}`;
-            products.push({
-                id: nextId++,
-                name,
-                category: cfg.key,
-                price,
-                description,
-                image: imageUrl,
-                quantity,
-                sold: 0,
-                createdAt: new Date().toISOString()
-            });
-        }
-    });
-    
-    return products;
 }
 
 // Hiển thị sản phẩm lên trang
