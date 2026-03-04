@@ -595,6 +595,35 @@ function getSampleProducts() {
     ];
     
     const extraPerCategory = 18;
+    const colors = ['Đen', 'Trắng', 'Be', 'Xám', 'Xanh navy', 'Nâu', 'Xanh lá', 'Đỏ gạch'];
+    const nameTemplates = {
+        ao: ['Áo thun basic', 'Áo polo cổ bẻ', 'Áo sơ mi tay dài', 'Áo sơ mi caro', 'Áo hoodie oversize', 'Áo khoác bomber', 'Áo sweater len'],
+        quan: ['Quần jeans slimfit', 'Quần jeans ống rộng', 'Quần tây công sở', 'Quần jogger thể thao', 'Quần short kaki', 'Quần jogger nỉ'],
+        giay: ['Giày sneaker lifestyle', 'Giày chạy bộ', 'Giày da lười', 'Giày boots cổ thấp', 'Giày sneaker cổ cao'],
+        non: ['Nón lưỡi trai', 'Nón bucket', 'Nón rộng vành', 'Nón len', 'Nón snapback']
+    };
+    const descTemplates = {
+        ao: [
+            'Chất liệu cotton thoáng mát, dễ phối với quần jeans hoặc quần short.',
+            'Phom regular fit, phù hợp đi học, đi làm và dạo phố.',
+            'Vải mềm, ít nhăn, giữ form tốt sau nhiều lần giặt.'
+        ],
+        quan: [
+            'Chất liệu denim co giãn nhẹ, thoải mái vận động cả ngày.',
+            'Thiết kế ống đứng hiện đại, phù hợp nhiều dáng người.',
+            'Cạp vừa, dễ phối với áo thun, sơ mi và giày sneaker.'
+        ],
+        giay: [
+            'Đế cao su êm ái, bám đường tốt khi di chuyển.',
+            'Phù hợp đi làm, đi học và dạo phố hằng ngày.',
+            'Lót giày thoáng khí, hạn chế mùi khó chịu.'
+        ],
+        non: [
+            'Form ôm đầu vừa vặn, đội lâu không bị đau.',
+            'Dễ phối với nhiều kiểu trang phục streetwear.',
+            'Phù hợp che nắng nhẹ khi đi chơi, dạo phố.'
+        ]
+    };
     let nextId = products.length + 1;
     
     categories.forEach(cfg => {
@@ -603,13 +632,21 @@ function getSampleProducts() {
             const priceRandom = cfg.minPrice + Math.random() * (cfg.maxPrice - cfg.minPrice);
             const price = Math.round(priceRandom / step) * step;
             const quantity = 10 + Math.floor(Math.random() * 91); // 10 - 100
+            const baseNames = nameTemplates[cfg.key] || [cfg.label];
+            const baseDescs = descTemplates[cfg.key] || [`Sản phẩm ${cfg.label.toLowerCase()} dễ phối đồ.`];
+            const baseName = baseNames[(i - 1) % baseNames.length];
+            const color = colors[(i - 1) % colors.length];
+            const name = `${baseName} ${color}`;
+            const baseDesc = baseDescs[(i - 1) % baseDescs.length];
+            const description = `${baseDesc} Màu ${color.toLowerCase()} phù hợp nhiều phong cách.`;
+            const imageUrl = cfg.image + `&sig=${nextId}`;
             products.push({
                 id: nextId++,
-                name: `${cfg.label} mẫu ${i}`,
+                name,
                 category: cfg.key,
                 price,
-                description: `Sản phẩm ${cfg.label.toLowerCase()} mẫu ${i} trong bộ sưu tập Custom Store.`,
-                image: cfg.image,
+                description,
+                image: imageUrl,
                 quantity,
                 sold: 0,
                 createdAt: new Date().toISOString()
