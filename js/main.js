@@ -874,12 +874,14 @@ function showProductDetailModal(product) {
     
     // Thêm modal vào body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.body.classList.add('modal-open');
     
     // Thêm sự kiện cho nút đóng
     const closeButtons = document.querySelectorAll('#product-detail-modal .close-modal');
     closeButtons.forEach(button => {
         button.addEventListener('click', function() {
             document.getElementById('product-detail-modal').remove();
+            document.body.classList.remove('modal-open');
         });
     });
     
@@ -904,6 +906,7 @@ function showProductDetailModal(product) {
             
             addToCart(product.id);
             document.getElementById('product-detail-modal').remove();
+            document.body.classList.remove('modal-open');
         });
     }
     
@@ -931,6 +934,7 @@ function showProductDetailModal(product) {
             
             // Đóng modal và chuyển hướng đến trang checkout
             document.getElementById('product-detail-modal').remove();
+            document.body.classList.remove('modal-open');
             setTimeout(() => {
                 window.location.href = 'checkout.html';
             }, 300);
@@ -941,6 +945,7 @@ function showProductDetailModal(product) {
     document.getElementById('product-detail-modal').addEventListener('click', function(e) {
         if (e.target === this) {
             this.remove();
+            document.body.classList.remove('modal-open');
         }
     });
 
