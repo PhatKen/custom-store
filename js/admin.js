@@ -812,6 +812,25 @@ function initUserTableEvents() {
             modal.style.display = 'flex';
         });
     });
+    
+    // Delete button handler
+    document.querySelectorAll('.users-table .btn-delete[data-user-id]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = parseInt(this.getAttribute('data-user-id'));
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${user.fullName}"?`)) {
+                const filteredUsers = users.filter(u => u.id !== userId);
+                localStorage.setItem('users', JSON.stringify(filteredUsers));
+                displayUsersTable(filteredUsers);
+                loadDashboardData();
+                showNotification('Xóa người dùng thành công!', 'success');
+            }
+        });
+    });
+    
     modal.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', function() {
             modal.style.display = 'none';
