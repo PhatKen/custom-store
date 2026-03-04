@@ -79,89 +79,7 @@ function loadProductsPage() {
 
 // Lấy sản phẩm mẫu và khởi tạo (copy logic từ main.js)
 function getSampleProductsAndInitialize() {
-    let products = [
-        {
-            id: 1,
-            name: 'Áo thun basic nam nữ',
-            category: 'ao',
-            price: 199000,
-            description: 'Áo thun basic chất liệu cotton thoáng mát, dễ phối đồ',
-            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 50,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 2,
-            name: 'Quần jeans slimfit',
-            category: 'quan',
-            price: 450000,
-            description: 'Quần jeans slimfit chất liệu denim cao cấp, form ôm vừa vặn',
-            image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 30,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 3,
-            name: 'Giày thể thao Nike',
-            category: 'giay',
-            price: 1200000,
-            description: 'Giày thể thao Nike chính hãng, êm ái và bền đẹp',
-            image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 20,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 4,
-            name: 'Nón lưỡi trai thời trang',
-            category: 'non',
-            price: 150000,
-            description: 'Nón lưỡi trai unisex, nhiều màu sắc, chất liệu vải cao cấp',
-            image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 45,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 5,
-            name: 'Áo sơ mi nam công sở',
-            category: 'ao',
-            price: 350000,
-            description: 'Áo sơ mi nam form regular, chất liệu vải lụa mát mẻ',
-            image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 25,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 6,
-            name: 'Quần short kaki',
-            category: 'quan',
-            price: 280000,
-            description: 'Quần short kaki nam nữ, chất liệu thấm hút tốt, thoáng mát',
-            image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 40,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 7,
-            name: 'Giày sandal nữ',
-            category: 'giay',
-            price: 320000,
-            description: 'Giày sandal nữ quai ngang, đế bằng êm ái, nhiều màu sắc',
-            image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 35,
-            createdAt: new Date().toISOString()
-        },
-        {
-            id: 8,
-            name: 'Nón rộng vành nữ',
-            category: 'non',
-            price: 220000,
-            description: 'Nón rộng vành nữ đi biển, chất liệu cói tự nhiên, nhẹ nhàng',
-            image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-            quantity: 28,
-            createdAt: new Date().toISOString()
-        }
-    ];
-    
+    let products = getSampleProducts();
     localStorage.setItem('products', JSON.stringify(products));
 }
 
@@ -186,6 +104,10 @@ function initFilterEvents() {
     // Reset filters
     document.getElementById('reset-filters').addEventListener('click', resetFilters);
 }
+
+const PRODUCTS_PER_PAGE = 21;
+let pagedProducts = [];
+let currentPage = 1;
 
 // Áp dụng các filter
 function applyFilters() {
@@ -227,19 +149,32 @@ function applyFilters() {
         filteredProducts.sort((a, b) => b.price - a.price);
     }
     
-    // Hiển thị sản phẩm
-    displayProductsList(filteredProducts);
+    pagedProducts = filteredProducts;
+    currentPage = 1;
+    renderProductsPage();
 }
 
 // Hiển thị danh sách sản phẩm
 function displayProductsList(products) {
+    pagedProducts = products;
+    currentPage = 1;
+    renderProductsPage();
+}
+
+function renderProductsPage() {
     const container = document.getElementById('products-container');
     const showingCount = document.getElementById('showing-count');
+    const pagination = document.getElementById('products-pagination');
     
     container.innerHTML = '';
-    showingCount.textContent = products.length;
     
-    if (products.length === 0) {
+    const total = pagedProducts.length;
+    const totalPages = Math.max(1, Math.ceil(total / PRODUCTS_PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    
+    if (total === 0) {
+        showingCount.textContent = 0;
+        if (pagination) pagination.innerHTML = '';
         container.innerHTML = `
             <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">
                 <i class="fas fa-inbox" style="font-size: 48px; color: var(--gray-color); margin-bottom: 20px; display: block;"></i>
@@ -250,10 +185,36 @@ function displayProductsList(products) {
         return;
     }
     
-    products.forEach(product => {
+    const start = (currentPage - 1) * PRODUCTS_PER_PAGE;
+    const pageItems = pagedProducts.slice(start, start + PRODUCTS_PER_PAGE);
+    
+    showingCount.textContent = `${pageItems.length} / ${total}`;
+    
+    pageItems.forEach(product => {
         const card = createProductCardForPage(product);
         container.appendChild(card);
     });
+    
+    if (pagination) {
+        if (totalPages === 1) {
+            pagination.innerHTML = '';
+        } else {
+            let html = '';
+            html += `<button class="page-btn" onclick="changeProductsPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>&laquo;</button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changeProductsPage(${i})">${i}</button>`;
+            }
+            html += `<button class="page-btn" onclick="changeProductsPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>&raquo;</button>`;
+            pagination.innerHTML = html;
+        }
+    }
+}
+
+function changeProductsPage(page) {
+    const totalPages = Math.max(1, Math.ceil(pagedProducts.length / PRODUCTS_PER_PAGE));
+    if (page < 1 || page > totalPages) return;
+    currentPage = page;
+    renderProductsPage();
 }
 
 // Tạo card sản phẩm cho trang sản phẩm

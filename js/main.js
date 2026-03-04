@@ -472,7 +472,7 @@ function loadProducts() {
 
 // Tạo dữ liệu sản phẩm mẫu
 function getSampleProducts() {
-    return [
+    const products = [
         {
             id: 1,
             name: 'Áo thun basic nam nữ',
@@ -562,6 +562,62 @@ function getSampleProducts() {
             createdAt: new Date().toISOString()
         }
     ];
+    
+    const categories = [
+        {
+            key: 'ao',
+            label: 'Áo',
+            image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            minPrice: 150000,
+            maxPrice: 600000
+        },
+        {
+            key: 'quan',
+            label: 'Quần',
+            image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            minPrice: 250000,
+            maxPrice: 800000
+        },
+        {
+            key: 'giay',
+            label: 'Giày',
+            image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            minPrice: 400000,
+            maxPrice: 1500000
+        },
+        {
+            key: 'non',
+            label: 'Nón',
+            image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+            minPrice: 80000,
+            maxPrice: 300000
+        }
+    ];
+    
+    const extraPerCategory = 18;
+    let nextId = products.length + 1;
+    
+    categories.forEach(cfg => {
+        for (let i = 1; i <= extraPerCategory; i++) {
+            const step = 10000;
+            const priceRandom = cfg.minPrice + Math.random() * (cfg.maxPrice - cfg.minPrice);
+            const price = Math.round(priceRandom / step) * step;
+            const quantity = 10 + Math.floor(Math.random() * 91); // 10 - 100
+            products.push({
+                id: nextId++,
+                name: `${cfg.label} mẫu ${i}`,
+                category: cfg.key,
+                price,
+                description: `Sản phẩm ${cfg.label.toLowerCase()} mẫu ${i} trong bộ sưu tập Custom Store.`,
+                image: cfg.image,
+                quantity,
+                sold: 0,
+                createdAt: new Date().toISOString()
+            });
+        }
+    });
+    
+    return products;
 }
 
 // Hiển thị sản phẩm lên trang
