@@ -2630,10 +2630,10 @@ body.modal-open {
     line-height: 1.4;
 }
 .chat-message.user {
-    background: var(--primary-color);
-    color: #fff;
+    background: #e8e9ff;
+    color: #333;
     margin-left: auto;
-    border-radius: 16px 0 16px 16px;
+    border-radius: 16px;
 }
 .chat-message.bot {
     background: #fff;
