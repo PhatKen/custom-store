@@ -830,40 +830,40 @@ function showProductDetailModal(product) {
                     <span class="close-modal">&times;</span>
                 </div>
                 <div class="modal-body product-detail">
-                    <div class="product-main" style="display:flex;gap:30px;">
-                        <div class="product-detail-image">
-                            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
-                            ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+                    <div class="product-detail-image">
+                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+                        ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+                    </div>
+                    <div class="product-detail-info">
+                        <span class="product-category">${categoryNames[product.category]}</span>
+                        <h2>${product.name}</h2>
+                        <div class="product-price">${formattedPrice}</div>
+                        <div class="product-description">
+                            <h4>Mô tả sản phẩm</h4>
+                            <p>${product.description}</p>
                         </div>
-                        <div class="product-detail-info">
-                            <span class="product-category">${categoryNames[product.category]}</span>
-                            <h2>${product.name}</h2>
-                            <div class="product-price">${formattedPrice}</div>
-                            <div class="product-description">
-                                <h4>Mô tả sản phẩm</h4>
-                                <p>${product.description}</p>
-                            </div>
-                            <div class="product-stock">
-                                <span class="stock-label">Tình trạng:</span>
-                                <span class="stock-value ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
-                                    ${isOutOfStock ? 'Hết hàng' : 'Còn hàng'}
-                                </span>
-                            </div>
-                            <div class="product-stock">
-                                <span class="stock-label">Số lượng còn lại:</span>
-                                <span class="stock-quantity">${displayQuantity}</span>
-                            </div>
-                            <div class="product-actions">
-                                <button class="btn-add-to-cart-detail btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
-                                    <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
-                                </button>
-                                <button class="btn-buy-now" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
-                                    <i class="fas fa-credit-card"></i> ${isOutOfStock ? 'Hết hàng' : 'Mua ngay'}
-                                </button>
-                            </div>
+                        <div class="product-stock">
+                            <span class="stock-label">Tình trạng:</span>
+                            <span class="stock-value ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
+                                ${isOutOfStock ? 'Hết hàng' : 'Còn hàng'}
+                            </span>
+                        </div>
+                        <div class="product-stock">
+                            <span class="stock-label">Số lượng còn lại:</span>
+                            <span class="stock-quantity">${displayQuantity}</span>
+                        </div>
+                        <div class="product-actions">
+                            <button class="btn-add-to-cart-detail btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
+                                <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                            </button>
+                            <button class="btn-buy-now" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
+                                <i class="fas fa-credit-card"></i> ${isOutOfStock ? 'Hết hàng' : 'Mua ngay'}
+                            </button>
                         </div>
                     </div>
-                    <div class="recommended-products" style="margin-top:30px;">
+                </div>
+                <div class="modal-body">
+                    <div class="recommended-products">
                         <h3>Có thể bạn quan tâm</h3>
                         <div class="recommended-grid" id="product-recommended-products"></div>
                     </div>
