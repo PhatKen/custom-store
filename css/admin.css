@@ -779,3 +779,29 @@
 .btn-save-status:active {
     transform: translateY(0);
 }
+
+/* Editor Toolbar Select Styles */
+.editor-select {
+    padding: 8px 12px;
+    border: 1px solid #d4d7db;
+    border-radius: var(--border-radius);
+    background-color: #f8f9fa;
+    color: var(--dark-color);
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: var(--transition);
+    min-width: 120px;
+}
+
+.editor-select:hover {
+    background-color: #e9ecef;
+    border-color: #bbb;
+}
+
+.editor-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: white;
+    box-shadow: 0 0 0 3px rgba(109, 93, 252, 0.1);
+}
