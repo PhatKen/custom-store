@@ -639,7 +639,9 @@ function getSampleProducts() {
             const name = `${baseName} ${color}`;
             const baseDesc = baseDescs[(i - 1) % baseDescs.length];
             const description = `${baseDesc} Màu ${color.toLowerCase()} phù hợp nhiều phong cách.`;
-            const imageUrl = cfg.image + `&sig=${nextId}`;
+            const keywords = `${cfg.label} ${baseName} ${color}`.toLowerCase();
+            const query = encodeURIComponent(keywords);
+            const imageUrl = `https://source.unsplash.com/600x600/?${query}&sig=${nextId}`;
             products.push({
                 id: nextId++,
                 name,
