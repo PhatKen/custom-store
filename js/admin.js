@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     loadUsers();
     initUserTableEvents();
     
+    // Khởi tải lịch sử mua hàng
+    loadPurchaseHistory();
+
     // Khởi tải bài viết
     loadPosts();
     initPostEvents();
@@ -596,6 +599,117 @@ function loadOrders() {
     initOrderDetailsModal();
 }
 
+// membership classification based on total spent
+function getMembership(total) {
+    if (total >= 10000) return 'Kim cương';
+    if (total >= 5000) return 'Vàng';
+    if (total >= 1000) return 'Bạc';
+    if (total > 0) return 'Đồng';
+    return '';
+}
+
+function loadPurchaseHistory() {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const history = users.map(user => {
+        const userOrders = orders.filter(o => o.userId === user.id);
+        const totalItems = userOrders.reduce((sum, o) => {
+            const count = (o.items || []).reduce((s, i) => s + (parseInt(i.quantity) || 0), 0);
+            return sum + count;
+        }, 0);
+        const totalMoney = userOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+        const membership = getMembership(totalMoney);
+        return { user, totalItems, totalMoney, membership };
+    }).filter(h => h.totalItems > 0 || h.totalMoney > 0);
+    displayHistoryTable(history);
+}
+
+function displayHistoryTable(history) {
+    const tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    if (!history || history.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center">Không có lịch sử mua hàng</td></tr>`;
+        return;
+    }
+    history.forEach(h => {
+        const row = document.createElement('tr');
+        const formattedTotal = h.totalMoney.toLocaleString('vi-VN') + ' VNĐ';
+        row.innerHTML = `
+            <td>${h.user.fullName}</td>
+            <td>${h.user.email}</td>
+            <td>${h.totalItems}</td>
+            <td>${formattedTotal}</td>
+            <td>${h.membership}</td>
+            <td>
+                <button class="btn-view-history" data-user-id="${h.user.id}" title="Xem chi tiết">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+    document.querySelectorAll('.btn-view-history').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const userId = parseInt(this.getAttribute('data-user-id'));
+            showHistoryDetails(userId);
+        });
+    });
+}
+
+function showHistoryDetails(userId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const userOrders = orders.filter(o => o.userId === userId);
+    const modal = document.getElementById('history-detail-modal');
+    const body = document.getElementById('history-detail-body');
+    const title = document.getElementById('history-detail-title');
+    if (!modal || !body || !title) return;
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => u.id === userId);
+    title.textContent = `Lịch sử mua của ${user ? user.fullName : 'Người dùng'}`;
+    if (userOrders.length === 0) {
+        body.innerHTML = '<p>Không có đơn hàng nào.</p>';
+    } else {
+        let html = '';
+        userOrders.forEach(order => {
+            const orderDate = new Date(order.createdAt);
+            const formattedDate = orderDate.toLocaleDateString('vi-VN');
+            html += `<div class="order-block">
+                        <h4>Đơn #${order.id} - ${formattedDate} - ${order.total.toLocaleString('vi-VN')} VNĐ</h4>
+                        <table class="orders-table" style="width:100%; margin-bottom:15px;">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Số lượng</th>
+                                    <th>Giá</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+            (order.items || []).forEach(item => {
+                html += `<tr>
+                            <td>${item.name || item.title || ''}</td>
+                            <td>${item.quantity}</td>
+                            <td>${(parseFloat(item.price)||0).toLocaleString('vi-VN')} VNĐ</td>
+                         </tr>`;
+            });
+            html += `     </tbody>
+                        </table>
+                    </div>`;
+        });
+        body.innerHTML = html;
+    }
+    modal.style.display = 'flex';
+    const closeBtns = modal.querySelectorAll('.close-modal');
+    closeBtns.forEach(btn => {
+        btn.addEventListener('click', () => { modal.style.display = 'none'; });
+    });
+    window.addEventListener('click', function handleOutside(e) {
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            window.removeEventListener('click', handleOutside);
+        }
+    });
+}
 // Hiển thị bảng đơn hàng
 function displayOrdersTable(orders) {
     const tbody = document.getElementById('orders-table-body');
