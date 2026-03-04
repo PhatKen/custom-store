@@ -450,18 +450,40 @@
                     </div>
                     <div class="form-group">
                         <label>Nội dung</label>
-                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">
+                            <select id="editor-fontfamily" title="Kiểu chữ" class="editor-select">
+                                <option value="">Kiểu chữ</option>
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="Courier New">Courier New</option>
+                                <option value="Georgia">Georgia</option>
+                                <option value="Verdana">Verdana</option>
+                                <option value="Comic Sans MS">Comic Sans MS</option>
+                                <option value="Trebuchet MS">Trebuchet MS</option>
+                                <option value="Impact">Impact</option>
+                            </select>
+                            <select id="editor-fontsize" title="Cỡ chữ" class="editor-select">
+                                <option value="">Cỡ chữ</option>
+                                <option value="1">8px</option>
+                                <option value="2">9px</option>
+                                <option value="3">10px</option>
+                                <option value="4">11px</option>
+                                <option value="5">12px</option>
+                                <option value="6">14px</option>
+                                <option value="7">16px</option>
+                                <option value="8">18px</option>
+                                <option value="9">20px</option>
+                                <option value="10">24px</option>
+                                <option value="11">26px</option>
+                                <option value="12">28px</option>
+                                <option value="13">36px</option>
+                                <option value="14">48px</option>
+                                <option value="15">72px</option>
+                            </select>
                             <button type="button" class="btn-secondary" data-cmd="bold"><i class="fas fa-bold"></i></button>
                             <button type="button" class="btn-secondary" data-cmd="italic"><i class="fas fa-italic"></i></button>
                             <button type="button" class="btn-secondary" data-cmd="underline"><i class="fas fa-underline"></i></button>
                             <input type="color" id="editor-color" title="Màu chữ">
-                            <select id="editor-fontsize" title="Cỡ chữ">
-                                <option value="3">Mặc định</option>
-                                <option value="4">Lớn</option>
-                                <option value="5">Rất lớn</option>
-                                <option value="6">To</option>
-                                <option value="7">Rất to</option>
-                            </select>
                             <label class="btn-secondary" style="cursor:pointer;">
                                 <i class="fas fa-image"></i> Ảnh
                                 <input type="file" id="editor-image" accept="image/*" style="display:none;">
