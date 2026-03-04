@@ -534,37 +534,6 @@ nav {
     gap: 30px;
 }
 
-.products-pagination {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 24px;
-}
-
-.page-btn {
-    min-width: 32px;
-    height: 32px;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--border-color);
-    background: #fff;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: 'Poppins', sans-serif;
-    transition: var(--transition);
-}
-
-.page-btn.active {
-    background: var(--primary-color);
-    color: #fff;
-    border-color: var(--primary-color);
-}
-
-.page-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 .product-card {
     background-color: white;
     border-radius: var(--border-radius);
