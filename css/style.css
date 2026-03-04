@@ -2621,7 +2621,7 @@ body.modal-open {
     background: #f8f9fa;
 }
 .chat-message {
-    display: inline-block;
+    display: block;
     max-width: 80%;
     padding: 10px 12px;
     border-radius: 12px;
