@@ -167,10 +167,23 @@ function initChatbot() {
     document.body.appendChild(panel);
     const body = panel.querySelector('#chat-body');
     const input = panel.querySelector('#chat-input-text');
+    let lastDateKey = null;
     function addMsg(text, who) {
+        const now = new Date();
+        const dateKey = now.toISOString().slice(0, 10);
+        if (lastDateKey !== dateKey) {
+            lastDateKey = dateKey;
+            const sep = document.createElement('div');
+            sep.className = 'chat-date-separator';
+            const dateLabel = now.toLocaleDateString('vi-VN');
+            const timeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            sep.textContent = `${dateLabel} • ${timeLabel}`;
+            body.appendChild(sep);
+        }
+        const timeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
         const div = document.createElement('div');
         div.className = `chat-message ${who}`;
-        div.innerHTML = text;
+        div.innerHTML = `<div class="chat-message-text">${text}</div><span class="chat-message-time">${timeLabel}</span>`;
         body.appendChild(div);
         body.scrollTop = body.scrollHeight;
     }
