@@ -1163,6 +1163,7 @@ body.modal-open {
     display: flex;
     flex-direction: column;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
 }
 
 .modal-header {
@@ -1197,8 +1198,6 @@ body.modal-open {
 
 .modal-body {
     padding: 30px;
-    overflow-y: auto;
-    flex: 1;
 }
 
 /* Product Detail Modal */
