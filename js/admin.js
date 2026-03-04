@@ -599,19 +599,28 @@ function loadOrders() {
     initOrderDetailsModal();
 }
 
-// membership classification based on total spent
+// membership classification based on total spent (VND)
+// Đồng: 0 - 5,000,000 | Bạc: 6,000,000 - 15,000,000 | Vàng: >= 16,000,000
 function getMembership(total) {
-    if (total >= 10000) return 'Kim cương';
-    if (total >= 5000) return 'Vàng';
-    if (total >= 1000) return 'Bạc';
+    if (total >= 16000000) return 'Vàng';
+    if (total >= 6000000) return 'Bạc';
     if (total > 0) return 'Đồng';
     return '';
 }
 
+function getMembershipRank(membership) {
+    if (membership === 'Vàng') return 3;
+    if (membership === 'Bạc') return 2;
+    if (membership === 'Đồng') return 1;
+    return 0;
+}
+
+let historySortAsc = true;
+
 function loadPurchaseHistory() {
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const history = users.map(user => {
+    let history = users.map(user => {
         const userOrders = orders.filter(o => o.userId === user.id);
         const totalItems = userOrders.reduce((sum, o) => {
             const count = (o.items || []).reduce((s, i) => s + (parseInt(i.quantity) || 0), 0);
@@ -621,6 +630,12 @@ function loadPurchaseHistory() {
         const membership = getMembership(totalMoney);
         return { user, totalItems, totalMoney, membership };
     }).filter(h => h.totalItems > 0 || h.totalMoney > 0);
+    
+    history = history.sort((a, b) => {
+        const ra = getMembershipRank(a.membership);
+        const rb = getMembershipRank(b.membership);
+        return historySortAsc ? ra - rb : rb - ra;
+    });
     displayHistoryTable(history);
 }
 
@@ -635,12 +650,15 @@ function displayHistoryTable(history) {
     history.forEach(h => {
         const row = document.createElement('tr');
         const formattedTotal = h.totalMoney.toLocaleString('vi-VN') + ' VNĐ';
+        const rank = getMembershipRank(h.membership);
+        const medal = rank === 3 ? '🥇' : rank === 2 ? '🥈' : rank === 1 ? '🥉' : '';
         row.innerHTML = `
+            <td>${h.user.id}</td>
             <td>${h.user.fullName}</td>
             <td>${h.user.email}</td>
             <td>${h.totalItems}</td>
             <td>${formattedTotal}</td>
-            <td>${h.membership}</td>
+            <td>${medal} ${h.membership || ''}</td>
             <td>
                 <button class="btn-view-history" data-user-id="${h.user.id}" title="Xem chi tiết">
                     <i class="fas fa-eye"></i>
@@ -655,6 +673,14 @@ function displayHistoryTable(history) {
             showHistoryDetails(userId);
         });
     });
+    const sortBtn = document.getElementById('membership-sort-btn');
+    if (sortBtn) {
+        sortBtn.onclick = function() {
+            historySortAsc = !historySortAsc;
+            loadPurchaseHistory();
+            this.querySelector('i').className = historySortAsc ? 'fas fa-sort-amount-down' : 'fas fa-sort-amount-up';
+        };
+    }
 }
 
 function showHistoryDetails(userId) {

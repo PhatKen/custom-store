@@ -39,7 +39,11 @@ function displayUserInfo(user) {
     document.getElementById('display-fullname').textContent = user.fullName || '--';
     document.getElementById('display-phone').textContent = user.phone || '--';
     document.getElementById('display-address').textContent = user.address || '--';
-    document.getElementById('user-email-display').textContent = user.email;
+    const emailDisplay = document.getElementById('user-email-display');
+    if (emailDisplay) {
+        const membershipInfo = calculateUserMembership(user.id);
+        emailDisplay.innerHTML = `${user.email}<br><span style="font-size:13px;">Membership: ${membershipInfo.label}</span>`;
+    }
     
     // Cập nhật avatar
     if (user.avatar) {

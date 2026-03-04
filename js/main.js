@@ -1197,6 +1197,7 @@ function updateUserHeader() {
     if (!navActions) return;
     
     if (currentUser) {
+        const membershipInfo = calculateUserMembership(currentUser.id);
         // Người dùng đã đăng nhập
         const userName = currentUser.fullName || currentUser.email.split('@')[0];
         navActions.innerHTML = `
@@ -1208,6 +1209,7 @@ function updateUserHeader() {
                 <button class="user-btn" id="user-menu-btn">
                     <i class="fas fa-user"></i>
                     <span>${userName}</span>
+                    ${membershipInfo.iconHtml}
                     <i class="fas fa-chevron-down"></i>
                 </button>
                 <div class="user-dropdown" id="user-dropdown">
@@ -1221,6 +1223,9 @@ function updateUserHeader() {
                         `<a href="admin.html" class="dropdown-item">
                             <i class="fas fa-cog"></i> Quản lý admin
                         </a>` : ''}
+                    <div class="dropdown-item" style="cursor:default;">
+                        <i class="fas fa-trophy"></i> Membership: ${membershipInfo.label}
+                    </div>
                     <a href="#" class="dropdown-item" id="logout-btn">
                         <i class="fas fa-sign-out-alt"></i> Đăng xuất
                     </a>
@@ -1284,6 +1289,25 @@ function updateUserHeader() {
         initMobileMenu();
     }
     initHeaderSearch();
+}
+
+function calculateUserMembership(userId) {
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const userOrders = orders.filter(o => o.userId === userId);
+    const totalMoney = userOrders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
+    let label = 'Chưa có hạng';
+    let iconHtml = '';
+    if (totalMoney >= 16000000) {
+        label = 'Vàng';
+        iconHtml = '<i class="fas fa-medal" style="color:#ffc107;margin-left:6px;"></i>';
+    } else if (totalMoney >= 6000000) {
+        label = 'Bạc';
+        iconHtml = '<i class="fas fa-medal" style="color:#ced4da;margin-left:6px;"></i>';
+    } else if (totalMoney > 0) {
+        label = 'Đồng';
+        iconHtml = '<i class="fas fa-medal" style="color:#cd7f32;margin-left:6px;"></i>';
+    }
+    return { label, iconHtml, totalMoney };
 }
 
 // Cập nhật lại các nút thêm vào giỏ trong các thẻ sản phẩm
