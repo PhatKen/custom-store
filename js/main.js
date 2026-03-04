@@ -73,71 +73,7 @@ function initializeSampleData() {
         console.log('Đã khởi tạo dữ liệu sản phẩm mẫu');
     }
     
-    // Khởi tạo đơn hàng mẫu nếu chưa có
-    let orders = JSON.parse(localStorage.getItem('orders')) || [];
-    if (orders.length === 0) {
-        orders = [
-            {
-                id: 1001,
-                customerName: 'Nguyễn Văn A',
-                customerPhone: '0987654321',
-                customerEmail: 'user@example.com',
-                customerAddress: '123 Đường ABC, Quận XYZ, TP.HCM',
-                paymentMethod: 'cod',
-                items: [
-                    {
-                        id: 1,
-                        name: 'Áo thun basic nam nữ',
-                        category: 'ao',
-                        price: 199000,
-                        image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                        quantity: 2
-                    },
-                    {
-                        id: 4,
-                        name: 'Nón lưỡi trai thời trang',
-                        category: 'non',
-                        price: 150000,
-                        image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                        quantity: 1
-                    }
-                ],
-                subtotal: 548000,
-                shippingFee: 30000,
-                discount: 0,
-                total: 578000,
-                status: 'completed',
-                createdAt: new Date('2023-11-15').toISOString()
-            },
-            {
-                id: 1002,
-                customerName: 'Trần Thị B',
-                customerPhone: '0912345678',
-                customerEmail: 'tranthi.b@example.com',
-                customerAddress: '456 Đường DEF, Quận GHI, TP.HCM',
-                paymentMethod: 'banking',
-                items: [
-                    {
-                        id: 3,
-                        name: 'Giày thể thao Nike',
-                        category: 'giay',
-                        price: 1200000,
-                        image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
-                        quantity: 1
-                    }
-                ],
-                subtotal: 1200000,
-                shippingFee: 30000,
-                discount: 0,
-                total: 1230000,
-                status: 'pending',
-                createdAt: new Date('2023-11-20').toISOString()
-            }
-        ];
-        
-        localStorage.setItem('orders', JSON.stringify(orders));
-        console.log('Đã khởi tạo dữ liệu đơn hàng mẫu');
-    }
+    // Không khởi tạo đơn hàng mẫu để doanh thu ban đầu = 0
 }
 
 // Gọi hàm khởi tạo dữ liệu

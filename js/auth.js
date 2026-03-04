@@ -133,7 +133,7 @@ function authenticateUser(email, password, rememberMe) {
 
 // Hàm khởi tạo dữ liệu mẫu
 function initializeSampleData() {
-    // Khởi tạo người dùng mẫu
+    // Khởi tạo người dùng mẫu (không khởi tạo đơn hàng mẫu để doanh thu ban đầu = 0)
     let users = JSON.parse(localStorage.getItem('users')) || [];
     
     if (users.length === 0) {
