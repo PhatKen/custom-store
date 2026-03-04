@@ -2630,14 +2630,46 @@ body.modal-open {
     line-height: 1.4;
 }
 .chat-message.user {
-    background: #e8e9ff;
-    color: #333;
+    background: var(--primary-color);
+    color: #fff;
     margin-left: auto;
+    border-radius: 16px 0 16px 16px;
 }
 .chat-message.bot {
     background: #fff;
     color: #333;
     border: 1px solid var(--border-color);
+}
+.chat-message-text {
+    word-wrap: break-word;
+}
+.chat-message-time {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.7;
+}
+.chat-message.user .chat-message-time {
+    text-align: right;
+}
+.chat-message.bot .chat-message-time {
+    text-align: left;
+}
+.chat-date-separator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 10px 0;
+    font-size: 12px;
+    color: var(--gray-color);
+    justify-content: center;
+}
+.chat-date-separator::before,
+.chat-date-separator::after {
+    content: "";
+    height: 1px;
+    background: var(--border-color);
+    flex: 1;
 }
 .chat-input {
     display: flex;
