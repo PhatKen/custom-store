@@ -563,6 +563,12 @@ function getSampleProducts() {
         }
     ];
     
+    products.forEach(p => {
+        const keywordsBase = `${p.name} ${p.description}`.toLowerCase();
+        const queryBase = encodeURIComponent(keywordsBase);
+        p.image = `https://source.unsplash.com/600x600/?${queryBase}&sig=${p.id}`;
+    });
+    
     const categories = [
         {
             key: 'ao',
@@ -639,7 +645,7 @@ function getSampleProducts() {
             const name = `${baseName} ${color}`;
             const baseDesc = baseDescs[(i - 1) % baseDescs.length];
             const description = `${baseDesc} Màu ${color.toLowerCase()} phù hợp nhiều phong cách.`;
-            const keywords = `${cfg.label} ${baseName} ${color}`.toLowerCase();
+            const keywords = `${name} ${description}`.toLowerCase();
             const query = encodeURIComponent(keywords);
             const imageUrl = `https://source.unsplash.com/600x600/?${query}&sig=${nextId}`;
             products.push({
