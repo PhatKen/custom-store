@@ -796,39 +796,46 @@ function displayUsersTable(users) {
     initUserTableEvents();
 }
 
+function handleUserEdit() {
+    const modal = document.getElementById('edit-user-modal');
+    if (!modal) return;
+    
+    const userId = parseInt(this.getAttribute('data-user-id'));
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    document.getElementById('edit-user-id').value = user.id;
+    document.getElementById('edit-user-status').value = user.status || 'active';
+    document.getElementById('edit-user-role').value = user.role || 'user';
+    modal.style.display = 'flex';
+}
+
+function handleUserDelete() {
+    const userId = parseInt(this.getAttribute('data-user-id'));
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    const user = users.find(u => u.id === userId);
+    if (!user) return;
+    
+    if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${user.fullName}"?`)) {
+        const filteredUsers = users.filter(u => u.id !== userId);
+        localStorage.setItem('users', JSON.stringify(filteredUsers));
+        displayUsersTable(filteredUsers);
+        loadDashboardData();
+        showNotification('Xóa người dùng thành công!', 'success');
+    }
+}
+
 function initUserTableEvents() {
     const modal = document.getElementById('edit-user-modal');
     const form = document.getElementById('edit-user-form');
     if (!modal || !form) return;
     document.querySelectorAll('.users-table .btn-edit[data-user-id]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const userId = parseInt(this.getAttribute('data-user-id'));
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            document.getElementById('edit-user-id').value = user.id;
-            document.getElementById('edit-user-status').value = user.status || 'active';
-            document.getElementById('edit-user-role').value = user.role || 'user';
-            modal.style.display = 'flex';
-        });
+        btn.addEventListener('click', handleUserEdit);
     });
     
     // Delete button handler
     document.querySelectorAll('.users-table .btn-delete[data-user-id]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const userId = parseInt(this.getAttribute('data-user-id'));
-            const users = JSON.parse(localStorage.getItem('users')) || [];
-            const user = users.find(u => u.id === userId);
-            if (!user) return;
-            
-            if (confirm(`Bạn có chắc chắn muốn xóa người dùng "${user.fullName}"?`)) {
-                const filteredUsers = users.filter(u => u.id !== userId);
-                localStorage.setItem('users', JSON.stringify(filteredUsers));
-                displayUsersTable(filteredUsers);
-                loadDashboardData();
-                showNotification('Xóa người dùng thành công!', 'success');
-            }
-        });
+        btn.addEventListener('click', handleUserDelete);
     });
     
     modal.querySelectorAll('.close-modal').forEach(btn => {
@@ -856,6 +863,75 @@ function initUserTableEvents() {
         modal.style.display = 'none';
         showNotification('Cập nhật người dùng thành công!', 'success');
     });
+    
+    // Search functionality
+    const userSearchInput = document.getElementById('user-search');
+    if (userSearchInput) {
+        userSearchInput.addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            const filteredUsers = users.filter(user => 
+                user.fullName.toLowerCase().includes(searchValue) ||
+                user.email.toLowerCase().includes(searchValue)
+            );
+            
+            const tbody = document.getElementById('users-table-body');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            if (!filteredUsers || filteredUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center">Không tìm thấy người dùng</td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                const userDate = new Date(user.createdAt);
+                const formattedDate = userDate.toLocaleDateString('vi-VN');
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.fullName}</td>
+                    <td>${user.email}</td>
+                    <td>${user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff_products' ? 'Nhân viên (xem sản phẩm)' : user.role === 'staff_orders' ? 'Nhân viên (xem đơn hàng)' : 'Người dùng'}</td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="status-badge status-${user.status}-user">
+                            ${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-edit" data-user-id="${user.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete" data-user-id="${user.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            // Gắn lại event listeners cho các nút mới
+            document.querySelectorAll('.users-table .btn-edit[data-user-id]').forEach(btn => {
+                btn.removeEventListener('click', handleUserEdit);
+                btn.addEventListener('click', handleUserEdit);
+            });
+            
+            document.querySelectorAll('.users-table .btn-delete[data-user-id]').forEach(btn => {
+                btn.removeEventListener('click', handleUserDelete);
+                btn.addEventListener('click', handleUserDelete);
+            });
+        });
+    }
 }
 
 // Khởi tạo chức năng đăng xuất
