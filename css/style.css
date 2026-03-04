@@ -1150,6 +1150,10 @@ footer {
     display: flex;
 }
 
+body.modal-open {
+    overflow: hidden;
+}
+
 .modal-content {
     background-color: white;
     border-radius: var(--border-radius);
