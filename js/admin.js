@@ -1221,10 +1221,20 @@ function initPostEvents() {
             document.execCommand('foreColor', false, this.value);
         });
     }
+    const fontfamilySelect = document.getElementById('editor-fontfamily');
+    if (fontfamilySelect) {
+        fontfamilySelect.addEventListener('change', function() {
+            if (this.value) {
+                document.execCommand('fontName', false, this.value);
+            }
+        });
+    }
     const sizeSelect = document.getElementById('editor-fontsize');
     if (sizeSelect) {
         sizeSelect.addEventListener('change', function() {
-            document.execCommand('fontSize', false, this.value);
+            if (this.value) {
+                document.execCommand('fontSize', false, this.value);
+            }
         });
     }
     const imageInput = document.getElementById('editor-image');
