@@ -660,9 +660,11 @@ function displayHistoryTable(history) {
             <td>${formattedTotal}</td>
             <td>${medal} ${h.membership || ''}</td>
             <td>
-                <button class="btn-view-history" data-user-id="${h.user.id}" title="Xem chi tiết">
+                <div class="action-buttons">
+                    <button class="btn-view btn-view-history" data-user-id="${h.user.id}" title="Xem chi tiết">
                     <i class="fas fa-eye"></i>
-                </button>
+                    </button>
+                </div>
             </td>
         `;
         tbody.appendChild(row);
