@@ -1619,6 +1619,7 @@ body.modal-open {
     border: none;
     color: var(--gray-color);
     cursor: pointer;
+    pointer-events: auto;
 }
 
 .form-options {
