@@ -86,8 +86,7 @@ function authenticateUser(email, password, rememberMe) {
         return;
     }
     
-    // Trong thực tế, mật khẩu phải được mã hóa và so sánh
-    // Ở đây, chúng ta sử dụng mật khẩu mặc định cho tài khoản mẫu
+    // Mật khẩu cho tài khoản mẫu mặc định
     const defaultPasswords = {
         'admin@customstore.com': 'admin123',
         'user@example.com': 'user123',
@@ -97,8 +96,17 @@ function authenticateUser(email, password, rememberMe) {
         'staff.orders@customstore.com': 'staff123'
     };
     
-    // Kiểm tra mật khẩu
-    if (defaultPasswords[email] && defaultPasswords[email] === password) {
+    let isPasswordValid = false;
+    
+    // Nếu user có trường password (tài khoản được đăng ký), so sánh trực tiếp
+    if (user.password) {
+        isPasswordValid = (user.password === password);
+    } else if (defaultPasswords[email]) {
+        // Ngược lại dùng mật khẩu mặc định cho các tài khoản mẫu
+        isPasswordValid = (defaultPasswords[email] === password);
+    }
+    
+    if (isPasswordValid) {
         // Đăng nhập thành công
         
         // Lưu thông tin người dùng hiện tại
