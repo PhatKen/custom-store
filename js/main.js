@@ -400,7 +400,7 @@ function getHomeNewsData() {
     const posts = JSON.parse(localStorage.getItem('posts')) || [];
     const visible = posts.filter(p => p.status !== 'hidden');
     if (visible.length === 0) {
-        return getSampleNews();
+        return [];
     }
     return visible.slice().reverse().map(post => {
         const date = new Date(post.createdAt);
