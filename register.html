@@ -188,6 +188,8 @@
             
             // Lưu vào localStorage
             localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('lastRegisteredEmail', email);
+            localStorage.setItem('lastRegisteredPassword', password);
             
             // Đăng nhập ngay sau khi đăng ký
             const currentUser = {
