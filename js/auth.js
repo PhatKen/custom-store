@@ -104,6 +104,16 @@ function authenticateUser(email, password, rememberMe) {
     } else if (defaultPasswords[email]) {
         // Ngược lại dùng mật khẩu mặc định cho các tài khoản mẫu
         isPasswordValid = (defaultPasswords[email] === password);
+    } else {
+        // Trường hợp tài khoản đã đăng ký trước đây nhưng chưa lưu password:
+        // lần đăng nhập này sẽ được coi là thiết lập mật khẩu mới
+        user.password = password;
+        const index = users.findIndex(u => u.id === user.id);
+        if (index !== -1) {
+            users[index] = user;
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+        isPasswordValid = true;
     }
     
     if (isPasswordValid) {
