@@ -1,4 +1,6 @@
 // Khởi tạo dữ liệu mẫu nếu chưa có
+const PRODUCTS_VERSION = 2;
+
 function initializeSampleData() {
     // Khởi tạo người dùng mẫu
     let users = JSON.parse(localStorage.getItem('users')) || [];
@@ -65,12 +67,14 @@ function initializeSampleData() {
         console.log('Đã khởi tạo dữ liệu người dùng mẫu');
     }
     
-    // Khởi tạo sản phẩm mẫu nếu chưa có
+    // Khởi tạo / cập nhật sản phẩm mẫu nếu chưa có hoặc version cũ
     let products = JSON.parse(localStorage.getItem('products')) || [];
-    if (products.length === 0) {
+    const storedVersion = parseInt(localStorage.getItem('productsVersion') || '0', 10);
+    if (products.length === 0 || storedVersion !== PRODUCTS_VERSION) {
         products = getSampleProducts();
         localStorage.setItem('products', JSON.stringify(products));
-        console.log('Đã khởi tạo dữ liệu sản phẩm mẫu');
+        localStorage.setItem('productsVersion', String(PRODUCTS_VERSION));
+        console.log('Đã khởi tạo/cập nhật dữ liệu sản phẩm mẫu');
     }
     
     // Không khởi tạo đơn hàng mẫu để doanh thu ban đầu = 0
