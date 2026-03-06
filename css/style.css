@@ -1279,6 +1279,7 @@ body.modal-open {
     font-size: 14px;
     color: var(--gray-color);
     line-height: 1.6;
+    white-space: pre-wrap;
 }
 
 .product-stock {
