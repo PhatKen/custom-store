@@ -376,17 +376,60 @@ function initPasswordToggles() {
 
 // Khởi tạo đăng nhập bằng mạng xã hội
 function initSocialLogin() {
+    function socialLogin(provider) {
+        let email;
+        let name;
+        if (provider === 'google') {
+            email = 'google.user@customstore.com';
+            name = 'Người dùng Google';
+        } else {
+            email = 'facebook.user@customstore.com';
+            name = 'Người dùng Facebook';
+        }
+        
+        let users = JSON.parse(localStorage.getItem('users')) || [];
+        let user = users.find(u => u.email === email);
+        if (!user) {
+            const newId = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+            user = {
+                id: newId,
+                fullName: name,
+                email: email,
+                phone: '',
+                role: 'user',
+                status: 'active',
+                createdAt: new Date().toISOString()
+            };
+            users.push(user);
+            localStorage.setItem('users', JSON.stringify(users));
+        }
+        
+        const currentUser = {
+            id: user.id,
+            fullName: user.fullName,
+            email: user.email,
+            role: user.role
+        };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('rememberedEmail', email);
+        
+        showAuthNotification(`Đăng nhập bằng ${provider === 'google' ? 'Google' : 'Facebook'} (demo) thành công!`, 'success');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 800);
+    }
+    
     // Đăng nhập bằng Google
     document.querySelectorAll('.social-btn.google').forEach(button => {
         button.addEventListener('click', function() {
-            showAuthNotification('Tính năng đăng nhập bằng Google đang được phát triển', 'info');
+            socialLogin('google');
         });
     });
     
     // Đăng nhập bằng Facebook
     document.querySelectorAll('.social-btn.facebook').forEach(button => {
         button.addEventListener('click', function() {
-            showAuthNotification('Tính năng đăng nhập bằng Facebook đang được phát triển', 'info');
+            socialLogin('facebook');
         });
     });
 }
