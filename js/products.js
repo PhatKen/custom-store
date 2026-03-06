@@ -159,6 +159,26 @@ function getSampleProductsAndInitialize() {
             image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
             quantity: 28,
             createdAt: new Date().toISOString()
+        },
+        {
+            id: 9,
+            name: 'Áo khoác nữ oversize',
+            category: 'ao',
+            price: 250000,
+            description: 'Áo hoodie màu kem form rộng, có khóa kéo phía trước và dây rút ở mũ, tạo phong cách trẻ trung và thoải mái.',
+            image: 'ao3.png',
+            quantity: 34,
+            createdAt: new Date().toISOString()
+        },
+        {
+            id: 10,
+            name: 'Áo khoác nam xành điệu',
+            category: 'ao',
+            price: 310000,
+            description: 'Áo khoác jean màu đen được treo trên móc, bên trong phối với áo thun trắng tạo phong cách đơn giản và hiện đại. Bên dưới có vài bộ quần áo được gấp gọn cùng một chậu cây trang trí, tạo cảm giác trưng bày như trong cửa hàng thời trang.',
+            image: 'ao2.png',
+            quantity: 62,
+            createdAt: new Date().toISOString()
         }
     ];
     
