@@ -389,6 +389,35 @@ function getSampleNews() {
     ];
 }
 
+function extractPostThumb(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html || '';
+    const img = div.querySelector('img');
+    return img ? img.src : 'https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=600&auto=format&fit=crop';
+}
+
+function getHomeNewsData() {
+    const posts = JSON.parse(localStorage.getItem('posts')) || [];
+    const visible = posts.filter(p => p.status !== 'hidden');
+    if (visible.length === 0) {
+        return getSampleNews();
+    }
+    return visible.slice().reverse().map(post => {
+        const date = new Date(post.createdAt);
+        const dateText = date.toLocaleDateString('vi-VN');
+        const baseContent = (post.content || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        const excerpt = baseContent.length > 160 ? baseContent.slice(0, 160) + '...' : baseContent;
+        return {
+            id: post.id,
+            category: 'Bài viết',
+            date: post.author ? `${dateText} • ${post.author}` : dateText,
+            title: post.title,
+            image: extractPostThumb(post.content),
+            excerpt
+        };
+    });
+}
+
 let homeNewsIndex = 0;
 let homeNewsTimer = null;
 let homeNewsData = [];
@@ -396,7 +425,8 @@ let homeNewsData = [];
 function initHomeNews() {
     const container = document.getElementById('home-news-item');
     if (!container) return;
-    homeNewsData = getSampleNews();
+    homeNewsData = getHomeNewsData();
+    if (homeNewsData.length === 0) return;
     renderHomeNewsItem(container, homeNewsData[homeNewsIndex]);
     if (homeNewsTimer) {
         clearInterval(homeNewsTimer);
