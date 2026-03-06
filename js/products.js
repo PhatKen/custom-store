@@ -166,7 +166,7 @@ function getSampleProductsAndInitialize() {
             category: 'ao',
             price: 250000,
             description: 'Áo hoodie màu kem form rộng, có khóa kéo phía trước và dây rút ở mũ, tạo phong cách trẻ trung và thoải mái.',
-            image: 'ao3.png',
+            image: 'image/ao3.png',
             quantity: 34,
             createdAt: new Date().toISOString()
         },
@@ -176,7 +176,7 @@ function getSampleProductsAndInitialize() {
             category: 'ao',
             price: 310000,
             description: 'Áo khoác jean màu đen được treo trên móc, bên trong phối với áo thun trắng tạo phong cách đơn giản và hiện đại. Bên dưới có vài bộ quần áo được gấp gọn cùng một chậu cây trang trí, tạo cảm giác trưng bày như trong cửa hàng thời trang.',
-            image: 'ao2.png',
+            image: 'image/ao2.png',
             quantity: 62,
             createdAt: new Date().toISOString()
         }
