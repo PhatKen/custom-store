@@ -50,6 +50,17 @@ function initLoginForm() {
     
     if (!form) return;
     
+    const emailInput = document.getElementById('login-email');
+    const passwordInput = document.getElementById('login-password');
+    const lastEmail = localStorage.getItem('lastRegisteredEmail');
+    const lastPassword = localStorage.getItem('lastRegisteredPassword');
+    if (lastEmail && emailInput && !emailInput.value) {
+        emailInput.value = lastEmail;
+    }
+    if (lastPassword && passwordInput && !passwordInput.value) {
+        passwordInput.value = lastPassword;
+    }
+    
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
