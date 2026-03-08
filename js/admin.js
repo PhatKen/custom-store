@@ -119,8 +119,178 @@ function loadDashboardData() {
     const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
     document.getElementById('total-revenue').textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
     
+    updateUserRoleStats(users);
+    initRevenueDashboard(products, orders);
+    
     // Tải hoạt động gần đây
     loadRecentActivity(products, orders, users);
+}
+
+function updateUserRoleStats(users) {
+    const counts = {
+        total: users.length,
+        admin: 0,
+        staffProducts: 0,
+        staffOrders: 0,
+        customer: 0
+    };
+    users.forEach(user => {
+        if (user.role === 'admin') counts.admin++;
+        else if (user.role === 'staff_products') counts.staffProducts++;
+        else if (user.role === 'staff_orders') counts.staffOrders++;
+        else counts.customer++;
+    });
+    const totalEl = document.getElementById('stat-users-total');
+    const adminEl = document.getElementById('stat-users-admin');
+    const staffProductsEl = document.getElementById('stat-users-staff-products');
+    const staffOrdersEl = document.getElementById('stat-users-staff-orders');
+    const customerEl = document.getElementById('stat-users-customers');
+    if (totalEl) totalEl.textContent = counts.total;
+    if (adminEl) adminEl.textContent = counts.admin;
+    if (staffProductsEl) staffProductsEl.textContent = counts.staffProducts;
+    if (staffOrdersEl) staffOrdersEl.textContent = counts.staffOrders;
+    if (customerEl) customerEl.textContent = counts.customer;
+}
+
+let currentRevenuePeriod = 'month';
+
+function initRevenueDashboard(products, orders) {
+    const filtersContainer = document.getElementById('revenue-period-filters');
+    if (!filtersContainer) return;
+    
+    filtersContainer.querySelectorAll('.filter-chip').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const period = btn.getAttribute('data-period');
+            if (!period) return;
+            currentRevenuePeriod = period;
+            filtersContainer.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateRevenueOverview(products, orders, period);
+        });
+    });
+    
+    updateRevenueOverview(products, orders, currentRevenuePeriod);
+}
+
+function getPeriodRange(period) {
+    const now = new Date();
+    let start = null;
+    if (period === 'day') {
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    } else if (period === 'week') {
+        const day = now.getDay() || 7;
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
+    } else if (period === 'month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (period === 'year') {
+        start = new Date(now.getFullYear(), 0, 1);
+    }
+    return { start, end: now };
+}
+
+function updateRevenueOverview(products, orders, period) {
+    const range = getPeriodRange(period);
+    const categoryNames = {
+        'ao': 'Áo',
+        'quan': 'Quần',
+        'giay': 'Giày',
+        'non': 'Nón'
+    };
+    const categories = Object.keys(categoryNames);
+    
+    const stats = {};
+    categories.forEach(cat => {
+        const catProducts = products.filter(p => p.category === cat);
+        stats[cat] = {
+            key: cat,
+            name: categoryNames[cat],
+            totalProducts: catProducts.length,
+            remainingQty: catProducts.reduce((sum, p) => sum + (parseInt(p.quantity) || 0), 0),
+            soldQty: 0,
+            revenue: 0,
+            orderCount: 0
+        };
+    });
+    
+    let filteredOrders = orders.filter(order => order && order.createdAt);
+    filteredOrders = filteredOrders.filter(order => order.status !== 'cancelled');
+    if (range.start) {
+        filteredOrders = filteredOrders.filter(order => {
+            const d = new Date(order.createdAt);
+            return d >= range.start && d <= range.end;
+        });
+    }
+    
+    let totalQuantity = 0;
+    let totalRevenue = 0;
+    
+    filteredOrders.forEach(order => {
+        const items = order.items || [];
+        const categoriesInOrder = new Set();
+        items.forEach(item => {
+            const cat = item.category;
+            if (!stats[cat]) return;
+            const qty = parseInt(item.quantity) || 0;
+            const lineTotal = (item.price || 0) * qty;
+            stats[cat].soldQty += qty;
+            stats[cat].revenue += lineTotal;
+            totalQuantity += qty;
+            totalRevenue += lineTotal;
+            categoriesInOrder.add(cat);
+        });
+        categoriesInOrder.forEach(cat => {
+            stats[cat].orderCount += 1;
+        });
+    });
+    
+    const tbody = document.getElementById('revenue-by-category-body');
+    if (tbody) {
+        tbody.innerHTML = '';
+        let hasRow = false;
+        categories.forEach(cat => {
+            const s = stats[cat];
+            if (!s) return;
+            const avgPrice = s.soldQty > 0 ? Math.round(s.revenue / s.soldQty) : 0;
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${s.name}</td>
+                <td>${s.totalProducts}</td>
+                <td>${s.remainingQty}</td>
+                <td>${s.soldQty}</td>
+                <td>${s.orderCount}</td>
+                <td>${s.revenue.toLocaleString('vi-VN')} VNĐ</td>
+                <td>${avgPrice.toLocaleString('vi-VN')} VNĐ</td>
+            `;
+            tbody.appendChild(row);
+            hasRow = true;
+        });
+        if (!hasRow) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td colspan="7" style="text-align:center; padding:16px 0; color: var(--gray-color);">
+                    Chưa có dữ liệu đơn hàng cho khoảng thời gian này
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+    }
+    
+    const totalOrdersEl = document.getElementById('revenue-total-orders');
+    const totalQtyEl = document.getElementById('revenue-total-quantity');
+    const totalAmountEl = document.getElementById('revenue-total-amount');
+    if (totalOrdersEl) totalOrdersEl.textContent = filteredOrders.length;
+    if (totalQtyEl) totalQtyEl.textContent = totalQuantity;
+    if (totalAmountEl) totalAmountEl.textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
+    
+    const labelEl = document.getElementById('revenue-period-label');
+    if (labelEl) {
+        let text = 'Tất cả thời gian';
+        if (period === 'day') text = 'Hôm nay';
+        else if (period === 'week') text = 'Tuần này';
+        else if (period === 'month') text = 'Tháng này';
+        else if (period === 'year') text = 'Năm nay';
+        labelEl.textContent = `Khoảng thời gian: ${text} (đơn hàng không bị hủy)`;
+    }
 }
 
 // Tải hoạt động gần đây
