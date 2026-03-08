@@ -304,8 +304,15 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="product-description">Mô tả sản phẩm *</label>
-                        <textarea id="product-description" rows="4" required></textarea>
+                        <label for="product-description-editor">Mô tả sản phẩm *</label>
+                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">
+                            <button type="button" class="btn-secondary" data-cmd="bold"><i class="fas fa-bold"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="italic"><i class="fas fa-italic"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="underline"><i class="fas fa-underline"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                        </div>
+                        <div id="product-description-editor" contenteditable="true" style="min-height:160px;border:1px solid var(--border-color);border-radius:var(--border-radius);padding:12px;background:#fff;"></div>
                     </div>
                     
                     <div class="form-group">
@@ -496,8 +503,15 @@
                         <small style="color:var(--gray-color);font-size:12px;">Chỉ các size được chọn mới hiển thị cho người dùng.</small>
                     </div>
                     <div class="form-group">
-                        <label for="edit-product-description">Mô tả</label>
-                        <textarea id="edit-product-description" rows="4" required></textarea>
+                        <label for="edit-product-description-editor">Mô tả</label>
+                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">
+                            <button type="button" class="btn-secondary" data-cmd="bold"><i class="fas fa-bold"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="italic"><i class="fas fa-italic"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="underline"><i class="fas fa-underline"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
+                            <button type="button" class="btn-secondary" data-cmd="insertOrderedList"><i class="fas fa-list-ol"></i></button>
+                        </div>
+                        <div id="edit-product-description-editor" contenteditable="true" style="min-height:160px;border:1px solid var(--border-color);border-radius:var(--border-radius);padding:12px;background:#fff;"></div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Lưu thay đổi</button>
