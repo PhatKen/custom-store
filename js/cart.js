@@ -217,7 +217,7 @@ function updateQuantity(productId, change) {
         cart.splice(itemIndex, 1);
     } else if (product && newQuantity > product.quantity) {
         // Kiểm tra xem số lượng mới có vượt quá số lượng còn lại không
-        showNotification(`Số lượng sản phẩm không được vượt quá ${product.quantity}`, 'error');
+        showNotification(`Số lượng sản phẩm ${product.name} chỉ còn lại ${product.quantity}`, 'error');
         return;
     } else {
         // Cập nhật số lượng
