@@ -1282,6 +1282,12 @@ body.modal-open {
     white-space: pre-wrap;
 }
 
+.product-description-content {
+    font-size: 14px;
+    color: var(--gray-color);
+    line-height: 1.6;
+}
+
 .product-sizes {
     margin-bottom: 15px;
 }
