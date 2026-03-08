@@ -1282,6 +1282,44 @@ body.modal-open {
     white-space: pre-wrap;
 }
 
+.product-size {
+    margin-bottom: 20px;
+}
+
+.product-size .stock-label {
+    margin-right: 10px;
+}
+
+.size-options {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.size-option {
+    min-width: 40px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: var(--transition);
+}
+
+.size-option:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.size-option.active {
+    background-color: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
 .product-stock {
     display: flex;
     gap: 15px;
