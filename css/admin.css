@@ -418,6 +418,27 @@
     color: var(--danger-color);
 }
 
+.size-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+}
+
+.size-checkbox-group label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.size-checkbox-group input[type="checkbox"] {
+    accent-color: var(--primary-color);
+}
+
 .action-buttons {
     display: flex;
     gap: 8px;

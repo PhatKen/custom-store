@@ -1282,36 +1282,25 @@ body.modal-open {
     white-space: pre-wrap;
 }
 
-.product-size {
-    margin-bottom: 20px;
-}
-
-.product-size .stock-label {
-    margin-right: 10px;
+.product-sizes {
+    margin-bottom: 15px;
 }
 
 .size-options {
-    display: inline-flex;
+    display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 6px;
 }
 
 .size-option {
-    min-width: 40px;
-    padding: 6px 10px;
+    padding: 6px 12px;
     border-radius: 20px;
     border: 1px solid var(--border-color);
     background-color: #fff;
-    cursor: pointer;
     font-size: 13px;
-    font-weight: 600;
+    cursor: pointer;
     transition: var(--transition);
-}
-
-.size-option:hover {
-    border-color: var(--primary-color);
-    color: var(--primary-color);
 }
 
 .size-option.active {
