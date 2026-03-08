@@ -39,6 +39,7 @@
             <h3>Quản lý</h3>
             <ul class="admin-menu">
                 <li><a href="#dashboard" class="active" data-section="dashboard"><i class="fas fa-chart-bar"></i> Tổng quan</a></li>
+                <li><a href="#analytics" data-section="analytics"><i class="fas fa-chart-line"></i> Thống kê</a></li>
                 <li><a href="#products-management" data-section="products-management"><i class="fas fa-box"></i> Quản lý sản phẩm</a></li>
                 <li><a href="#add-product" data-section="add-product"><i class="fas fa-plus-circle"></i> Thêm sản phẩm</a></li>
                 <li><a href="#orders" data-section="orders"><i class="fas fa-shopping-cart"></i> Đơn hàng</a></li>
@@ -91,91 +92,107 @@
                     </div>
                 </div>
                 
-                <div class="dashboard-analytics">
-                    <div class="revenue-panel">
-                        <div class="panel-header">
-                            <div>
-                                <h3>Doanh số theo danh mục</h3>
-                                <p class="panel-subtitle" id="revenue-period-label">Trong tháng này (tất cả đơn hàng hợp lệ)</p>
-                            </div>
-                            <div class="revenue-filters" id="revenue-period-filters">
-                                <button type="button" class="filter-chip active" data-period="day">Ngày</button>
-                                <button type="button" class="filter-chip" data-period="week">Tuần</button>
-                                <button type="button" class="filter-chip" data-period="month">Tháng</button>
-                                <button type="button" class="filter-chip" data-period="year">Năm</button>
-                                <button type="button" class="filter-chip" data-period="all">Tất cả</button>
-                            </div>
-                        </div>
-                        <div class="revenue-summary-row">
-                            <div class="revenue-summary-item">
-                                <span class="label">Tổng đơn hàng</span>
-                                <span class="value" id="revenue-total-orders">0</span>
-                            </div>
-                            <div class="revenue-summary-item">
-                                <span class="label">Tổng sản phẩm bán</span>
-                                <span class="value" id="revenue-total-quantity">0</span>
-                            </div>
-                            <div class="revenue-summary-item">
-                                <span class="label">Doanh thu gộp</span>
-                                <span class="value" id="revenue-total-amount">0 VNĐ</span>
-                            </div>
-                        </div>
-                        <div class="revenue-table-container">
-                            <table class="revenue-table">
-                                <thead>
-                                    <tr>
-                                        <th>Danh mục</th>
-                                        <th>Số sản phẩm</th>
-                                        <th>Tồn kho</th>
-                                        <th>Đã bán</th>
-                                        <th>Đơn hàng</th>
-                                        <th>Doanh thu</th>
-                                        <th>Giá trung bình</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="revenue-by-category-body">
-                                    <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <div class="user-panel">
-                        <h3>Thống kê người dùng</h3>
-                        <div class="user-stat-grid">
-                            <div class="user-stat-card primary">
-                                <span class="label">Tổng người dùng</span>
-                                <span class="value" id="stat-users-total">0</span>
-                                <span class="hint">Bao gồm khách hàng và nội bộ</span>
-                            </div>
-                            <div class="user-stat-card">
-                                <span class="label">Quản trị viên</span>
-                                <span class="value" id="stat-users-admin">0</span>
-                                <span class="hint">role = admin</span>
-                            </div>
-                            <div class="user-stat-card">
-                                <span class="label">Nhân viên sản phẩm</span>
-                                <span class="value" id="stat-users-staff-products">0</span>
-                                <span class="hint">Quản lý kho & sản phẩm</span>
-                            </div>
-                            <div class="user-stat-card">
-                                <span class="label">Nhân viên đơn hàng</span>
-                                <span class="value" id="stat-users-staff-orders">0</span>
-                                <span class="hint">Xử lý / giao hàng</span>
-                            </div>
-                            <div class="user-stat-card">
-                                <span class="label">Khách hàng</span>
-                                <span class="value" id="stat-users-customers">0</span>
-                                <span class="hint">Tài khoản mua sắm</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
                 <div class="recent-activity">
                     <h3>Hoạt động gần đây</h3>
                     <div class="activity-list" id="activity-list">
                         <!-- Hoạt động sẽ được thêm bằng JavaScript -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Analytics Section -->
+            <section id="analytics" class="admin-section">
+                <h2><i class="fas fa-chart-line"></i> Thống kê doanh số</h2>
+                
+                <div class="analytics-filters">
+                    <div class="analytics-filter-group">
+                        <label for="analytics-range">Khoảng thời gian</label>
+                        <select id="analytics-range">
+                            <option value="all">Tất cả</option>
+                            <option value="day">Hôm nay</option>
+                            <option value="week">7 ngày gần đây</option>
+                            <option value="month">Tháng này</option>
+                            <option value="year">Năm nay</option>
+                        </select>
+                    </div>
+                    <div class="analytics-filter-summary">
+                        <span id="analytics-range-label">Tất cả thời gian</span>
+                    </div>
+                </div>
+                
+                <div class="analytics-summary-cards">
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon revenue">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="analytics-card-info">
+                            <h3>Doanh thu</h3>
+                            <p id="analytics-total-revenue">0 VNĐ</p>
+                            <span id="analytics-total-orders">0 đơn hàng</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon quantity">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="analytics-card-info">
+                            <h3>Sản phẩm đã bán</h3>
+                            <p id="analytics-items-sold">0</p>
+                            <span id="analytics-average-order">Giá trị đơn trung bình: 0 VNĐ</span>
+                        </div>
+                    </div>
+                    <div class="analytics-card">
+                        <div class="analytics-card-icon users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="analytics-card-info">
+                            <h3>Người dùng</h3>
+                            <p id="analytics-users-total">0</p>
+                            <span id="analytics-users-detail">0 admin • 0 nhân viên</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <h3>Thống kê theo danh mục</h3>
+                    <div class="analytics-table-container">
+                        <table class="users-table analytics-table">
+                            <thead>
+                                <tr>
+                                    <th>Danh mục</th>
+                                    <th>Số lượng còn lại</th>
+                                    <th>Số lượng đã bán</th>
+                                    <th>Số đơn hàng</th>
+                                    <th>Doanh thu</th>
+                                    <th>Tỉ trọng doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analytics-category-body">
+                                <!-- Dữ liệu sẽ được thêm bằng JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="analytics-section">
+                    <h3>Thống kê người dùng</h3>
+                    <div class="analytics-user-stats">
+                        <div class="analytics-user-card total">
+                            <h4>Tổng người dùng</h4>
+                            <p id="analytics-users-total-2">0</p>
+                        </div>
+                        <div class="analytics-user-card admin">
+                            <h4>Quản trị viên</h4>
+                            <p id="analytics-admin-count">0</p>
+                        </div>
+                        <div class="analytics-user-card staff-products">
+                            <h4>Nhân viên sản phẩm</h4>
+                            <p id="analytics-staff-products-count">0</p>
+                        </div>
+                        <div class="analytics-user-card staff-orders">
+                            <h4>Nhân viên đơn hàng</h4>
+                            <p id="analytics-staff-orders-count">0</p>
+                        </div>
                     </div>
                 </div>
             </section>
