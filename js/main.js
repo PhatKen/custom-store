@@ -772,6 +772,10 @@ function showProductDetailModal(product) {
                         <h2>${product.name}</h2>
                         <div class="product-price">${currentPrice.toLocaleString('vi-VN')} VNĐ</div>
                         ${sizeOptionsHTML}
+                        <div class="product-description">
+                            <h4>Mô tả sản phẩm</h4>
+                            <p>${product.description}</p>
+                        </div>
                         <div class="product-stock">
                             <span class="stock-label">Tình trạng:</span>
                             <span class="stock-value ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
@@ -789,10 +793,6 @@ function showProductDetailModal(product) {
                             <button class="btn-buy-now" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
                                 <i class="fas fa-credit-card"></i> ${isOutOfStock ? 'Hết hàng' : 'Mua ngay'}
                             </button>
-                        </div>
-                        <div class="product-description">
-                            <h4>Mô tả sản phẩm</h4>
-                            <p>${product.description}</p>
                         </div>
                     </div>
                 </div>
