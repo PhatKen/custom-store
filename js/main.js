@@ -830,6 +830,8 @@ function showProductDetailModal(product) {
     // Số lượng hiển thị (hiển thị 0 khi hết hàng)
     const displayQuantity = isOutOfStock ? 0 : product.quantity;
     
+    const hasSizeOptions = product.category === 'non' || product.category === 'quan';
+    
     // Tạo modal HTML
     const modalHTML = `
         <div class="modal active" id="product-detail-modal">
@@ -851,6 +853,13 @@ function showProductDetailModal(product) {
                             <h4>Mô tả sản phẩm</h4>
                             <p>${product.description}</p>
                         </div>
+                        ${hasSizeOptions ? `
+                        <div class="product-size">
+                            <span class="stock-label">Chọn size:</span>
+                            <div class="size-options" id="detail-size-options">
+                                ${['S','M','L','XL','XXL'].map(s => `<button type="button" class="size-option" data-size="${s}">${s}</button>`).join('')}
+                            </div>
+                        </div>` : ''}
                         <div class="product-stock">
                             <span class="stock-label">Tình trạng:</span>
                             <span class="stock-value ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
