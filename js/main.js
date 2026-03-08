@@ -814,7 +814,9 @@ function viewProductDetail(productId) {
 // Hiển thị modal chi tiết sản phẩm
 function showProductDetailModal(product) {
     // Format giá tiền
-    const formattedPrice = product.price.toLocaleString('vi-VN') + ' VNĐ';
+    let currentPrice = product.price;
+    let selectedSize = null;
+    
     
     // Lấy tên danh mục
     const categoryNames = {
@@ -823,14 +825,32 @@ function showProductDetailModal(product) {
         'giay': 'Giày',
         'non': 'Nón'
     };
-    
     // Kiểm tra trạng thái hàng
     const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
     
     // Số lượng hiển thị (hiển thị 0 khi hết hàng)
     const displayQuantity = isOutOfStock ? 0 : product.quantity;
     
-    const hasSizeOptions = product.category === 'non' || product.category === 'quan';
+    const baseSizes = ['S','M','L','XL','XXL'];
+    const enabledSizes = Array.isArray(product.sizes) && product.sizes.length ? product.sizes : baseSizes;
+    const sizeOrder = ['S','M','L','XL','XXL'];
+    const sizes = enabledSizes
+        .filter((s, idx, arr) => arr.indexOf(s) === idx && sizeOrder.includes(s))
+        .sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
+    const hasSizes = (product.category === 'ao' || product.category === 'quan') && sizes.length > 0;
+    if (hasSizes) {
+        selectedSize = sizes[0];
+    }
+    const sizeOptionsHTML = hasSizes ? `
+        <div class="product-sizes">
+            <span class="stock-label">Size:</span>
+            <div class="size-options">
+                ${sizes.map((size, index) => `
+                    <button class="size-option${index === 0 ? ' active' : ''}" data-size="${size}" data-index="${index}">${size}</button>
+                `).join('')}
+            </div>
+        </div>
+    ` : '';
     
     // Tạo modal HTML
     const modalHTML = `
@@ -848,18 +868,12 @@ function showProductDetailModal(product) {
                     <div class="product-detail-info">
                         <span class="product-category">${categoryNames[product.category]}</span>
                         <h2>${product.name}</h2>
-                        <div class="product-price">${formattedPrice}</div>
+                        <div class="product-price">${currentPrice.toLocaleString('vi-VN')} VNĐ</div>
+                        ${sizeOptionsHTML}
                         <div class="product-description">
                             <h4>Mô tả sản phẩm</h4>
                             <p>${product.description}</p>
                         </div>
-                        ${hasSizeOptions ? `
-                        <div class="product-size">
-                            <span class="stock-label">Chọn size:</span>
-                            <div class="size-options" id="detail-size-options">
-                                ${['S','M','L','XL','XXL'].map(s => `<button type="button" class="size-option" data-size="${s}">${s}</button>`).join('')}
-                            </div>
-                        </div>` : ''}
                         <div class="product-stock">
                             <span class="stock-label">Tình trạng:</span>
                             <span class="stock-value ${isOutOfStock ? 'out-of-stock' : 'in-stock'}">
@@ -893,6 +907,40 @@ function showProductDetailModal(product) {
     // Thêm modal vào body
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.body.classList.add('modal-open');
+    
+    const modal = document.getElementById('product-detail-modal');
+    const priceEl = modal.querySelector('.product-price');
+    const sizeButtons = modal.querySelectorAll('.size-option');
+    
+    function updatePriceBySizeIndex(index) {
+        if (!hasSizes) {
+            currentPrice = product.price;
+        } else {
+            const multiplier = Math.pow(1.03, index);
+            currentPrice = Math.round(product.price * multiplier);
+            selectedSize = sizes[index];
+        }
+        if (priceEl) {
+            priceEl.textContent = currentPrice.toLocaleString('vi-VN') + ' VNĐ';
+        }
+    }
+    
+    if (hasSizes && sizeButtons.length) {
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const idx = parseInt(this.getAttribute('data-index'), 10) || 0;
+                updatePriceBySizeIndex(idx);
+            });
+        });
+        updatePriceBySizeIndex(0);
+    } else {
+        currentPrice = product.price;
+        if (priceEl) {
+            priceEl.textContent = currentPrice.toLocaleString('vi-VN') + ' VNĐ';
+        }
+    }
     
     // Thêm sự kiện cho nút đóng
     const closeButtons = document.querySelectorAll('#product-detail-modal .close-modal');

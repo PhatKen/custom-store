@@ -363,6 +363,14 @@ function editProduct(productId) {
     const productStatus = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
     document.getElementById('edit-product-status').value = productStatus;
     
+    const sizeContainer = document.getElementById('edit-product-sizes');
+    if (sizeContainer) {
+        const checkedSizes = Array.isArray(product.sizes) ? product.sizes : ['S','M','L','XL','XXL'];
+        sizeContainer.querySelectorAll('input[type="checkbox"]').forEach(input => {
+            input.checked = checkedSizes.includes(input.value);
+        });
+    }
+    
     // Hiển thị modal
     const modal = document.getElementById('edit-product-modal');
     modal.style.display = 'flex';
@@ -388,6 +396,11 @@ function editProduct(productId) {
         e.preventDefault();
         
         // Cập nhật sản phẩm
+        const sizeContainer = document.getElementById('edit-product-sizes');
+        let sizes = [];
+        if (sizeContainer) {
+            sizes = Array.from(sizeContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+        }
         const updatedProduct = {
             id: parseInt(document.getElementById('edit-product-id').value),
             name: document.getElementById('edit-product-name').value,
@@ -396,8 +409,9 @@ function editProduct(productId) {
             quantity: parseInt(document.getElementById('edit-product-quantity').value),
             description: document.getElementById('edit-product-description').value,
             status: document.getElementById('edit-product-status').value,
-            image: product.image, // Giữ nguyên hình ảnh cũ
-            createdAt: product.createdAt
+            image: product.image,
+            createdAt: product.createdAt,
+            sizes: sizes.length ? sizes : undefined
         };
         
         // Cập nhật trong mảng sản phẩm
@@ -520,6 +534,11 @@ function initAddProductForm() {
         const productQuantity = parseInt(document.getElementById('product-quantity').value);
         const productDescription = document.getElementById('product-description').value;
         const productImage = imageInput.files[0];
+        const sizeContainer = document.getElementById('product-sizes');
+        let sizes = [];
+        if (sizeContainer) {
+            sizes = Array.from(sizeContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
+        }
         
         // Kiểm tra dữ liệu
         if (!productName || !productCategory || !productPrice || !productQuantity || !productDescription) {
@@ -543,8 +562,9 @@ function initAddProductForm() {
                 price: productPrice,
                 quantity: productQuantity,
                 description: productDescription,
-                image: e.target.result, // Lưu hình ảnh dưới dạng base64
-                createdAt: new Date().toISOString()
+                image: e.target.result,
+                createdAt: new Date().toISOString(),
+                sizes: sizes.length ? sizes : undefined
             };
             
             // Lưu sản phẩm vào localStorage
