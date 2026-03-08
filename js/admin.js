@@ -513,7 +513,10 @@ function editProduct(productId) {
     document.getElementById('edit-product-category').value = product.category;
     document.getElementById('edit-product-price').value = product.price;
     document.getElementById('edit-product-quantity').value = product.quantity;
-    document.getElementById('edit-product-description').value = product.description;
+    const editDescEditor = document.getElementById('edit-product-description-editor');
+    if (editDescEditor) {
+        editDescEditor.innerHTML = product.description || '';
+    }
     
     // Thiết lập trạng thái sản phẩm dựa trên số lượng hoặc trạng thái được lưu
     const productStatus = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
@@ -557,13 +560,15 @@ function editProduct(productId) {
         if (sizeContainer) {
             sizes = Array.from(sizeContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
         }
+        const editDescEditorSubmit = document.getElementById('edit-product-description-editor');
+        const updatedDescription = editDescEditorSubmit ? editDescEditorSubmit.innerHTML.trim() : product.description;
         const updatedProduct = {
             id: parseInt(document.getElementById('edit-product-id').value),
             name: document.getElementById('edit-product-name').value,
             category: document.getElementById('edit-product-category').value,
             price: parseInt(document.getElementById('edit-product-price').value),
             quantity: parseInt(document.getElementById('edit-product-quantity').value),
-            description: document.getElementById('edit-product-description').value,
+            description: updatedDescription,
             status: document.getElementById('edit-product-status').value,
             image: product.image,
             createdAt: product.createdAt,
@@ -688,7 +693,7 @@ function initAddProductForm() {
         const productCategory = document.getElementById('product-category').value;
         const productPrice = parseInt(document.getElementById('product-price').value);
         const productQuantity = parseInt(document.getElementById('product-quantity').value);
-        const productDescription = document.getElementById('product-description').value;
+        const productDescription = document.getElementById('product-description-editor').innerHTML.trim();
         const productImage = imageInput.files[0];
         const sizeContainer = document.getElementById('product-sizes');
         let sizes = [];

@@ -774,7 +774,7 @@ function showProductDetailModal(product) {
                         ${sizeOptionsHTML}
                         <div class="product-description">
                             <h4>Mô tả sản phẩm</h4>
-                            <p>${product.description}</p>
+                            <div class="product-description-content">${product.description}</div>
                         </div>
                         <div class="product-stock">
                             <span class="stock-label">Tình trạng:</span>
