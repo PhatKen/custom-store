@@ -709,6 +709,12 @@ function viewProductDetail(productId) {
 
 // Hiển thị modal chi tiết sản phẩm
 function showProductDetailModal(product) {
+    const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
+    const stored = storedProducts.find(p => p.id == product.id);
+    if (stored && typeof stored.description === 'string') {
+        product.description = stored.description;
+    }
+    
     // Format giá tiền
     let currentPrice = product.price;
     let selectedSize = null;
