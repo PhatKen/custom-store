@@ -33,6 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Khởi tạo tìm kiếm và lọc
     initSearchAndFilter();
+    
+    // Khởi tạo thống kê chi tiết
+    initAnalytics();
 });
 
 function applyRoleRestrictions() {
@@ -119,178 +122,161 @@ function loadDashboardData() {
     const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
     document.getElementById('total-revenue').textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
     
-    updateUserRoleStats(users);
-    initRevenueDashboard(products, orders);
-    
     // Tải hoạt động gần đây
     loadRecentActivity(products, orders, users);
 }
 
-function updateUserRoleStats(users) {
-    const counts = {
-        total: users.length,
-        admin: 0,
-        staffProducts: 0,
-        staffOrders: 0,
-        customer: 0
-    };
-    users.forEach(user => {
-        if (user.role === 'admin') counts.admin++;
-        else if (user.role === 'staff_products') counts.staffProducts++;
-        else if (user.role === 'staff_orders') counts.staffOrders++;
-        else counts.customer++;
-    });
-    const totalEl = document.getElementById('stat-users-total');
-    const adminEl = document.getElementById('stat-users-admin');
-    const staffProductsEl = document.getElementById('stat-users-staff-products');
-    const staffOrdersEl = document.getElementById('stat-users-staff-orders');
-    const customerEl = document.getElementById('stat-users-customers');
-    if (totalEl) totalEl.textContent = counts.total;
-    if (adminEl) adminEl.textContent = counts.admin;
-    if (staffProductsEl) staffProductsEl.textContent = counts.staffProducts;
-    if (staffOrdersEl) staffOrdersEl.textContent = counts.staffOrders;
-    if (customerEl) customerEl.textContent = counts.customer;
+function initAnalytics() {
+    const rangeSelect = document.getElementById('analytics-range');
+    if (!rangeSelect) return;
+    rangeSelect.addEventListener('change', renderAnalytics);
+    renderAnalytics();
 }
 
-let currentRevenuePeriod = 'month';
-
-function initRevenueDashboard(products, orders) {
-    const filtersContainer = document.getElementById('revenue-period-filters');
-    if (!filtersContainer) return;
-    
-    filtersContainer.querySelectorAll('.filter-chip').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const period = btn.getAttribute('data-period');
-            if (!period) return;
-            currentRevenuePeriod = period;
-            filtersContainer.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            updateRevenueOverview(products, orders, period);
-        });
-    });
-    
-    updateRevenueOverview(products, orders, currentRevenuePeriod);
-}
-
-function getPeriodRange(period) {
+function getOrdersByRange(range, allOrders) {
+    if (range === 'all') return allOrders;
     const now = new Date();
-    let start = null;
-    if (period === 'day') {
+    let start = new Date(0);
+    if (range === 'day') {
         start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    } else if (period === 'week') {
-        const day = now.getDay() || 7;
-        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - day + 1);
-    } else if (period === 'month') {
+    } else if (range === 'week') {
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+    } else if (range === 'month') {
         start = new Date(now.getFullYear(), now.getMonth(), 1);
-    } else if (period === 'year') {
+    } else if (range === 'year') {
         start = new Date(now.getFullYear(), 0, 1);
     }
-    return { start, end: now };
+    return allOrders.filter(order => {
+        const d = order.createdAt ? new Date(order.createdAt) : new Date();
+        return d >= start && d <= now;
+    });
 }
 
-function updateRevenueOverview(products, orders, period) {
-    const range = getPeriodRange(period);
-    const categoryNames = {
-        'ao': 'Áo',
-        'quan': 'Quần',
-        'giay': 'Giày',
-        'non': 'Nón'
-    };
-    const categories = Object.keys(categoryNames);
+function getRangeLabel(range) {
+    const now = new Date();
+    const formatter = new Intl.DateTimeFormat('vi-VN');
+    if (range === 'day') {
+        return 'Hôm nay (' + formatter.format(now) + ')';
+    }
+    if (range === 'week') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        return '7 ngày gần đây (' + formatter.format(start) + ' - ' + formatter.format(now) + ')';
+    }
+    if (range === 'month') {
+        return 'Tháng này (' + (now.getMonth() + 1) + '/' + now.getFullYear() + ')';
+    }
+    if (range === 'year') {
+        return 'Năm ' + now.getFullYear();
+    }
+    return 'Tất cả thời gian';
+}
+
+function renderAnalytics() {
+    const products = JSON.parse(localStorage.getItem('products')) || [];
+    const ordersAll = JSON.parse(localStorage.getItem('orders')) || [];
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    
+    const rangeSelect = document.getElementById('analytics-range');
+    const range = rangeSelect ? rangeSelect.value : 'all';
+    const orders = getOrdersByRange(range, ordersAll);
+    
+    const rangeLabelEl = document.getElementById('analytics-range-label');
+    if (rangeLabelEl) {
+        rangeLabelEl.textContent = getRangeLabel(range);
+    }
+    
+    const categoryNames = { ao: 'Áo', quan: 'Quần', giay: 'Giày', non: 'Nón' };
+    const categories = ['ao', 'quan', 'giay', 'non'];
     
     const stats = {};
     categories.forEach(cat => {
-        const catProducts = products.filter(p => p.category === cat);
         stats[cat] = {
             key: cat,
             name: categoryNames[cat],
-            totalProducts: catProducts.length,
-            remainingQty: catProducts.reduce((sum, p) => sum + (parseInt(p.quantity) || 0), 0),
-            soldQty: 0,
-            revenue: 0,
-            orderCount: 0
+            remaining: 0,
+            sold: 0,
+            orders: 0,
+            revenue: 0
         };
     });
     
-    let filteredOrders = orders.filter(order => order && order.createdAt);
-    filteredOrders = filteredOrders.filter(order => order.status !== 'cancelled');
-    if (range.start) {
-        filteredOrders = filteredOrders.filter(order => {
-            const d = new Date(order.createdAt);
-            return d >= range.start && d <= range.end;
-        });
-    }
+    products.forEach(p => {
+        if (stats[p.category]) {
+            stats[p.category].remaining += parseInt(p.quantity) || 0;
+        }
+    });
     
-    let totalQuantity = 0;
-    let totalRevenue = 0;
-    
-    filteredOrders.forEach(order => {
-        const items = order.items || [];
-        const categoriesInOrder = new Set();
-        items.forEach(item => {
+    // Tính doanh số theo danh mục dựa trên các đơn hàng
+    orders.forEach(order => {
+        const seenInOrder = {};
+        (order.items || []).forEach(item => {
             const cat = item.category;
             if (!stats[cat]) return;
             const qty = parseInt(item.quantity) || 0;
-            const lineTotal = (item.price || 0) * qty;
-            stats[cat].soldQty += qty;
-            stats[cat].revenue += lineTotal;
-            totalQuantity += qty;
-            totalRevenue += lineTotal;
-            categoriesInOrder.add(cat);
-        });
-        categoriesInOrder.forEach(cat => {
-            stats[cat].orderCount += 1;
+            const price = parseInt(item.price) || 0;
+            stats[cat].sold += qty;
+            stats[cat].revenue += qty * price;
+            if (!seenInOrder[cat]) {
+                stats[cat].orders += 1;
+                seenInOrder[cat] = true;
+            }
         });
     });
     
-    const tbody = document.getElementById('revenue-by-category-body');
-    if (tbody) {
-        tbody.innerHTML = '';
-        let hasRow = false;
-        categories.forEach(cat => {
-            const s = stats[cat];
-            if (!s) return;
-            const avgPrice = s.soldQty > 0 ? Math.round(s.revenue / s.soldQty) : 0;
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${s.name}</td>
-                <td>${s.totalProducts}</td>
-                <td>${s.remainingQty}</td>
-                <td>${s.soldQty}</td>
-                <td>${s.orderCount}</td>
-                <td>${s.revenue.toLocaleString('vi-VN')} VNĐ</td>
-                <td>${avgPrice.toLocaleString('vi-VN')} VNĐ</td>
-            `;
-            tbody.appendChild(row);
-            hasRow = true;
-        });
-        if (!hasRow) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td colspan="7" style="text-align:center; padding:16px 0; color: var(--gray-color);">
-                    Chưa có dữ liệu đơn hàng cho khoảng thời gian này
-                </td>
-            `;
-            tbody.appendChild(row);
-        }
-    }
+    const totalRevenue = orders.reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+    const totalOrders = orders.length;
+    const totalItemsSold = Object.values(stats).reduce((sum, s) => sum + s.sold, 0);
+    const avgOrder = totalOrders ? Math.round(totalRevenue / totalOrders) : 0;
     
-    const totalOrdersEl = document.getElementById('revenue-total-orders');
-    const totalQtyEl = document.getElementById('revenue-total-quantity');
-    const totalAmountEl = document.getElementById('revenue-total-amount');
-    if (totalOrdersEl) totalOrdersEl.textContent = filteredOrders.length;
-    if (totalQtyEl) totalQtyEl.textContent = totalQuantity;
-    if (totalAmountEl) totalAmountEl.textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
+    const totalUsers = users.length;
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    const staffProductsCount = users.filter(u => u.role === 'staff_products').length;
+    const staffOrdersCount = users.filter(u => u.role === 'staff_orders').length;
     
-    const labelEl = document.getElementById('revenue-period-label');
-    if (labelEl) {
-        let text = 'Tất cả thời gian';
-        if (period === 'day') text = 'Hôm nay';
-        else if (period === 'week') text = 'Tuần này';
-        else if (period === 'month') text = 'Tháng này';
-        else if (period === 'year') text = 'Năm nay';
-        labelEl.textContent = `Khoảng thời gian: ${text} (đơn hàng không bị hủy)`;
-    }
+    const totalRevEl = document.getElementById('analytics-total-revenue');
+    const totalOrdersEl = document.getElementById('analytics-total-orders');
+    const itemsSoldEl = document.getElementById('analytics-items-sold');
+    const avgOrderEl = document.getElementById('analytics-average-order');
+    
+    if (totalRevEl) totalRevEl.textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
+    if (totalOrdersEl) totalOrdersEl.textContent = totalOrders + ' đơn hàng';
+    if (itemsSoldEl) itemsSoldEl.textContent = totalItemsSold.toString();
+    if (avgOrderEl) avgOrderEl.textContent = 'Giá trị đơn trung bình: ' + avgOrder.toLocaleString('vi-VN') + ' VNĐ';
+    
+    const usersTotalEl = document.getElementById('analytics-users-total');
+    const usersDetailEl = document.getElementById('analytics-users-detail');
+    const usersTotal2El = document.getElementById('analytics-users-total-2');
+    const adminCountEl = document.getElementById('analytics-admin-count');
+    const staffProdEl = document.getElementById('analytics-staff-products-count');
+    const staffOrdersEl = document.getElementById('analytics-staff-orders-count');
+    
+    if (usersTotalEl) usersTotalEl.textContent = totalUsers.toString();
+    if (usersDetailEl) usersDetailEl.textContent =
+        adminCount + ' admin • ' + (staffProductsCount + staffOrdersCount) + ' nhân viên';
+    if (usersTotal2El) usersTotal2El.textContent = totalUsers.toString();
+    if (adminCountEl) adminCountEl.textContent = adminCount.toString();
+    if (staffProdEl) staffProdEl.textContent = staffProductsCount.toString();
+    if (staffOrdersEl) staffOrdersEl.textContent = staffOrdersCount.toString();
+    
+    const tbody = document.getElementById('analytics-category-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+    
+    const totalRevenueCategories = Object.values(stats).reduce((sum, s) => sum + s.revenue, 0);
+    
+    Object.values(stats).forEach(s => {
+        const tr = document.createElement('tr');
+        const ratio = totalRevenueCategories ? (s.revenue / totalRevenueCategories) * 100 : 0;
+        tr.innerHTML = `
+            <td>${s.name}</td>
+            <td>${s.remaining}</td>
+            <td>${s.sold}</td>
+            <td>${s.orders}</td>
+            <td>${s.revenue.toLocaleString('vi-VN')} VNĐ</td>
+            <td>${ratio.toFixed(1)}%</td>
+        `;
+        tbody.appendChild(tr);
+    });
 }
 
 // Tải hoạt động gần đây
