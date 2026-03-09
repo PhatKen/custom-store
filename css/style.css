@@ -621,6 +621,11 @@ nav {
     overflow: hidden;
 }
 
+.product-detail-info .product-description {
+    height: auto;
+    overflow: visible;
+}
+
 .product-price {
     font-size: 20px;
     font-weight: 700;
