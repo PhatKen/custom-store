@@ -48,7 +48,6 @@ function displayOrderItems(cart) {
                 <p class="order-item-quantity">Số lượng: ${item.quantity}</p>
             </div>
             <div class="order-item-price">
-                <p class="unit-price">${item.price.toLocaleString('vi-VN')} ₫</p>
                 <p class="total-price">${itemTotal.toLocaleString('vi-VN')} ₫</p>
             </div>
         `;
