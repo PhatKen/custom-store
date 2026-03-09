@@ -1251,14 +1251,19 @@ body.modal-open {
     min-width: 0;
     max-width: 100%;
     position: relative;
+    height: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
 }
 
 .product-detail-image img {
     width: 100%;
-    height: auto;
-    max-height: 600px;
-    object-fit: cover;
-    border-radius: var(--border-radius);
+    height: 100%;
+    object-fit: contain;
+    border-radius: inherit;
     box-shadow: var(--shadow);
 }
 
@@ -3133,10 +3138,7 @@ body.modal-open {
     .product-detail-image {
         max-width: 100%;
         width: 100%;
-    }
-    
-    .product-detail-image img {
-        max-height: 300px;
+        height: 320px;
     }
     
     .product-detail-info h2 {
