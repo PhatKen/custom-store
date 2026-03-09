@@ -513,6 +513,18 @@
                         </div>
                         <div id="edit-product-description-editor" contenteditable="true" style="min-height:160px;border:1px solid var(--border-color);border-radius:var(--border-radius);padding:12px;background:#fff;"></div>
                     </div>
+                    <div class="form-group">
+                        <label for="edit-product-image">Hình ảnh sản phẩm</label>
+                        <div class="image-upload-container">
+                            <div class="image-preview" id="edit-image-preview">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Kéo thả hình ảnh vào đây hoặc nhấn để tải lên</p>
+                            </div>
+                            <input type="file" id="edit-product-image" accept="image/*" hidden>
+                            <button type="button" class="btn-upload" id="edit-upload-btn">Chọn hình ảnh mới</button>
+                        </div>
+                        <p class="image-note">Nếu không chọn hình mới, hệ thống sẽ giữ nguyên hình hiện tại.</p>
+                    </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-primary">Lưu thay đổi</button>
                         <button type="button" class="btn-secondary close-modal">Hủy</button>
