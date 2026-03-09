@@ -714,8 +714,12 @@ function showProductDetailModal(product) {
     if (stored && typeof stored.description === 'string') {
         product.description = stored.description;
     }
+    const productImages = Array.isArray(stored?.images) && stored.images.length
+        ? stored.images
+        : (Array.isArray(product.images) && product.images.length
+            ? product.images
+            : [product.image]);
     
-    // Format giá tiền
     let currentPrice = product.price;
     let selectedSize = null;
     
@@ -754,7 +758,14 @@ function showProductDetailModal(product) {
         </div>
     ` : '';
     
-    // Tạo modal HTML
+    const galleryImages = productImages;
+    const mainImage = galleryImages[0];
+    const thumbnailsHTML = galleryImages.map((src, index) => `
+        <button class="product-gallery-thumb${index === 0 ? ' active' : ''}" data-index="${index}">
+            <img src="${src}" alt="${product.name} ${index + 1}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+        </button>
+    `).join('');
+
     const modalHTML = `
         <div class="modal active" id="product-detail-modal">
             <div class="modal-content">
@@ -763,9 +774,14 @@ function showProductDetailModal(product) {
                     <span class="close-modal">&times;</span>
                 </div>
                 <div class="modal-body product-detail">
-                    <div class="product-detail-image">
-                        <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
-                        ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+                    <div class="product-detail-gallery">
+                        <div class="product-gallery-thumbs">
+                            ${thumbnailsHTML}
+                        </div>
+                        <div class="product-detail-image">
+                            <img class="product-gallery-main-img" src="${mainImage}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+                            ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+                        </div>
                     </div>
                     <div class="product-detail-info">
                         <span class="product-category">${categoryNames[product.category]}</span>
@@ -813,7 +829,20 @@ function showProductDetailModal(product) {
     const modal = document.getElementById('product-detail-modal');
     const priceEl = modal.querySelector('.product-price');
     const sizeButtons = modal.querySelectorAll('.size-option');
-    
+    const mainImgEl = modal.querySelector('.product-gallery-main-img');
+    const thumbButtons = modal.querySelectorAll('.product-gallery-thumb');
+    if (mainImgEl && thumbButtons.length) {
+        thumbButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                thumbButtons.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                const idx = parseInt(this.getAttribute('data-index'), 10) || 0;
+                const src = galleryImages[idx] || galleryImages[0];
+                mainImgEl.src = src;
+            });
+        });
+    }
+
     function updatePriceBySizeIndex(index) {
         if (!hasSizes) {
             currentPrice = product.price;
@@ -942,9 +971,11 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
     const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + ' VNĐ';
     const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón' };
     const loggedIn = JSON.parse(localStorage.getItem('currentUser')) !== null;
+    const recoImages = Array.isArray(recoProduct.images) && recoProduct.images.length ? recoProduct.images : [recoProduct.image];
+    const recoMainImage = recoImages[0];
     card.innerHTML = `
         <div class="product-image">
-            <img src="${recoProduct.image}" alt="${recoProduct.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            <img src="${recoMainImage}" alt="${recoProduct.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
         </div>
         <div class="product-info">
             <span class="product-category">${categoryNames[recoProduct.category]}</span>

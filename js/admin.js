@@ -414,10 +414,8 @@ function displayProductsTable(products) {
     products.forEach(product => {
         const row = document.createElement('tr');
         
-        // Format giá tiền
         const formattedPrice = product.price.toLocaleString('vi-VN') + ' VNĐ';
         
-        // Xác định tên danh mục
         const categoryNames = {
             'ao': 'Áo',
             'quan': 'Quần',
@@ -425,17 +423,16 @@ function displayProductsTable(products) {
             'non': 'Nón'
         };
         
-        // Xác định trạng thái dựa trên trường status hoặc số lượng
         const status = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');
         const statusText = status === 'out-of-stock' ? 'Hết hàng' : 'Còn hàng';
         
-        // Số lượng hiển thị (hiển thị 0 khi hết hàng)
         const displayQuantity = status === 'out-of-stock' ? 0 : product.quantity;
+        const mainImage = Array.isArray(product.images) && product.images.length ? product.images[0] : product.image;
         
         row.innerHTML = `
             <td>${product.id}</td>
             <td class="product-image-cell">
-                <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+                <img src="${mainImage}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
             </td>
             <td>${product.name}</td>
             <td>
@@ -532,10 +529,11 @@ function editProduct(productId) {
     const editImagePreview = document.getElementById('edit-image-preview');
     const editImageInput = document.getElementById('edit-product-image');
     const editUploadBtn = document.getElementById('edit-upload-btn');
-    let newImageDataUrl = null;
+    let newImagesData = null;
     if (editImagePreview) {
-        if (product.image) {
-            editImagePreview.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+        const currentImages = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
+        if (currentImages.length) {
+            editImagePreview.innerHTML = `<img src="${currentImages[0]}" alt="${product.name}">`;
             editImagePreview.classList.add('has-image');
         } else {
             editImagePreview.innerHTML = `
@@ -550,15 +548,27 @@ function editProduct(productId) {
             editImageInput.click();
         };
         editImageInput.onchange = function() {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                    editImagePreview.classList.add('has-image');
-                    newImageDataUrl = e.target.result;
+            const files = this.files ? Array.from(this.files) : [];
+            if (!files.length) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                editImagePreview.classList.add('has-image');
+            };
+            reader.readAsDataURL(files[0]);
+            const imagesData = [];
+            let loaded = 0;
+            files.forEach(file => {
+                const r = new FileReader();
+                r.onload = function(ev) {
+                    imagesData.push(ev.target.result);
+                    loaded++;
+                    if (loaded === files.length) {
+                        newImagesData = imagesData;
+                    }
                 };
-                reader.readAsDataURL(this.files[0]);
-            }
+                r.readAsDataURL(file);
+            });
         };
         editImagePreview.ondragover = function(e) {
             e.preventDefault();
@@ -571,16 +581,28 @@ function editProduct(productId) {
         editImagePreview.ondrop = function(e) {
             e.preventDefault();
             this.style.borderColor = 'var(--border-color)';
-            if (e.dataTransfer.files.length) {
-                editImageInput.files = e.dataTransfer.files;
-                const reader = new FileReader();
-                reader.onload = function(e2) {
-                    editImagePreview.innerHTML = `<img src="${e2.target.result}" alt="Preview">`;
-                    editImagePreview.classList.add('has-image');
-                    newImageDataUrl = e2.target.result;
+            if (!e.dataTransfer.files.length) return;
+            editImageInput.files = e.dataTransfer.files;
+            const files = Array.from(e.dataTransfer.files);
+            const reader = new FileReader();
+            reader.onload = function(e2) {
+                editImagePreview.innerHTML = `<img src="${e2.target.result}" alt="Preview">`;
+                editImagePreview.classList.add('has-image');
+            };
+            reader.readAsDataURL(files[0]);
+            const imagesData = [];
+            let loaded = 0;
+            files.forEach(file => {
+                const r = new FileReader();
+                r.onload = function(ev) {
+                    imagesData.push(ev.target.result);
+                    loaded++;
+                    if (loaded === files.length) {
+                        newImagesData = imagesData;
+                    }
                 };
-                reader.readAsDataURL(e.dataTransfer.files[0]);
-            }
+                r.readAsDataURL(file);
+            });
         };
     }
 
@@ -615,6 +637,12 @@ function editProduct(productId) {
         const editDescEditorSubmit = document.getElementById('edit-product-description-editor');
         const updatedDescription = editDescEditorSubmit ? editDescEditorSubmit.innerHTML.trim() : product.description;
 
+        const existingImages = Array.isArray(product.images) && product.images.length
+            ? product.images
+            : (product.image ? [product.image] : []);
+        const finalImages = newImagesData && newImagesData.length ? newImagesData : existingImages;
+        const mainImage = finalImages && finalImages.length ? finalImages[0] : product.image;
+
         const updatedProduct = {
             id: parseInt(document.getElementById('edit-product-id').value),
             name: document.getElementById('edit-product-name').value,
@@ -623,7 +651,8 @@ function editProduct(productId) {
             quantity: parseInt(document.getElementById('edit-product-quantity').value),
             description: updatedDescription,
             status: document.getElementById('edit-product-status').value,
-            image: newImageDataUrl ? newImageDataUrl : product.image,
+            image: mainImage,
+            images: finalImages,
             createdAt: product.createdAt,
             sizes: sizes.length ? sizes : undefined
         };
@@ -686,13 +715,10 @@ function initAddProductForm() {
     imageInput.addEventListener('change', function() {
         if (this.files && this.files[0]) {
             const reader = new FileReader();
-            
             reader.onload = function(e) {
-                // Hiển thị hình ảnh xem trước
                 imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
                 imagePreview.classList.add('has-image');
             };
-            
             reader.readAsDataURL(this.files[0]);
         }
     });
@@ -734,7 +760,7 @@ function initAddProductForm() {
         const productPrice = parseInt(document.getElementById('product-price').value);
         const productQuantity = parseInt(document.getElementById('product-quantity').value);
         const productDescription = document.getElementById('product-description-editor').innerHTML.trim();
-        const productImage = imageInput.files[0];
+        const imageFiles = imageInput.files ? Array.from(imageInput.files) : [];
         const sizeContainer = document.getElementById('product-sizes');
         let sizes = [];
         if (sizeContainer) {
@@ -747,60 +773,55 @@ function initAddProductForm() {
             return;
         }
         
-        if (!productImage) {
-            showNotification('Vui lòng chọn hình ảnh sản phẩm!', 'error');
+        if (!imageFiles.length) {
+            showNotification('Vui lòng chọn ít nhất một hình ảnh sản phẩm!', 'error');
             return;
         }
-        
-        // Đọc hình ảnh dưới dạng base64
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Tạo sản phẩm mới
-            const newProduct = {
-                id: generateProductId(),
-                name: productName,
-                category: productCategory,
-                price: productPrice,
-                quantity: productQuantity,
-                description: productDescription,
-                image: e.target.result,
-                createdAt: new Date().toISOString(),
-                sizes: sizes.length ? sizes : undefined
+
+        const imagesData = [];
+        let loadedCount = 0;
+
+        imageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagesData.push(e.target.result);
+                loadedCount++;
+                if (loadedCount === imageFiles.length) {
+                    const mainImage = imagesData[0];
+                    const newProduct = {
+                        id: generateProductId(),
+                        name: productName,
+                        category: productCategory,
+                        price: productPrice,
+                        quantity: productQuantity,
+                        description: productDescription,
+                        image: mainImage,
+                        images: imagesData,
+                        createdAt: new Date().toISOString(),
+                        sizes: sizes.length ? sizes : undefined
+                    };
+                    
+                    let products = JSON.parse(localStorage.getItem('products')) || [];
+                    products.push(newProduct);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    window.dispatchEvent(new Event('productsUpdated'));
+                    form.reset();
+                    imagePreview.innerHTML = `
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Kéo thả nhiều hình ảnh vào đây hoặc nhấn để tải lên</p>
+                    `;
+                    imagePreview.classList.remove('has-image');
+                    displayProductsTable(products);
+                    loadDashboardData();
+                    showNotification('Thêm sản phẩm thành công!', 'success');
+                    const productsTab = document.querySelector('a[data-section="products-management"]');
+                    if (productsTab) {
+                        productsTab.click();
+                    }
+                }
             };
-            
-            // Lưu sản phẩm vào localStorage
-            let products = JSON.parse(localStorage.getItem('products')) || [];
-            products.push(newProduct);
-            localStorage.setItem('products', JSON.stringify(products));
-            
-            // Phát sự kiện tùy chỉnh để thông báo cho các trang khác
-            window.dispatchEvent(new Event('productsUpdated'));
-            
-            // Reset form
-            form.reset();
-            imagePreview.innerHTML = `
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Kéo thả hình ảnh vào đây hoặc nhấn để tải lên</p>
-            `;
-            imagePreview.classList.remove('has-image');
-            
-            // Cập nhật bảng sản phẩm
-            displayProductsTable(products);
-            
-            // Cập nhật dashboard
-            loadDashboardData();
-            
-            // Hiển thị thông báo
-            showNotification('Thêm sản phẩm thành công!', 'success');
-            
-            // Chuyển đến trang quản lý sản phẩm
-            const productsTab = document.querySelector('a[data-section="products-management"]');
-            if (productsTab) {
-                productsTab.click();
-            }
-        };
-        
-        reader.readAsDataURL(productImage);
+            reader.readAsDataURL(file);
+        });
     });
 }
 
