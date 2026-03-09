@@ -104,14 +104,24 @@ function createCartItemElement(item) {
 
 // Cập nhật tổng kết giỏ hàng
 function updateCartSummary(cart) {
-    // Tính tổng phụ
     const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
-    
-    // Cập nhật DOM
-    document.getElementById('subtotal').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
-    document.getElementById('total').textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
-    
-    // Cập nhật các nút hành động
+    const shippingFee = cart.length > 0 ? 30000 : 0;
+    const discountText = document.getElementById('discount') ? document.getElementById('discount').textContent : '0';
+    const discount = parseInt((discountText || '0').replace(/[^0-9]/g, '')) || 0;
+    const total = subtotal + shippingFee - discount;
+
+    const subtotalEl = document.getElementById('subtotal');
+    const shippingEl = document.getElementById('shipping-fee-cart');
+    const totalEl = document.getElementById('total');
+    const discountRow = document.getElementById('discount-row-cart');
+
+    if (subtotalEl) subtotalEl.textContent = subtotal.toLocaleString('vi-VN') + ' VNĐ';
+    if (shippingEl) shippingEl.textContent = shippingFee.toLocaleString('vi-VN') + ' VNĐ';
+    if (totalEl) totalEl.textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+    if (discountRow) {
+        discountRow.style.display = discount > 0 ? 'flex' : 'none';
+    }
+
     updateCartActions(cart);
 }
 
@@ -278,14 +288,11 @@ function applyCoupon() {
         
         // Tính giảm giá
         const discount = Math.floor(subtotal * discountRate);
-        
-        // Cập nhật tổng kết
-        const shippingFee = 30000;
-        const total = subtotal + shippingFee - discount;
-        
-        // Cập nhật DOM
-        document.getElementById('discount').textContent = discount.toLocaleString('vi-VN') + ' VNĐ';
-        document.getElementById('total').textContent = total.toLocaleString('vi-VN') + ' VNĐ';
+        const discountEl = document.getElementById('discount');
+        if (discountEl) {
+            discountEl.textContent = discount.toLocaleString('vi-VN') + ' VNĐ';
+        }
+        updateCartSummary(cart);
         
         // Lưu mã giảm giá vào localStorage
         localStorage.setItem('appliedCoupon', couponCode);
