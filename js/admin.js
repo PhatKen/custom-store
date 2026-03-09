@@ -507,7 +507,6 @@ function editProduct(productId) {
         return;
     }
     
-    // Điền thông tin vào form chỉnh sửa
     document.getElementById('edit-product-id').value = product.id;
     document.getElementById('edit-product-name').value = product.name;
     document.getElementById('edit-product-category').value = product.category;
@@ -530,7 +529,61 @@ function editProduct(productId) {
         });
     }
     
-    // Hiển thị modal
+    const editImagePreview = document.getElementById('edit-image-preview');
+    const editImageInput = document.getElementById('edit-product-image');
+    const editUploadBtn = document.getElementById('edit-upload-btn');
+    let newImageDataUrl = null;
+    if (editImagePreview) {
+        if (product.image) {
+            editImagePreview.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+            editImagePreview.classList.add('has-image');
+        } else {
+            editImagePreview.innerHTML = `
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Kéo thả hình ảnh vào đây hoặc nhấn để tải lên</p>
+            `;
+            editImagePreview.classList.remove('has-image');
+        }
+    }
+    if (editUploadBtn && editImageInput && editImagePreview) {
+        editUploadBtn.onclick = function() {
+            editImageInput.click();
+        };
+        editImageInput.onchange = function() {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    editImagePreview.classList.add('has-image');
+                    newImageDataUrl = e.target.result;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        };
+        editImagePreview.ondragover = function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--primary-color)';
+        };
+        editImagePreview.ondragleave = function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+        };
+        editImagePreview.ondrop = function(e) {
+            e.preventDefault();
+            this.style.borderColor = 'var(--border-color)';
+            if (e.dataTransfer.files.length) {
+                editImageInput.files = e.dataTransfer.files;
+                const reader = new FileReader();
+                reader.onload = function(e2) {
+                    editImagePreview.innerHTML = `<img src="${e2.target.result}" alt="Preview">`;
+                    editImagePreview.classList.add('has-image');
+                    newImageDataUrl = e2.target.result;
+                };
+                reader.readAsDataURL(e.dataTransfer.files[0]);
+            }
+        };
+    }
+
     const modal = document.getElementById('edit-product-modal');
     modal.style.display = 'flex';
     
@@ -553,8 +606,7 @@ function editProduct(productId) {
     const editForm = document.getElementById('edit-product-form');
     editForm.onsubmit = function(e) {
         e.preventDefault();
-        
-        // Cập nhật sản phẩm
+
         const sizeContainer = document.getElementById('edit-product-sizes');
         let sizes = [];
         if (sizeContainer) {
@@ -562,6 +614,7 @@ function editProduct(productId) {
         }
         const editDescEditorSubmit = document.getElementById('edit-product-description-editor');
         const updatedDescription = editDescEditorSubmit ? editDescEditorSubmit.innerHTML.trim() : product.description;
+
         const updatedProduct = {
             id: parseInt(document.getElementById('edit-product-id').value),
             name: document.getElementById('edit-product-name').value,
@@ -570,32 +623,19 @@ function editProduct(productId) {
             quantity: parseInt(document.getElementById('edit-product-quantity').value),
             description: updatedDescription,
             status: document.getElementById('edit-product-status').value,
-            image: product.image,
+            image: newImageDataUrl ? newImageDataUrl : product.image,
             createdAt: product.createdAt,
             sizes: sizes.length ? sizes : undefined
         };
-        
-        // Cập nhật trong mảng sản phẩm
+
         const productIndex = products.findIndex(p => p.id == updatedProduct.id);
         if (productIndex !== -1) {
             products[productIndex] = updatedProduct;
-            
-            // Lưu vào localStorage
             localStorage.setItem('products', JSON.stringify(products));
-            
-            // Phát sự kiện tùy chỉnh để thông báo cho các trang khác
             window.dispatchEvent(new Event('productsUpdated'));
-            
-            // Cập nhật bảng
             displayProductsTable(products);
-            
-            // Cập nhật dashboard
             loadDashboardData();
-            
-            // Đóng modal
             modal.style.display = 'none';
-            
-            // Hiển thị thông báo
             showNotification('Cập nhật sản phẩm thành công!', 'success');
         }
     };
