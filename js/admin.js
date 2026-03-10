@@ -315,6 +315,9 @@ function renderAnalytics() {
     const adminCount = users.filter(u => u.role === 'admin').length;
     const staffProductsCount = users.filter(u => u.role === 'staff_products').length;
     const staffOrdersCount = users.filter(u => u.role === 'staff_orders').length;
+    const cashierCount = users.filter(u => u.role === 'cashier').length;
+    const staffMarketingCount = users.filter(u => u.role === 'staff_marketing').length;
+    const customerCount = users.filter(u => u.role === 'user').length;
     
     const totalRevEl = document.getElementById('analytics-total-revenue');
     const totalOrdersEl = document.getElementById('analytics-total-orders');
@@ -332,14 +335,24 @@ function renderAnalytics() {
     const adminCountEl = document.getElementById('analytics-admin-count');
     const staffProdEl = document.getElementById('analytics-staff-products-count');
     const staffOrdersEl = document.getElementById('analytics-staff-orders-count');
+    const cashierCountEl = document.getElementById('analytics-cashier-count');
+    const staffMarketingCountEl = document.getElementById('analytics-staff-marketing-count');
+    const customerCountEl = document.getElementById('analytics-customer-count');
     
     if (usersTotalEl) usersTotalEl.textContent = totalUsers.toString();
     if (usersDetailEl) usersDetailEl.textContent =
-        adminCount + ' admin • ' + (staffProductsCount + staffOrdersCount) + ' nhân viên';
+        adminCount + ' admin • ' +
+        (staffProductsCount + staffOrdersCount) + ' nhân viên • ' +
+        cashierCount + ' thu ngân • ' +
+        staffMarketingCount + ' marketing • ' +
+        customerCount + ' khách hàng';
     if (usersTotal2El) usersTotal2El.textContent = totalUsers.toString();
     if (adminCountEl) adminCountEl.textContent = adminCount.toString();
     if (staffProdEl) staffProdEl.textContent = staffProductsCount.toString();
     if (staffOrdersEl) staffOrdersEl.textContent = staffOrdersCount.toString();
+    if (cashierCountEl) cashierCountEl.textContent = cashierCount.toString();
+    if (staffMarketingCountEl) staffMarketingCountEl.textContent = staffMarketingCount.toString();
+    if (customerCountEl) customerCountEl.textContent = customerCount.toString();
     
     const tbody = document.getElementById('analytics-category-body');
     if (!tbody) return;
