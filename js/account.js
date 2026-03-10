@@ -316,52 +316,17 @@ async function saveAccountInfo(e) {
             ward,
             addressDetail
         };
-
-        try {
-            console.log('Update profile payload:', payload);
-            const token = localStorage.getItem('token');
-            const res = await fetch('/api/user/update-profile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...(token ? { Authorization: 'Bearer ' + token } : {})
-                },
-                body: JSON.stringify(payload)
-            });
-            let responseText = '';
-            try {
-                responseText = await res.text();
-            } catch (_) {}
-            console.log('Update profile response:', res.status, responseText);
-            if (!res.ok) {
-                let message = 'Cập nhật tài khoản thất bại';
-                try {
-                    const parsed = responseText ? JSON.parse(responseText) : null;
-                    if (parsed && parsed.message) {
-                        message = parsed.message;
-                    }
-                } catch (_) {}
-                throw new Error(message);
-            }
-        } catch (apiErr) {
-            throw apiErr;
-        }
         
-        // Cập nhật thông tin cục bộ sau khi API thành công
-        users[userIndex].fullName = fullName;
-        users[userIndex].phone = phone;
-        users[userIndex].province = province;
-        users[userIndex].district = district;
-        users[userIndex].ward = ward;
-        users[userIndex].addressDetail = addressDetail;
-        users[userIndex].address = fullAddress;
+        console.log('Update profile payload:', payload);
         
+        const updatedUser = {
+            ...users[userIndex],
+            ...payload,
+            address: fullAddress
+        };
+        users[userIndex] = updatedUser;
         localStorage.setItem('users', JSON.stringify(users));
-        
-        if (currentUser) {
-            currentUser.fullName = fullName;
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        }
+        localStorage.setItem('currentUser', JSON.stringify(updatedUser));
         
         displayUserInfo(users[userIndex]);
         toggleEditMode();
