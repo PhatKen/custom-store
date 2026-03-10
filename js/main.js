@@ -63,6 +63,24 @@ function initializeSampleData() {
                     role: 'staff_orders',
                     status: 'active',
                     createdAt: new Date().toISOString()
+                },
+                {
+                    id: 7,
+                    fullName: 'Thu ngân',
+                    email: 'cashier@customstore.com',
+                    phone: '0900000003',
+                    role: 'cashier',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 8,
+                    fullName: 'Nhân viên Marketing',
+                    email: 'marketing@customstore.com',
+                    phone: '0900000004',
+                    role: 'staff_marketing',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
                 }
             ];
         }
