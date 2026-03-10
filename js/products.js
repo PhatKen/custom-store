@@ -218,8 +218,8 @@ function renderPagination(totalPages) {
             if (page === productsCurrentPage) return;
             productsCurrentPage = page;
             displayProductsList(productsLastFiltered);
-            const scrollPanel = document.querySelector('.product-list-scroll');
-            if (scrollPanel) scrollPanel.scrollTo({ top: 0, behavior: 'smooth' });
+            const layoutTop = document.querySelector('.products-content');
+            if (layoutTop) layoutTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         return btn;
     };
