@@ -127,6 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLogout();
     initSearchAndFilter();
     initAnalytics();
+    initAdminScrollLock();
 });
 
 function applyRoleRestrictions() {
@@ -186,6 +187,23 @@ function initAdminNavigation() {
                 targetSection.classList.add('active');
             }
         });
+    });
+}
+
+function initAdminScrollLock() {
+    const main = document.querySelector('.admin-main');
+    if (!main) return;
+    const sidebar = document.querySelector('.sidebar');
+    const header = document.querySelector('.admin-header');
+
+    const forwardWheel = e => {
+        main.scrollTop += e.deltaY;
+        e.preventDefault();
+    };
+
+    [sidebar, header].forEach(el => {
+        if (!el) return;
+        el.addEventListener('wheel', forwardWheel, { passive: false });
     });
 }
 
