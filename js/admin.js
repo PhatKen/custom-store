@@ -345,40 +345,14 @@ function setTrendElement(el, trend) {
     if (trend.sign === 'negative') el.classList.add('negative');
 }
 
-function getDemoOrders() {
-    const now = new Date();
-    const mk = (id, daysAgo, name, total, status, items) => ({
-        id,
-        customerName: name,
-        total,
-        status,
-        createdAt: new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, 10, 15).toISOString(),
-        items
-    });
-    return [
-        mk(1021, 0, 'Nguyễn Văn A', 299000, 'shipping', [
-            { name: 'Áo thun basic', category: 'ao', price: 199000, quantity: 1 },
-            { name: 'Nón lưỡi trai', category: 'non', price: 100000, quantity: 1 }
-        ]),
-        mk(1020, 1, 'Trần Thị B', 450000, 'packing', [
-            { name: 'Quần jeans slimfit', category: 'quan', price: 450000, quantity: 1 }
-        ]),
-        mk(1019, 2, 'Lê Văn C', 1200000, 'delivered', [
-            { name: 'Giày thể thao', category: 'giay', price: 1200000, quantity: 1 }
-        ]),
-        mk(1018, 3, 'Phạm Văn D', 350000, 'pending', [
-            { name: 'Áo sơ mi', category: 'ao', price: 350000, quantity: 1 }
-        ]),
-        mk(1017, 4, 'Hoàng Thị E', 280000, 'cancelled', [
-            { name: 'Quần short kaki', category: 'quan', price: 280000, quantity: 1 }
-        ])
-    ];
-}
-
 function buildRevenueSeries(range, ordersAll) {
     const now = new Date();
-    const orders = (ordersAll && ordersAll.length) ? ordersAll : getDemoOrders();
+    const orders = Array.isArray(ordersAll) ? ordersAll : [];
     const points = [];
+
+    if (!orders.length) {
+        return { labels: [], values: [] };
+    }
 
     if (range === 'day') {
         const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -488,10 +462,15 @@ function renderRevenueChart(range, ordersAll) {
 function renderRecentOrders(ordersAll) {
     const tbody = document.getElementById('analytics-recent-orders-body');
     if (!tbody) return;
-    const orders = (ordersAll && ordersAll.length) ? ordersAll.slice() : getDemoOrders();
+    const orders = (ordersAll && ordersAll.length) ? ordersAll.slice() : [];
     orders.sort((a, b) => getOrderDate(b).getTime() - getOrderDate(a).getTime());
     const recent = orders.slice(0, 5);
     tbody.innerHTML = '';
+
+    if (!recent.length) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center">Chưa có đơn hàng</td></tr>`;
+        return;
+    }
 
     recent.forEach(o => {
         const tr = document.createElement('tr');
@@ -509,7 +488,7 @@ function renderRecentOrders(ordersAll) {
 function renderTopProducts(ordersInRange) {
     const tbody = document.getElementById('analytics-top-products-body');
     if (!tbody) return;
-    const orders = (ordersInRange && ordersInRange.length) ? ordersInRange : getDemoOrders();
+    const orders = (ordersInRange && ordersInRange.length) ? ordersInRange : [];
     const map = {};
     orders.forEach(o => {
         (o.items || []).forEach(it => {
@@ -523,6 +502,10 @@ function renderTopProducts(ordersInRange) {
     });
     const list = Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
     tbody.innerHTML = '';
+    if (!list.length) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center">Chưa có dữ liệu bán hàng</td></tr>`;
+        return;
+    }
     list.forEach(p => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
