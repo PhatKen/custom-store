@@ -38,7 +38,7 @@ const DEFAULT_USERS = [
     {
         id: 5,
         fullName: 'Nhân viên Sản phẩm',
-        email: 'staff.products@customstore.com',
+        email: 'products@customstore.com',
         phone: '0900000001',
         role: 'staff_products',
         status: 'active',
@@ -47,7 +47,7 @@ const DEFAULT_USERS = [
     {
         id: 6,
         fullName: 'Nhân viên Đơn hàng',
-        email: 'staff.orders@customstore.com',
+        email: 'orders@customstore.com',
         phone: '0900000002',
         role: 'staff_orders',
         status: 'active',

@@ -72,6 +72,32 @@ function getRoleLabel(role) {
     return labels[role] || 'Người dùng';
 }
 
+function migrateStaffEmails() {
+    const oldToNew = {
+        'staff.products@customstore.com': 'products@customstore.com',
+        'staff.orders@customstore.com': 'orders@customstore.com'
+    };
+
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+    if (users.length) {
+        let changed = false;
+        users.forEach(u => {
+            const nextEmail = oldToNew[u.email];
+            if (nextEmail) {
+                u.email = nextEmail;
+                changed = true;
+            }
+        });
+        if (changed) localStorage.setItem('users', JSON.stringify(users));
+    }
+
+    const currentUser = getCurrentUser();
+    if (currentUser && oldToNew[currentUser.email]) {
+        currentUser.email = oldToNew[currentUser.email];
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+}
+
 // Khởi tạo trang admin
 document.addEventListener('DOMContentLoaded', function() {
     const currentUser = getCurrentUser();
@@ -83,6 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.href = 'index.html';
         return;
     }
+
+    migrateStaffEmails();
 
     initAdminNavigation();
     applyRoleRestrictions();
@@ -1168,7 +1196,7 @@ function getSampleUsers() {
         {
             id: 5,
             fullName: 'Nhân viên Sản phẩm',
-            email: 'staff.products@customstore.com',
+            email: 'products@customstore.com',
             role: 'staff_products',
             status: 'active',
             createdAt: new Date('2024-02-01').toISOString()
@@ -1176,7 +1204,7 @@ function getSampleUsers() {
         {
             id: 6,
             fullName: 'Nhân viên Đơn hàng',
-            email: 'staff.orders@customstore.com',
+            email: 'orders@customstore.com',
             role: 'staff_orders',
             status: 'active',
             createdAt: new Date('2024-02-01').toISOString()

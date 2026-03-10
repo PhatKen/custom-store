@@ -84,6 +84,9 @@ function initLoginForm() {
 function authenticateUser(email, password, rememberMe) {
     // Khởi tạo dữ liệu mẫu nếu chưa có
     initializeSampleData();
+
+    if (email === 'staff.products@customstore.com') email = 'products@customstore.com';
+    if (email === 'staff.orders@customstore.com') email = 'orders@customstore.com';
     
     // Lấy người dùng từ localStorage
     const users = JSON.parse(localStorage.getItem('users')) || [];
@@ -103,8 +106,8 @@ function authenticateUser(email, password, rememberMe) {
         'user@example.com': 'user123',
         'tranthi.b@example.com': 'password123',
         'levan.c@example.com': 'password123',
-        'staff.products@customstore.com': 'staff123',
-        'staff.orders@customstore.com': 'staff123',
+        'products@customstore.com': 'staff123',
+        'orders@customstore.com': 'staff123',
         'cashier@customstore.com': 'staff123',
         'marketing@customstore.com': 'staff123'
     };
@@ -166,6 +169,21 @@ function authenticateUser(email, password, rememberMe) {
 function initializeSampleData() {
     // Khởi tạo người dùng mẫu (không khởi tạo đơn hàng mẫu để doanh thu ban đầu = 0)
     let users = JSON.parse(localStorage.getItem('users')) || [];
+
+    if (users.length) {
+        let changed = false;
+        users.forEach(u => {
+            if (u.email === 'staff.products@customstore.com') {
+                u.email = 'products@customstore.com';
+                changed = true;
+            }
+            if (u.email === 'staff.orders@customstore.com') {
+                u.email = 'orders@customstore.com';
+                changed = true;
+            }
+        });
+        if (changed) localStorage.setItem('users', JSON.stringify(users));
+    }
     
     if (users.length === 0) {
         if (typeof getDefaultUsers === 'function') {
@@ -211,7 +229,7 @@ function initializeSampleData() {
                 {
                     id: 5,
                     fullName: 'Nhân viên Sản phẩm',
-                    email: 'staff.products@customstore.com',
+                    email: 'products@customstore.com',
                     phone: '0900000001',
                     role: 'staff_products',
                     status: 'active',
@@ -220,7 +238,7 @@ function initializeSampleData() {
                 {
                     id: 6,
                     fullName: 'Nhân viên Đơn hàng',
-                    email: 'staff.orders@customstore.com',
+                    email: 'orders@customstore.com',
                     phone: '0900000002',
                     role: 'staff_orders',
                     status: 'active',
