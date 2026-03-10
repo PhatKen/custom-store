@@ -929,16 +929,101 @@ function editProduct(productId) {
     const modal = document.getElementById('edit-product-modal');
     modal.style.display = 'flex';
 
-    modal.querySelectorAll('.editor-toolbar [data-cmd]').forEach(btn => {
+    const editDescEditorForToolbar = document.getElementById('edit-product-description-editor');
+
+    const focusEditorFromToolbar = el => {
+        const toolbar = el.closest('.editor-toolbar');
+        const editorId = toolbar ? toolbar.getAttribute('data-editor') : null;
+        const editor = editorId ? document.getElementById(editorId) : null;
+        if (editor) editor.focus();
+        return editor;
+    };
+
+    const applyInlineStyleAtSelection = (editor, styleString) => {
+        if (!editor) return;
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        if (!editor.contains(range.commonAncestorContainer)) return;
+
+        if (range.collapsed) {
+            const span = document.createElement('span');
+            span.setAttribute('style', styleString);
+            const text = document.createTextNode('\u200B');
+            span.appendChild(text);
+            range.insertNode(span);
+            const nextRange = document.createRange();
+            nextRange.setStart(text, 1);
+            nextRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(nextRange);
+            return;
+        }
+    };
+
+    const normalizeFontTags = editor => {
+        if (!editor) return;
+        editor.querySelectorAll('font[face]').forEach(node => {
+            const face = node.getAttribute('face') || '';
+            const span = document.createElement('span');
+            if (face) span.style.fontFamily = face;
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+    };
+
+    const applyFontFamily = (editor, font) => {
+        if (!font) return;
+        const selection = window.getSelection();
+        const hasSelection = selection && selection.rangeCount && !selection.getRangeAt(0).collapsed;
+        if (hasSelection) {
+            editor.focus();
+            document.execCommand('fontName', false, font);
+            normalizeFontTags(editor);
+            return;
+        }
+        applyInlineStyleAtSelection(editor, `font-family:${font};`);
+    };
+
+    const applyFontSizePx = (editor, px) => {
+        if (!px) return;
+        const selection = window.getSelection();
+        const hasSelection = selection && selection.rangeCount && !selection.getRangeAt(0).collapsed;
+        if (!hasSelection) {
+            applyInlineStyleAtSelection(editor, `font-size:${px}px;`);
+            return;
+        }
+        editor.focus();
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('fontSize', false, '7');
+        editor.querySelectorAll('font[size="7"]').forEach(node => {
+            const span = document.createElement('span');
+            span.style.fontSize = `${px}px`;
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+    };
+
+    modal.querySelectorAll('.editor-toolbar button[data-cmd]').forEach(btn => {
         btn.onclick = function(e) {
             e.preventDefault();
             const cmd = this.getAttribute('data-cmd');
             if (!cmd) return;
-            const toolbar = this.closest('.editor-toolbar');
-            const editorId = toolbar ? toolbar.getAttribute('data-editor') : null;
-            const editor = editorId ? document.getElementById(editorId) : null;
-            if (editor) editor.focus();
+            const editor = focusEditorFromToolbar(this);
             document.execCommand(cmd, false, null);
+            normalizeFontTags(editor);
+        };
+    });
+
+    modal.querySelectorAll('.editor-toolbar select[data-cmd]').forEach(sel => {
+        sel.onchange = function() {
+            const cmd = this.getAttribute('data-cmd');
+            const editor = focusEditorFromToolbar(this) || editDescEditorForToolbar;
+            if (cmd === 'fontName') {
+                applyFontFamily(editor, this.value);
+            } else if (cmd === 'fontSizePx') {
+                applyFontSizePx(editor, parseInt(this.value, 10));
+            }
         };
     });
 
