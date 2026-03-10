@@ -259,62 +259,113 @@ function handleAvatarUpload(event) {
 }
 
 // Lưu thông tin tài khoản
-function saveAccountInfo(e) {
+async function saveAccountInfo(e) {
     e.preventDefault();
     
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
     const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex(u => u.id === currentUser.id);
+    const userIndex = currentUser ? users.findIndex(u => u.id === currentUser.id) : -1;
     
     if (userIndex === -1) {
         showNotification('Không tìm thấy tài khoản', 'error');
         return;
     }
     
-    const fullName = document.getElementById('edit-fullname').value.trim();
-    const phone = document.getElementById('edit-phone').value.trim();
-    const province = document.getElementById('edit-province').value.trim();
-    const district = document.getElementById('edit-district').value.trim();
-    const ward = document.getElementById('edit-ward').value.trim();
-    const addressDetail = document.getElementById('edit-address').value.trim();
-    
-    if (!fullName) {
-        showNotification('Vui lòng nhập họ tên', 'error');
-        return;
+    const submitBtn = document.querySelector('#edit-form .btn-save');
+    const originalBtnText = submitBtn ? (submitBtn.dataset.originalText || submitBtn.textContent) : '';
+    if (submitBtn) {
+        submitBtn.dataset.originalText = originalBtnText;
+        submitBtn.textContent = 'Đang lưu...';
+        submitBtn.disabled = true;
     }
     
-    // Tạo địa chỉ đầy đủ
-    let fullAddress = addressDetail;
-    if (ward) fullAddress = ward + ', ' + fullAddress;
-    if (district) fullAddress = district + ', ' + fullAddress;
-    if (province) {
-        const provinceName = vietnamAddressData[province]?.name || province;
-        fullAddress = provinceName + ', ' + fullAddress;
+    try {
+        const fullName = document.getElementById('edit-fullname').value.trim();
+        const phone = document.getElementById('edit-phone').value.trim();
+        const provinceSelect = document.getElementById('edit-province');
+        const districtSelect = document.getElementById('edit-district');
+        const wardSelect = document.getElementById('edit-ward');
+        const addressDetail = document.getElementById('edit-address').value.trim();
+
+        const province = provinceSelect && provinceSelect.selectedIndex > 0
+            ? provinceSelect.options[provinceSelect.selectedIndex].textContent
+            : '';
+        const district = districtSelect && districtSelect.selectedIndex > 0
+            ? districtSelect.options[districtSelect.selectedIndex].textContent
+            : '';
+        const ward = wardSelect && wardSelect.selectedIndex > 0
+            ? wardSelect.options[wardSelect.selectedIndex].textContent
+            : '';
+        
+        if (!fullName) {
+            showNotification('Vui lòng nhập họ tên', 'error');
+            return;
+        }
+        
+        // Tạo địa chỉ đầy đủ
+        let fullAddress = addressDetail || '';
+        if (ward) fullAddress = (fullAddress ? ward + ', ' + fullAddress : ward);
+        if (district) fullAddress = (fullAddress ? district + ', ' + fullAddress : district);
+        if (province) fullAddress = (fullAddress ? province + ', ' + fullAddress : province);
+
+        const payload = {
+            fullName,
+            phone,
+            province,
+            district,
+            ward,
+            addressDetail
+        };
+
+        try {
+            const res = await fetch('/api/user/update-profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) {
+                let message = 'Cập nhật tài khoản thất bại';
+                try {
+                    const errData = await res.json();
+                    if (errData && errData.message) {
+                        message = errData.message;
+                    }
+                } catch (_) {}
+                throw new Error(message);
+            }
+        } catch (apiErr) {
+            throw apiErr;
+        }
+        
+        // Cập nhật thông tin cục bộ sau khi API thành công
+        users[userIndex].fullName = fullName;
+        users[userIndex].phone = phone;
+        users[userIndex].province = province;
+        users[userIndex].district = district;
+        users[userIndex].ward = ward;
+        users[userIndex].addressDetail = addressDetail;
+        users[userIndex].address = fullAddress;
+        
+        localStorage.setItem('users', JSON.stringify(users));
+        
+        if (currentUser) {
+            currentUser.fullName = fullName;
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+        
+        displayUserInfo(users[userIndex]);
+        toggleEditMode();
+        showNotification('Cập nhật tài khoản thành công!', 'success');
+    } catch (err) {
+        showNotification(err.message || 'Có lỗi xảy ra khi cập nhật tài khoản', 'error');
+    } finally {
+        if (submitBtn) {
+            submitBtn.textContent = originalBtnText || 'Lưu Thay Đổi';
+            submitBtn.disabled = false;
+        }
     }
-    
-    // Cập nhật thông tin
-    users[userIndex].fullName = fullName;
-    users[userIndex].phone = phone;
-    users[userIndex].address = fullAddress;
-    users[userIndex].province = province;
-    users[userIndex].district = district;
-    users[userIndex].ward = ward;
-    users[userIndex].addressDetail = addressDetail;
-    
-    // Lưu vào localStorage
-    localStorage.setItem('users', JSON.stringify(users));
-    
-    // Cập nhật currentUser nếu cần
-    currentUser.fullName = fullName;
-    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
-    // Refresh display
-    displayUserInfo(users[userIndex]);
-    
-    // Chuyển về chế độ hiển thị
-    toggleEditMode();
-    
-    showNotification('Thông tin tài khoản đã được cập nhật!', 'success');
 }
 
 // Hiển thị modal xác nhận xóa
