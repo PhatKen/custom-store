@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="products-page-body">
     <!-- Header & Navigation -->
     <header>
         <div class="container">
@@ -35,7 +35,7 @@
             
             <div class="products-layout">
                 <!-- Sidebar - Tìm kiếm và Lọc -->
-                <aside class="products-sidebar">
+                <aside class="products-sidebar sidebar-filter">
                     <div class="filter-section">
                         <h3>Tìm Kiếm Sản Phẩm</h3>
                         
@@ -95,14 +95,16 @@
                 </aside>
                 
                 <!-- Main Content - Products Grid -->
-                <main class="products-content">
+                <main class="products-content product-list">
                     <div class="products-count">
                         <p>Hiển thị <span id="showing-start">0</span>–<span id="showing-end">0</span> trong <span id="total-count">0</span> sản phẩm</p>
                     </div>
-                    <div class="products-grid" id="products-container">
-                        <!-- Sản phẩm sẽ được thêm bằng JavaScript -->
+                    <div class="product-list-scroll">
+                        <div class="products-grid" id="products-container">
+                            <!-- Sản phẩm sẽ được thêm bằng JavaScript -->
+                        </div>
+                        <div class="products-pagination" id="products-pagination"></div>
                     </div>
-                    <div class="products-pagination" id="products-pagination"></div>
                 </main>
             </div>
         </div>
