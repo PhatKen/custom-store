@@ -77,9 +77,10 @@ function updateCheckoutSummary(subtotal, discount) {
 
 // Khởi tạo sự kiện checkout
 function initCheckoutEvents() {
-    // Khởi tạo địa chỉ combobox
-    initAddressSelectors();
+    // Tự động điền thông tin từ tài khoản (tên, SĐT, địa chỉ đã lưu)
     prefillAddressFromUser();
+    // Khởi tạo địa chỉ combobox (sẽ dùng dữ liệu đã set trước đó nếu có)
+    initAddressSelectors();
     
     // Nút quay lại
     const backBtn = document.getElementById('back-btn');
@@ -118,6 +119,9 @@ function prefillAddressFromUser() {
     const fullnameEl = document.getElementById('fullname');
     const phoneEl = document.getElementById('phone');
     const addressEl = document.getElementById('address');
+    const provinceSelect = document.getElementById('province');
+    const districtSelect = document.getElementById('district');
+    const wardSelect = document.getElementById('ward');
     
     if (fullnameEl && currentUser.fullName) fullnameEl.value = currentUser.fullName;
     if (phoneEl && currentUser.phone) phoneEl.value = currentUser.phone;
@@ -125,6 +129,10 @@ function prefillAddressFromUser() {
     if (addressEl) {
         addressEl.value = currentUser.addressDetail || currentUser.address || '';
     }
+
+    if (provinceSelect) provinceSelect.dataset.initialName = currentUser.province || '';
+    if (districtSelect) districtSelect.dataset.initialName = currentUser.district || '';
+    if (wardSelect) wardSelect.dataset.initialName = currentUser.ward || '';
 }
 
 // Xác thực và gửi checkout
@@ -430,6 +438,10 @@ function initAddressSelectors() {
     const wardSelect = document.getElementById('ward');
     
     if (!provinceSelect || !districtSelect || !wardSelect) return;
+
+    const initialProvinceName = provinceSelect.dataset.initialName || '';
+    const initialDistrictName = districtSelect.dataset.initialName || '';
+    const initialWardName = wardSelect.dataset.initialName || '';
     
     function setSelectState(select, placeholder, disabled) {
         if (!select) return;
@@ -456,13 +468,21 @@ function initAddressSelectors() {
                     provinceSelect.appendChild(opt);
                 });
             provinceSelect.disabled = false;
+
+            if (initialProvinceName) {
+                const opt = Array.from(provinceSelect.options).find(o => o.textContent === initialProvinceName);
+                if (opt) {
+                    provinceSelect.value = opt.value;
+                    await loadDistricts(opt.value, true);
+                }
+            }
         } catch (err) {
             setSelectState(provinceSelect, 'Không tải được tỉnh/thành', true);
             showNotification('Không tải được danh sách tỉnh/thành. Vui lòng thử lại.', 'error');
         }
     }
 
-    async function loadDistricts(provinceCode) {
+    async function loadDistricts(provinceCode, applyInitial) {
         if (!provinceCode) {
             setSelectState(districtSelect, 'Chọn quận/huyện', true);
             setSelectState(wardSelect, 'Chọn phường/xã', true);
@@ -487,13 +507,21 @@ function initAddressSelectors() {
                     districtSelect.appendChild(opt);
                 });
             districtSelect.disabled = false;
+
+            if (applyInitial && initialDistrictName) {
+                const opt = Array.from(districtSelect.options).find(o => o.textContent === initialDistrictName);
+                if (opt) {
+                    districtSelect.value = opt.value;
+                    await loadWards(opt.value, true);
+                }
+            }
         } catch (err) {
             setSelectState(districtSelect, 'Không tải được quận/huyện', true);
             showNotification('Không tải được danh sách quận/huyện. Vui lòng thử lại.', 'error');
         }
     }
 
-    async function loadWards(districtCode) {
+    async function loadWards(districtCode, applyInitial) {
         if (!districtCode) {
             setSelectState(wardSelect, 'Chọn phường/xã', true);
             return;
@@ -516,6 +544,13 @@ function initAddressSelectors() {
                     wardSelect.appendChild(opt);
                 });
             wardSelect.disabled = false;
+
+            if (applyInitial && initialWardName) {
+                const opt = Array.from(wardSelect.options).find(o => o.textContent === initialWardName);
+                if (opt) {
+                    wardSelect.value = opt.value;
+                }
+            }
         } catch (err) {
             setSelectState(wardSelect, 'Không tải được phường/xã', true);
             showNotification('Không tải được danh sách phường/xã. Vui lòng thử lại.', 'error');
@@ -525,13 +560,16 @@ function initAddressSelectors() {
     // Sự kiện thay đổi tỉnh/thành phố
     provinceSelect.addEventListener('change', function() {
         const selectedProvinceCode = this.value;
-        loadDistricts(selectedProvinceCode);
+        districtSelect.dataset.initialName = '';
+        wardSelect.dataset.initialName = '';
+        loadDistricts(selectedProvinceCode, false);
     });
     
     // Sự kiện thay đổi quận/huyện
     districtSelect.addEventListener('change', function() {
         const selectedDistrictCode = this.value;
-        loadWards(selectedDistrictCode);
+        wardSelect.dataset.initialName = '';
+        loadWards(selectedDistrictCode, false);
     });
 
     // Mặc định luôn tải địa chỉ Việt Nam
