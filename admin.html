@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/admin.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto:wght@400;500;700&family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body class="admin-page">
     <!-- Admin Header -->
@@ -584,11 +584,34 @@
                         <div class="section-title">Mô tả sản phẩm</div>
                         <div class="form-group">
                             <div class="editor-toolbar compact" data-editor="edit-product-description-editor">
+                                <select class="editor-select" data-cmd="fontName" aria-label="Font">
+                                    <option value="">Font</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Roboto">Roboto</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Verdana">Verdana</option>
+                                </select>
+                                <select class="editor-select" data-cmd="fontSizePx" aria-label="Cỡ chữ">
+                                    <option value="">Size</option>
+                                    <option value="12">12</option>
+                                    <option value="14">14</option>
+                                    <option value="16">16</option>
+                                    <option value="18">18</option>
+                                    <option value="24">24</option>
+                                    <option value="32">32</option>
+                                </select>
+                                <span class="editor-divider" aria-hidden="true"></span>
                                 <button type="button" class="btn-secondary" data-cmd="bold" title="Đậm"><i class="fas fa-bold"></i></button>
                                 <button type="button" class="btn-secondary" data-cmd="italic" title="Nghiêng"><i class="fas fa-italic"></i></button>
                                 <button type="button" class="btn-secondary" data-cmd="underline" title="Gạch chân"><i class="fas fa-underline"></i></button>
+                                <span class="editor-divider" aria-hidden="true"></span>
                                 <button type="button" class="btn-secondary" data-cmd="insertUnorderedList" title="Danh sách"><i class="fas fa-list-ul"></i></button>
                                 <button type="button" class="btn-secondary" data-cmd="insertOrderedList" title="Đánh số"><i class="fas fa-list-ol"></i></button>
+                                <span class="editor-divider" aria-hidden="true"></span>
+                                <button type="button" class="btn-secondary" data-cmd="justifyLeft" title="Canh trái"><i class="fas fa-align-left"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="justifyCenter" title="Canh giữa"><i class="fas fa-align-center"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="justifyRight" title="Canh phải"><i class="fas fa-align-right"></i></button>
                             </div>
                             <div id="edit-product-description-editor" class="editor-surface" contenteditable="true"></div>
                         </div>
