@@ -131,7 +131,7 @@ function prefillAddressFromUser() {
 function validateAndSubmitCheckout() {
     const fullname = document.getElementById('fullname').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const country = document.getElementById('country').value.trim();
+    const country = 'Việt Nam';
     const provinceSelect = document.getElementById('province');
     const districtSelect = document.getElementById('district');
     const wardSelect = document.getElementById('ward');
@@ -148,11 +148,6 @@ function validateAndSubmitCheckout() {
     
     if (!phone) {
         showNotification('Vui lòng nhập số điện thoại', 'error');
-        return;
-    }
-    
-    if (!country) {
-        showNotification('Vui lòng chọn quốc gia', 'error');
         return;
     }
     
@@ -430,12 +425,11 @@ async function fetchJson(url) {
 
 // Khởi tạo combobox địa chỉ
 function initAddressSelectors() {
-    const countrySelect = document.getElementById('country');
     const provinceSelect = document.getElementById('province');
     const districtSelect = document.getElementById('district');
     const wardSelect = document.getElementById('ward');
     
-    if (!countrySelect) return;
+    if (!provinceSelect || !districtSelect || !wardSelect) return;
     
     function setSelectState(select, placeholder, disabled) {
         if (!select) return;
@@ -528,18 +522,6 @@ function initAddressSelectors() {
         }
     }
 
-    // Sự kiện thay đổi quốc gia
-    countrySelect.addEventListener('change', function() {
-        const selectedCountry = this.value;
-        setSelectState(provinceSelect, 'Chọn tỉnh/thành phố', true);
-        setSelectState(districtSelect, 'Chọn quận/huyện', true);
-        setSelectState(wardSelect, 'Chọn phường/xã', true);
-
-        if (selectedCountry === 'vietnam') {
-            loadProvinces();
-        }
-    });
-    
     // Sự kiện thay đổi tỉnh/thành phố
     provinceSelect.addEventListener('change', function() {
         const selectedProvinceCode = this.value;
@@ -551,4 +533,7 @@ function initAddressSelectors() {
         const selectedDistrictCode = this.value;
         loadWards(selectedDistrictCode);
     });
+
+    // Mặc định luôn tải địa chỉ Việt Nam
+    loadProvinces();
 }
