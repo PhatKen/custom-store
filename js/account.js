@@ -39,10 +39,21 @@ function displayUserInfo(user) {
     document.getElementById('display-fullname').textContent = user.fullName || '--';
     document.getElementById('display-phone').textContent = user.phone || '--';
     document.getElementById('display-address').textContent = user.address || '--';
+    const nameDisplay = document.getElementById('user-name-display');
     const emailDisplay = document.getElementById('user-email-display');
+    const membershipBadge = document.getElementById('user-membership-badge');
+    const membershipInfo = calculateUserMembership(user.id);
+    if (nameDisplay) {
+        nameDisplay.textContent = user.fullName || user.email || 'User';
+    }
     if (emailDisplay) {
-        const membershipInfo = calculateUserMembership(user.id);
-        emailDisplay.innerHTML = `${user.email}<br><span style="font-size:13px;">Membership: ${membershipInfo.label}</span>`;
+        emailDisplay.textContent = user.email || '';
+    }
+    if (membershipBadge) {
+        const span = membershipBadge.querySelector('span');
+        if (span) {
+            span.textContent = 'Membership: ' + (membershipInfo.label || '--');
+        }
     }
     
     // Cập nhật avatar
@@ -202,7 +213,7 @@ function loadUserOrders() {
                 Trạng thái: <span class="order-status">${order.status || 'confirmed'}</span>
             </div>
             <button class="order-toggle">Xem chi tiết đơn hàng</button>
-            <div class="order-card-detail" style="display:none;">
+            <div class="order-card-detail">
                 <div class="order-items">${itemsHTML}</div>
                 <div class="order-delivery">
                     <div class="order-delivery-title">Thông tin giao hàng</div>
