@@ -318,19 +318,27 @@ async function saveAccountInfo(e) {
         };
 
         try {
+            console.log('Update profile payload:', payload);
+            const token = localStorage.getItem('token');
             const res = await fetch('/api/user/update-profile', {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? 'Bearer ' + token : ''
                 },
                 body: JSON.stringify(payload)
             });
+            let responseText = '';
+            try {
+                responseText = await res.text();
+            } catch (_) {}
+            console.log('Update profile response:', res.status, responseText);
             if (!res.ok) {
                 let message = 'Cập nhật tài khoản thất bại';
                 try {
-                    const errData = await res.json();
-                    if (errData && errData.message) {
-                        message = errData.message;
+                    const parsed = responseText ? JSON.parse(responseText) : null;
+                    if (parsed && parsed.message) {
+                        message = parsed.message;
                     }
                 } catch (_) {}
                 throw new Error(message);
