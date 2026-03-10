@@ -36,7 +36,7 @@ function checkLoggedIn() {
     
     if (currentUser) {
         // Nếu đã đăng nhập, chuyển hướng
-        if (currentUser.role === 'admin' || currentUser.role === 'staff_products' || currentUser.role === 'staff_orders') {
+        if (currentUser.role === 'admin' || currentUser.role === 'staff_products' || currentUser.role === 'staff_orders' || currentUser.role === 'cashier' || currentUser.role === 'staff_marketing') {
             window.location.href = 'admin.html';
         } else {
             window.location.href = 'index.html';
@@ -104,7 +104,9 @@ function authenticateUser(email, password, rememberMe) {
         'tranthi.b@example.com': 'password123',
         'levan.c@example.com': 'password123',
         'staff.products@customstore.com': 'staff123',
-        'staff.orders@customstore.com': 'staff123'
+        'staff.orders@customstore.com': 'staff123',
+        'cashier@customstore.com': 'staff123',
+        'marketing@customstore.com': 'staff123'
     };
     
     let isPasswordValid = false;
@@ -148,7 +150,7 @@ function authenticateUser(email, password, rememberMe) {
         }
         
         // Chuyển hướng dựa trên vai trò
-        if (user.role === 'admin' || user.role === 'staff_products' || user.role === 'staff_orders') {
+        if (user.role === 'admin' || user.role === 'staff_products' || user.role === 'staff_orders' || user.role === 'cashier' || user.role === 'staff_marketing') {
             window.location.href = 'admin.html';
         } else {
             window.location.href = 'index.html';
@@ -221,6 +223,24 @@ function initializeSampleData() {
                     email: 'staff.orders@customstore.com',
                     phone: '0900000002',
                     role: 'staff_orders',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 7,
+                    fullName: 'Thu ngân',
+                    email: 'cashier@customstore.com',
+                    phone: '0900000003',
+                    role: 'cashier',
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: 8,
+                    fullName: 'Nhân viên Marketing',
+                    email: 'marketing@customstore.com',
+                    phone: '0900000004',
+                    role: 'staff_marketing',
                     status: 'active',
                     createdAt: new Date().toISOString()
                 }

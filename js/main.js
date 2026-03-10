@@ -1218,7 +1218,7 @@ function updateUserHeader() {
                     <a href="account.html#my-orders" class="dropdown-item">
                         <i class="fas fa-receipt"></i> Đơn hàng của tôi
                     </a>
-                    ${(currentUser.role === 'admin' || currentUser.role === 'staff_products' || currentUser.role === 'staff_orders') ? 
+                    ${(currentUser.role === 'admin' || currentUser.role === 'staff_products' || currentUser.role === 'staff_orders' || currentUser.role === 'cashier' || currentUser.role === 'staff_marketing') ? 
                         `<a href="admin.html" class="dropdown-item">
                             <i class="fas fa-cog"></i> Quản lý admin
                         </a>` : ''}

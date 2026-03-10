@@ -1,81 +1,136 @@
+const ADMIN_ROLE_CONFIG = {
+    admin: {
+        sections: ['dashboard', 'analytics', 'products-management', 'add-product', 'orders', 'purchase-history', 'users', 'posts'],
+        permissions: {
+            products: { manage: true },
+            orders: { delete: true, updateStatus: true },
+            users: { manage: true },
+            posts: { manage: true }
+        }
+    },
+    staff_products: {
+        sections: ['dashboard', 'products-management', 'add-product'],
+        permissions: {
+            products: { manage: true }
+        }
+    },
+    staff_orders: {
+        sections: ['dashboard', 'orders', 'purchase-history'],
+        permissions: {
+            orders: { delete: false, updateStatus: false }
+        }
+    },
+    cashier: {
+        sections: ['dashboard', 'analytics', 'purchase-history'],
+        permissions: {}
+    },
+    staff_marketing: {
+        sections: ['dashboard', 'posts'],
+        permissions: {
+            posts: { manage: true }
+        }
+    }
+};
+
+function getCurrentUser() {
+    return JSON.parse(localStorage.getItem('currentUser'));
+}
+
+function getRoleConfig(role) {
+    return ADMIN_ROLE_CONFIG[role] || null;
+}
+
+function canAccessAdmin(role) {
+    return !!getRoleConfig(role);
+}
+
+function canAccessSection(sectionId) {
+    const currentUser = getCurrentUser();
+    const role = currentUser?.role;
+    const config = getRoleConfig(role);
+    if (!config) return false;
+    return config.sections.includes(sectionId);
+}
+
+function hasPermission(area, action) {
+    const currentUser = getCurrentUser();
+    const role = currentUser?.role;
+    const config = getRoleConfig(role);
+    if (!config) return false;
+    return !!(config.permissions && config.permissions[area] && config.permissions[area][action]);
+}
+
+function getRoleLabel(role) {
+    const labels = {
+        admin: 'Quản trị viên',
+        staff_products: 'Nhân viên (xem sản phẩm)',
+        staff_orders: 'Nhân viên (xem đơn hàng)',
+        cashier: 'Thu ngân',
+        staff_marketing: 'Nhân viên (marketing)',
+        user: 'Người dùng'
+    };
+    return labels[role] || 'Người dùng';
+}
+
 // Khởi tạo trang admin
 document.addEventListener('DOMContentLoaded', function() {
-    // Khởi tạo navigation
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+        window.location.href = 'login.html';
+        return;
+    }
+    if (!canAccessAdmin(currentUser.role)) {
+        window.location.href = 'index.html';
+        return;
+    }
+
     initAdminNavigation();
-    
     applyRoleRestrictions();
-    
-    // Khởi tạo tải dữ liệu dashboard
+
     loadDashboardData();
-    
-    // Khởi tải sản phẩm
     loadProductsForAdmin();
-    
-    // Khởi tạo form thêm sản phẩm
     initAddProductForm();
-    
-    // Khởi tải đơn hàng
     loadOrders();
-    
-    // Khởi tải người dùng
     loadUsers();
     initUserTableEvents();
-    
-    // Khởi tải lịch sử mua hàng
     loadPurchaseHistory();
-
-    // Khởi tải bài viết
     loadPosts();
     initPostEvents();
-    
-    // Khởi tạo chức năng đăng xuất
     initLogout();
-    
-    // Khởi tạo tìm kiếm và lọc
     initSearchAndFilter();
-    
-    // Khởi tạo thống kê chi tiết
     initAnalytics();
 });
 
 function applyRoleRestrictions() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    const currentUser = getCurrentUser();
     if (!currentUser) return;
     const role = currentUser.role;
-    const menuItem = sel => document.querySelector(`.admin-menu a[data-section="${sel}"]`)?.closest('li');
-    const hideSection = id => {
-        const sec = document.getElementById(id);
-        if (sec) sec.classList.remove('active');
-    };
-    if (role === 'staff_products') {
-        menuItem('add-product') && (menuItem('add-product').style.display = 'none');
-        menuItem('orders') && (menuItem('orders').style.display = 'none');
-        menuItem('users') && (menuItem('users').style.display = 'none');
-        hideSection('add-product');
-        hideSection('orders');
-        hideSection('users');
-        const prodLink = document.querySelector('.admin-menu a[data-section="products-management"]');
-        if (prodLink) prodLink.click();
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.products-table .btn-edit') || e.target.closest('.products-table .btn-delete')) {
-                e.preventDefault();
-            }
-        });
-    } else if (role === 'staff_orders') {
-        menuItem('products-management') && (menuItem('products-management').style.display = 'none');
-        menuItem('add-product') && (menuItem('add-product').style.display = 'none');
-        menuItem('users') && (menuItem('users').style.display = 'none');
-        hideSection('products-management');
-        hideSection('add-product');
-        hideSection('users');
-        const ordersLink = document.querySelector('.admin-menu a[data-section="orders"]');
-        if (ordersLink) ordersLink.click();
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-delete-order')) {
-                e.preventDefault();
-            }
-        });
-    }
+    const config = getRoleConfig(role);
+    if (!config) return;
+
+    const allowedSections = new Set(config.sections);
+
+    document.querySelectorAll('.admin-menu a[data-section]').forEach(link => {
+        const sectionId = link.getAttribute('data-section');
+        const li = link.closest('li');
+        const allowed = allowedSections.has(sectionId);
+        if (li) li.style.display = allowed ? '' : 'none';
+    });
+
+    document.querySelectorAll('.admin-section').forEach(sec => {
+        const allowed = allowedSections.has(sec.id);
+        sec.style.display = allowed ? '' : 'none';
+        sec.classList.remove('active');
+    });
+
+    const menuLinks = document.querySelectorAll('.admin-menu a[data-section]');
+    menuLinks.forEach(item => item.classList.remove('active'));
+
+    const initialSection = config.sections.includes('dashboard') ? 'dashboard' : config.sections[0];
+    const initialLink = document.querySelector(`.admin-menu a[data-section="${initialSection}"]`);
+    const initialSectionEl = document.getElementById(initialSection);
+    if (initialLink) initialLink.classList.add('active');
+    if (initialSectionEl) initialSectionEl.classList.add('active');
 }
 
 // Khởi tạo navigation admin
@@ -411,6 +466,8 @@ function displayProductsTable(products) {
         return;
     }
     
+    const canManageProducts = hasPermission('products', 'manage') || canAccessSection('products-management');
+
     products.forEach(product => {
         const row = document.createElement('tr');
         
@@ -429,6 +486,17 @@ function displayProductsTable(products) {
         const displayQuantity = status === 'out-of-stock' ? 0 : product.quantity;
         const mainImage = Array.isArray(product.images) && product.images.length ? product.images[0] : product.image;
         
+        const actionButtonsHtml = canManageProducts ? `
+                <div class="action-buttons">
+                    <button class="btn-edit" data-product-id="${product.id}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn-delete" data-product-id="${product.id}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+        ` : '';
+
         row.innerHTML = `
             <td>${product.id}</td>
             <td class="product-image-cell">
@@ -446,14 +514,7 @@ function displayProductsTable(products) {
                 <span class="status-badge status-${status}">${statusText}</span>
             </td>
             <td>
-                <div class="action-buttons">
-                    <button class="btn-edit" data-product-id="${product.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn-delete" data-product-id="${product.id}">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+                ${actionButtonsHtml}
             </td>
         `;
         
@@ -462,22 +523,12 @@ function displayProductsTable(products) {
     
     // Thêm sự kiện cho các nút
     addProductTableEvents();
-    
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser && currentUser.role === 'staff_products') {
-        document.querySelectorAll('.products-table .btn-edit, .products-table .btn-delete').forEach(btn => {
-            btn.setAttribute('disabled', 'true');
-            btn.style.pointerEvents = 'none';
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-        });
-    }
 }
 
 // Thêm sự kiện cho bảng sản phẩm
 function addProductTableEvents() {
     // Sự kiện chỉnh sửa
-    document.querySelectorAll('.btn-edit').forEach(button => {
+    document.querySelectorAll('.products-table .btn-edit[data-product-id]').forEach(button => {
         button.addEventListener('click', function() {
             const productId = this.getAttribute('data-product-id');
             editProduct(productId);
@@ -485,7 +536,7 @@ function addProductTableEvents() {
     });
     
     // Sự kiện xóa
-    document.querySelectorAll('.btn-delete').forEach(button => {
+    document.querySelectorAll('.products-table .btn-delete[data-product-id]').forEach(button => {
         button.addEventListener('click', function() {
             const productId = this.getAttribute('data-product-id');
             deleteProduct(productId);
@@ -495,6 +546,10 @@ function addProductTableEvents() {
 
 // Chỉnh sửa sản phẩm
 function editProduct(productId) {
+    if (!hasPermission('products', 'manage')) {
+        showNotification('Bạn không có quyền chỉnh sửa sản phẩm', 'error');
+        return;
+    }
     // Lấy sản phẩm từ localStorage
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const product = products.find(p => p.id == productId);
@@ -672,6 +727,10 @@ function editProduct(productId) {
 
 // Xóa sản phẩm
 function deleteProduct(productId) {
+    if (!hasPermission('products', 'manage')) {
+        showNotification('Bạn không có quyền xóa sản phẩm', 'error');
+        return;
+    }
     if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
         return;
     }
@@ -706,6 +765,7 @@ function initAddProductForm() {
     const imagePreview = document.getElementById('image-preview');
     
     if (!form) return;
+    if (!hasPermission('products', 'manage')) return;
     
     // Xử lý upload hình ảnh
     uploadBtn.addEventListener('click', function() {
@@ -997,6 +1057,8 @@ function displayOrdersTable(orders) {
         return;
     }
     
+    const canDeleteOrders = hasPermission('orders', 'delete');
+
     orders.forEach(order => {
         const row = document.createElement('tr');
         
@@ -1010,6 +1072,12 @@ function displayOrdersTable(orders) {
         // Lấy tên người nhận từ deliveryInfo hoặc customerName (để tương thích cũ)
         const customerName = order.deliveryInfo?.fullname || order.customerName || 'N/A';
         
+        const deleteButtonHtml = canDeleteOrders ? `
+                    <button class="btn-delete-order" data-order-id="${order.id}" title="Xóa đơn hàng">
+                        <i class="fas fa-trash"></i>
+                    </button>
+        ` : '';
+
         row.innerHTML = `
             <td>#${order.id}</td>
             <td>${customerName}</td>
@@ -1025,25 +1093,13 @@ function displayOrdersTable(orders) {
                     <button class="btn-view" data-order-id="${order.id}" title="Xem chi tiết">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-delete-order" data-order-id="${order.id}" title="Xóa đơn hàng">
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    ${deleteButtonHtml}
                 </div>
             </td>
         `;
         
         tbody.appendChild(row);
     });
-    
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-    if (currentUser && currentUser.role === 'staff_orders') {
-        document.querySelectorAll('.orders-table .btn-delete-order').forEach(btn => {
-            btn.setAttribute('disabled', 'true');
-            btn.style.pointerEvents = 'none';
-            btn.style.opacity = '0.5';
-            btn.style.cursor = 'not-allowed';
-        });
-    }
 }
 
 // Lấy văn bản trạng thái đơn hàng
@@ -1061,6 +1117,7 @@ function getOrderStatusText(status) {
 
 // Tải người dùng
 function loadUsers() {
+    if (!hasPermission('users', 'manage')) return;
     const users = JSON.parse(localStorage.getItem('users')) || [];
     
     // Nếu không có người dùng, thêm người dùng mẫu
@@ -1123,6 +1180,22 @@ function getSampleUsers() {
             role: 'staff_orders',
             status: 'active',
             createdAt: new Date('2024-02-01').toISOString()
+        },
+        {
+            id: 7,
+            fullName: 'Thu ngân',
+            email: 'cashier@customstore.com',
+            role: 'cashier',
+            status: 'active',
+            createdAt: new Date('2024-02-01').toISOString()
+        },
+        {
+            id: 8,
+            fullName: 'Nhân viên Marketing',
+            email: 'marketing@customstore.com',
+            role: 'staff_marketing',
+            status: 'active',
+            createdAt: new Date('2024-02-01').toISOString()
         }
     ];
 }
@@ -1144,6 +1217,8 @@ function displayUsersTable(users) {
         return;
     }
     
+    const canManageUsers = hasPermission('users', 'manage');
+
     users.forEach(user => {
         const row = document.createElement('tr');
         
@@ -1151,18 +1226,7 @@ function displayUsersTable(users) {
         const userDate = new Date(user.createdAt);
         const formattedDate = userDate.toLocaleDateString('vi-VN');
         
-        row.innerHTML = `
-            <td>${user.id}</td>
-            <td>${user.fullName}</td>
-            <td>${user.email}</td>
-            <td>${user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff_products' ? 'Nhân viên (xem sản phẩm)' : user.role === 'staff_orders' ? 'Nhân viên (xem đơn hàng)' : 'Người dùng'}</td>
-            <td>${formattedDate}</td>
-            <td>
-                <span class="status-badge status-${user.status}-user">
-                    ${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                </span>
-            </td>
-            <td>
+        const actionButtonsHtml = canManageUsers ? `
                 <div class="action-buttons">
                     <button class="btn-edit" data-user-id="${user.id}">
                         <i class="fas fa-edit"></i>
@@ -1171,6 +1235,21 @@ function displayUsersTable(users) {
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
+        ` : '';
+
+        row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.fullName}</td>
+            <td>${user.email}</td>
+            <td>${getRoleLabel(user.role)}</td>
+            <td>${formattedDate}</td>
+            <td>
+                <span class="status-badge status-${user.status}-user">
+                    ${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                </span>
+            </td>
+            <td>
+                ${actionButtonsHtml}
             </td>
         `;
         
@@ -1181,6 +1260,10 @@ function displayUsersTable(users) {
 }
 
 function handleUserEdit() {
+    if (!hasPermission('users', 'manage')) {
+        showNotification('Bạn không có quyền quản lý người dùng', 'error');
+        return;
+    }
     const modal = document.getElementById('edit-user-modal');
     if (!modal) return;
     
@@ -1195,6 +1278,10 @@ function handleUserEdit() {
 }
 
 function handleUserDelete() {
+    if (!hasPermission('users', 'manage')) {
+        showNotification('Bạn không có quyền quản lý người dùng', 'error');
+        return;
+    }
     const userId = parseInt(this.getAttribute('data-user-id'));
     const users = JSON.parse(localStorage.getItem('users')) || [];
     const user = users.find(u => u.id === userId);
@@ -1213,6 +1300,7 @@ function initUserTableEvents() {
     const modal = document.getElementById('edit-user-modal');
     const form = document.getElementById('edit-user-form');
     if (!modal || !form) return;
+    if (!hasPermission('users', 'manage')) return;
     document.querySelectorAll('.users-table .btn-edit[data-user-id]').forEach(btn => {
         btn.addEventListener('click', handleUserEdit);
     });
@@ -1232,6 +1320,10 @@ function initUserTableEvents() {
     });
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (!hasPermission('users', 'manage')) {
+            showNotification('Bạn không có quyền quản lý người dùng', 'error');
+            return;
+        }
         const id = parseInt(document.getElementById('edit-user-id').value);
         const status = document.getElementById('edit-user-status').value;
         const role = document.getElementById('edit-user-role').value;
@@ -1279,18 +1371,7 @@ function initUserTableEvents() {
                 const userDate = new Date(user.createdAt);
                 const formattedDate = userDate.toLocaleDateString('vi-VN');
                 
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.fullName}</td>
-                    <td>${user.email}</td>
-                    <td>${user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff_products' ? 'Nhân viên (xem sản phẩm)' : user.role === 'staff_orders' ? 'Nhân viên (xem đơn hàng)' : 'Người dùng'}</td>
-                    <td>${formattedDate}</td>
-                    <td>
-                        <span class="status-badge status-${user.status}-user">
-                            ${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-                        </span>
-                    </td>
-                    <td>
+                const actionButtonsHtml = `
                         <div class="action-buttons">
                             <button class="btn-edit" data-user-id="${user.id}">
                                 <i class="fas fa-edit"></i>
@@ -1299,6 +1380,21 @@ function initUserTableEvents() {
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
+                `;
+
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.fullName}</td>
+                    <td>${user.email}</td>
+                    <td>${getRoleLabel(user.role)}</td>
+                    <td>${formattedDate}</td>
+                    <td>
+                        <span class="status-badge status-${user.status}-user">
+                            ${user.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+                        </span>
+                    </td>
+                    <td>
+                        ${actionButtonsHtml}
                     </td>
                 `;
                 tbody.appendChild(row);
@@ -1425,10 +1521,7 @@ function initOrderDetailsModal() {
         // Thêm event listener cho nút xóa đơn hàng
         const deleteBtn = e.target.closest('.btn-delete-order[data-order-id]');
         if (deleteBtn) {
-            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-            if (currentUser && currentUser.role === 'staff_orders') {
-                return;
-            }
+            if (!hasPermission('orders', 'delete')) return;
             const orderId = deleteBtn.getAttribute('data-order-id');
             deleteOrder(orderId);
         }
@@ -1478,6 +1571,11 @@ function showOrderDetails(orderId) {
     // Thiết lập giá trị hiện tại cho dropdown trạng thái
     const statusSelect = document.getElementById('modal-order-status-select');
     statusSelect.value = order.status || 'pending';
+    if (!hasPermission('orders', 'updateStatus')) {
+        statusSelect.setAttribute('disabled', 'true');
+    } else {
+        statusSelect.removeAttribute('disabled');
+    }
     
     document.getElementById('modal-payment-method').textContent = order.paymentMethodName || 'N/A';
     
@@ -1531,14 +1629,17 @@ function showOrderDetails(orderId) {
     // Thêm event listener cho nút xóa trong modal
     const deleteBtn = document.getElementById('delete-order-modal-btn');
     if (deleteBtn) {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (currentUser && currentUser.role === 'staff_orders') {
+        if (!hasPermission('orders', 'delete')) {
             deleteBtn.setAttribute('disabled', 'true');
             deleteBtn.style.pointerEvents = 'none';
             deleteBtn.style.opacity = '0.5';
             deleteBtn.style.cursor = 'not-allowed';
             deleteBtn.onclick = null;
         } else {
+            deleteBtn.removeAttribute('disabled');
+            deleteBtn.style.pointerEvents = '';
+            deleteBtn.style.opacity = '';
+            deleteBtn.style.cursor = '';
             deleteBtn.onclick = function() {
                 deleteOrder(orderId);
             };
@@ -1548,18 +1649,22 @@ function showOrderDetails(orderId) {
     // Thêm event listener cho nút lưu trạng thái đơn hàng
     const saveStatusBtn = document.getElementById('save-order-status-btn');
     if (saveStatusBtn) {
-        const statusSelect = document.getElementById('modal-order-status-select');
-        if (statusSelect) {
-            statusSelect.removeAttribute('disabled');
+        if (!hasPermission('orders', 'updateStatus')) {
+            saveStatusBtn.setAttribute('disabled', 'true');
+            saveStatusBtn.style.pointerEvents = 'none';
+            saveStatusBtn.style.opacity = '0.5';
+            saveStatusBtn.style.cursor = 'not-allowed';
+            saveStatusBtn.onclick = null;
+        } else {
+            saveStatusBtn.removeAttribute('disabled');
+            saveStatusBtn.style.pointerEvents = '';
+            saveStatusBtn.style.opacity = '';
+            saveStatusBtn.style.cursor = '';
+            saveStatusBtn.onclick = function() {
+                const newStatus = document.getElementById('modal-order-status-select').value;
+                saveOrderStatus(orderId, newStatus);
+            };
         }
-        saveStatusBtn.removeAttribute('disabled');
-        saveStatusBtn.style.pointerEvents = '';
-        saveStatusBtn.style.opacity = '';
-        saveStatusBtn.style.cursor = '';
-        saveStatusBtn.onclick = function() {
-            const newStatus = document.getElementById('modal-order-status-select').value;
-            saveOrderStatus(orderId, newStatus);
-        };
     }
     
     // Hiển thị modal
@@ -1568,6 +1673,10 @@ function showOrderDetails(orderId) {
 
 // Lưu trạng thái đơn hàng
 function saveOrderStatus(orderId, newStatus) {
+    if (!hasPermission('orders', 'updateStatus')) {
+        showNotification('Bạn không có quyền cập nhật trạng thái đơn hàng', 'error');
+        return;
+    }
     const orders = JSON.parse(localStorage.getItem('orders')) || [];
     const orderIndex = orders.findIndex(o => String(o.id) === String(orderId));
     
@@ -1594,6 +1703,10 @@ function saveOrderStatus(orderId, newStatus) {
 
 // Xóa đơn hàng
 function deleteOrder(orderId) {
+    if (!hasPermission('orders', 'delete')) {
+        showNotification('Bạn không có quyền xóa đơn hàng', 'error');
+        return;
+    }
     // Xác nhận trước khi xóa
     if (!confirm(`Bạn có chắc chắn muốn xóa đơn hàng ${orderId} không?\n\nHành động này không thể hoàn tác!`)) {
         return;
@@ -1640,6 +1753,7 @@ function savePosts(posts) {
     localStorage.setItem('posts', JSON.stringify(posts));
 }
 function loadPosts() {
+    if (!hasPermission('posts', 'manage')) return;
     const posts = getPosts();
     displayPostsTable(posts);
 }
@@ -1655,10 +1769,23 @@ function displayPostsTable(posts) {
         `;
         return;
     }
+    const canManagePosts = hasPermission('posts', 'manage');
+
     posts.slice().reverse().forEach(post => {
         const date = new Date(post.createdAt);
         const formattedDate = date.toLocaleDateString('vi-VN');
         const row = document.createElement('tr');
+
+        const actionButtonsHtml = canManagePosts ? `
+                <div class="action-buttons">
+                    <button class="btn-edit" data-post-id="${post.id}" title="Sửa"><i class="fas fa-edit"></i></button>
+                    <button class="btn-delete" data-post-id="${post.id}" title="Xóa"><i class="fas fa-trash"></i></button>
+                    <button class="btn-secondary btn-toggle" data-post-id="${post.id}" title="Ẩn/Hiện">
+                        <i class="fas fa-eye${post.status === 'hidden' ? '-slash' : ''}"></i>
+                    </button>
+                </div>
+        ` : '';
+
         row.innerHTML = `
             <td>${post.id}</td>
             <td>${post.title}</td>
@@ -1670,13 +1797,7 @@ function displayPostsTable(posts) {
                 </span>
             </td>
             <td>
-                <div class="action-buttons">
-                    <button class="btn-edit" data-post-id="${post.id}" title="Sửa"><i class="fas fa-edit"></i></button>
-                    <button class="btn-delete" data-post-id="${post.id}" title="Xóa"><i class="fas fa-trash"></i></button>
-                    <button class="btn-secondary btn-toggle" data-post-id="${post.id}" title="Ẩn/Hiện">
-                        <i class="fas fa-eye${post.status === 'hidden' ? '-slash' : ''}"></i>
-                    </button>
-                </div>
+                ${actionButtonsHtml}
             </td>
         `;
         tbody.appendChild(row);
@@ -1688,6 +1809,7 @@ function initPostEvents() {
     const form = document.getElementById('post-editor-form');
     const closeBtns = modal ? modal.querySelectorAll('.close-modal') : [];
     if (!addBtn || !modal || !form) return;
+    if (!hasPermission('posts', 'manage')) return;
     document.querySelectorAll('.editor-toolbar [data-cmd]').forEach(btn => {
         btn.addEventListener('click', function() {
             const cmd = this.getAttribute('data-cmd');
@@ -1751,6 +1873,10 @@ function initPostEvents() {
     });
     form.addEventListener('submit', function(e) {
         e.preventDefault();
+        if (!hasPermission('posts', 'manage')) {
+            showNotification('Bạn không có quyền quản lý bài viết', 'error');
+            return;
+        }
         const id = document.getElementById('post-id').value;
         const title = document.getElementById('post-title').value.trim();
         const author = document.getElementById('post-author').value.trim();
@@ -1792,6 +1918,10 @@ function initPostEvents() {
         const deleteBtn = e.target.closest('.btn-delete[data-post-id]');
         const toggleBtn = e.target.closest('.btn-toggle[data-post-id]');
         if (editBtn) {
+            if (!hasPermission('posts', 'manage')) {
+                showNotification('Bạn không có quyền quản lý bài viết', 'error');
+                return;
+            }
             const postId = editBtn.getAttribute('data-post-id');
             const posts = getPosts();
             const post = posts.find(p => String(p.id) === String(postId));
@@ -1805,6 +1935,10 @@ function initPostEvents() {
             modal.style.display = 'flex';
         }
         if (deleteBtn) {
+            if (!hasPermission('posts', 'manage')) {
+                showNotification('Bạn không có quyền quản lý bài viết', 'error');
+                return;
+            }
             const postId = deleteBtn.getAttribute('data-post-id');
             if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) return;
             let posts = getPosts();
@@ -1814,6 +1948,10 @@ function initPostEvents() {
             showNotification('Đã xóa bài viết', 'success');
         }
         if (toggleBtn) {
+            if (!hasPermission('posts', 'manage')) {
+                showNotification('Bạn không có quyền quản lý bài viết', 'error');
+                return;
+            }
             const postId = toggleBtn.getAttribute('data-post-id');
             const posts = getPosts();
             const idx = posts.findIndex(p => String(p.id) === String(postId));
