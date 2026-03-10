@@ -63,8 +63,8 @@ function hasPermission(area, action) {
 function getRoleLabel(role) {
     const labels = {
         admin: 'Quản trị viên',
-        staff_products: 'Nhân viên (xem sản phẩm)',
-        staff_orders: 'Nhân viên (xem đơn hàng)',
+        staff_products: 'Nhân viên (sản phẩm)',
+        staff_orders: 'Nhân viên (đơn hàng)',
         cashier: 'Thu ngân',
         staff_marketing: 'Nhân viên (marketing)',
         user: 'Người dùng'
