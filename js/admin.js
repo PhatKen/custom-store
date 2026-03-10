@@ -254,6 +254,286 @@ function getRangeLabel(range) {
     return 'Tất cả thời gian';
 }
 
+let analyticsRevenueChart = null;
+
+function formatCurrencyVnd(value) {
+    const n = parseInt(value) || 0;
+    return n.toLocaleString('vi-VN') + ' ₫';
+}
+
+function getOrderDate(order) {
+    const d = order && order.createdAt ? new Date(order.createdAt) : new Date();
+    return isNaN(d.getTime()) ? new Date() : d;
+}
+
+function getOrderCustomerName(order) {
+    return order?.deliveryInfo?.fullname || order?.customerName || 'N/A';
+}
+
+function getPeriodMeta(range) {
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let start = new Date(0);
+    let prevStart = new Date(0);
+    let prevEnd = new Date(0);
+    let prevLabel = 'kỳ trước';
+
+    if (range === 'day') {
+        start = startOfDay;
+        prevStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+        prevEnd = startOfDay;
+        prevLabel = 'hôm qua';
+    } else if (range === 'week') {
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        prevStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
+        prevEnd = start;
+        prevLabel = '7 ngày trước';
+    } else if (range === 'month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        prevEnd = start;
+        prevLabel = 'tháng trước';
+    } else if (range === 'year') {
+        start = new Date(now.getFullYear(), 0, 1);
+        prevStart = new Date(now.getFullYear() - 1, 0, 1);
+        prevEnd = start;
+        prevLabel = 'năm trước';
+    } else {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        prevEnd = start;
+        prevLabel = 'tháng trước';
+    }
+
+    return { now, start, prevStart, prevEnd, prevLabel };
+}
+
+function filterByPeriod(items, dateGetter, start, end) {
+    const startTs = start.getTime();
+    const endTs = end.getTime();
+    return (items || []).filter(it => {
+        const d = dateGetter(it);
+        const ts = d.getTime();
+        return ts >= startTs && ts < endTs;
+    });
+}
+
+function sumOrderRevenue(orders) {
+    return (orders || []).reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+}
+
+function sumItemsSold(orders) {
+    return (orders || []).reduce((sum, o) => {
+        const items = o.items || [];
+        return sum + items.reduce((s, it) => s + (parseInt(it.quantity) || 0), 0);
+    }, 0);
+}
+
+function buildTrendText(currValue, prevValue, label) {
+    if (!prevValue && !currValue) return { text: '—', sign: 'neutral' };
+    if (!prevValue && currValue) return { text: '+100% so với ' + label, sign: 'positive' };
+    const pct = ((currValue - prevValue) / prevValue) * 100;
+    const rounded = Math.round(pct);
+    return { text: (rounded >= 0 ? '+' : '') + rounded + '% so với ' + label, sign: rounded >= 0 ? 'positive' : 'negative' };
+}
+
+function setTrendElement(el, trend) {
+    if (!el) return;
+    el.textContent = trend.text;
+    el.classList.remove('positive', 'negative');
+    if (trend.sign === 'positive') el.classList.add('positive');
+    if (trend.sign === 'negative') el.classList.add('negative');
+}
+
+function getDemoOrders() {
+    const now = new Date();
+    const mk = (id, daysAgo, name, total, status, items) => ({
+        id,
+        customerName: name,
+        total,
+        status,
+        createdAt: new Date(now.getFullYear(), now.getMonth(), now.getDate() - daysAgo, 10, 15).toISOString(),
+        items
+    });
+    return [
+        mk(1021, 0, 'Nguyễn Văn A', 299000, 'shipping', [
+            { name: 'Áo thun basic', category: 'ao', price: 199000, quantity: 1 },
+            { name: 'Nón lưỡi trai', category: 'non', price: 100000, quantity: 1 }
+        ]),
+        mk(1020, 1, 'Trần Thị B', 450000, 'packing', [
+            { name: 'Quần jeans slimfit', category: 'quan', price: 450000, quantity: 1 }
+        ]),
+        mk(1019, 2, 'Lê Văn C', 1200000, 'delivered', [
+            { name: 'Giày thể thao', category: 'giay', price: 1200000, quantity: 1 }
+        ]),
+        mk(1018, 3, 'Phạm Văn D', 350000, 'pending', [
+            { name: 'Áo sơ mi', category: 'ao', price: 350000, quantity: 1 }
+        ]),
+        mk(1017, 4, 'Hoàng Thị E', 280000, 'cancelled', [
+            { name: 'Quần short kaki', category: 'quan', price: 280000, quantity: 1 }
+        ])
+    ];
+}
+
+function buildRevenueSeries(range, ordersAll) {
+    const now = new Date();
+    const orders = (ordersAll && ordersAll.length) ? ordersAll : getDemoOrders();
+    const points = [];
+
+    if (range === 'day') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        for (let h = 0; h < 24; h++) {
+            const label = String(h).padStart(2, '0') + ':00';
+            points.push({ label, start: new Date(start.getTime() + h * 3600000), end: new Date(start.getTime() + (h + 1) * 3600000) });
+        }
+    } else if (range === 'week') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+            const label = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+            points.push({ label, start: d, end: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) });
+        }
+    } else if (range === 'month') {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        const days = Math.max(1, now.getDate());
+        for (let i = 0; i < days; i++) {
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
+            points.push({ label: String(d.getDate()), start: d, end: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) });
+        }
+    } else if (range === 'year') {
+        for (let m = 0; m < 12; m++) {
+            const start = new Date(now.getFullYear(), m, 1);
+            const end = new Date(now.getFullYear(), m + 1, 1);
+            const label = start.toLocaleDateString('vi-VN', { month: 'short' });
+            points.push({ label, start, end });
+        }
+    } else {
+        for (let i = 11; i >= 0; i--) {
+            const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const end = new Date(now.getFullYear(), now.getMonth() - i + 1, 1);
+            const label = start.toLocaleDateString('vi-VN', { month: 'short' });
+            points.push({ label, start, end });
+        }
+    }
+
+    const labels = points.map(p => p.label);
+    const values = points.map(p => {
+        const periodOrders = filterByPeriod(orders, getOrderDate, p.start, p.end);
+        return sumOrderRevenue(periodOrders);
+    });
+
+    return { labels, values };
+}
+
+function renderRevenueChart(range, ordersAll) {
+    const canvas = document.getElementById('analytics-revenue-chart');
+    if (!canvas) return;
+    if (typeof Chart === 'undefined') return;
+
+    const { labels, values } = buildRevenueSeries(range, ordersAll);
+
+    if (analyticsRevenueChart) {
+        analyticsRevenueChart.destroy();
+        analyticsRevenueChart = null;
+    }
+
+    analyticsRevenueChart = new Chart(canvas, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Doanh thu',
+                    data: values,
+                    borderColor: '#6a5af9',
+                    backgroundColor: 'rgba(106, 90, 249, 0.16)',
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => formatCurrencyVnd(ctx.raw)
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    ticks: {
+                        callback: value => {
+                            const n = parseInt(value) || 0;
+                            if (n >= 1000000) return (n / 1000000).toFixed(0) + 'M';
+                            if (n >= 1000) return (n / 1000).toFixed(0) + 'K';
+                            return n.toString();
+                        }
+                    },
+                    grid: { color: 'rgba(148, 163, 184, 0.25)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+}
+
+function renderRecentOrders(ordersAll) {
+    const tbody = document.getElementById('analytics-recent-orders-body');
+    if (!tbody) return;
+    const orders = (ordersAll && ordersAll.length) ? ordersAll.slice() : getDemoOrders();
+    orders.sort((a, b) => getOrderDate(b).getTime() - getOrderDate(a).getTime());
+    const recent = orders.slice(0, 5);
+    tbody.innerHTML = '';
+
+    recent.forEach(o => {
+        const tr = document.createElement('tr');
+        const code = 'ORD' + String(o.id);
+        tr.innerHTML = `
+            <td>#${code}</td>
+            <td>${getOrderCustomerName(o)}</td>
+            <td>${formatCurrencyVnd(o.total)}</td>
+            <td><span class="status-badge status-${o.status}">${getOrderStatusText(o.status)}</span></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function renderTopProducts(ordersInRange) {
+    const tbody = document.getElementById('analytics-top-products-body');
+    if (!tbody) return;
+    const orders = (ordersInRange && ordersInRange.length) ? ordersInRange : getDemoOrders();
+    const map = {};
+    orders.forEach(o => {
+        (o.items || []).forEach(it => {
+            const name = it.name || it.title || 'Sản phẩm';
+            if (!map[name]) map[name] = { name, sold: 0, revenue: 0 };
+            const qty = parseInt(it.quantity) || 0;
+            const price = parseInt(it.price) || 0;
+            map[name].sold += qty;
+            map[name].revenue += qty * price;
+        });
+    });
+    const list = Object.values(map).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
+    tbody.innerHTML = '';
+    list.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.sold}</td>
+            <td>${formatCurrencyVnd(p.revenue)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
 function renderAnalytics() {
     const products = JSON.parse(localStorage.getItem('products')) || [];
     const ordersAll = JSON.parse(localStorage.getItem('orders')) || [];
@@ -324,10 +604,23 @@ function renderAnalytics() {
     const itemsSoldEl = document.getElementById('analytics-items-sold');
     const avgOrderEl = document.getElementById('analytics-average-order');
     
-    if (totalRevEl) totalRevEl.textContent = totalRevenue.toLocaleString('vi-VN') + ' VNĐ';
+    if (totalRevEl) totalRevEl.textContent = formatCurrencyVnd(totalRevenue);
     if (totalOrdersEl) totalOrdersEl.textContent = totalOrders + ' đơn hàng';
     if (itemsSoldEl) itemsSoldEl.textContent = totalItemsSold.toString();
-    if (avgOrderEl) avgOrderEl.textContent = 'Giá trị đơn trung bình: ' + avgOrder.toLocaleString('vi-VN') + ' VNĐ';
+    if (avgOrderEl) avgOrderEl.textContent = 'Giá trị đơn trung bình: ' + formatCurrencyVnd(avgOrder);
+
+    const { now, start, prevStart, prevEnd, prevLabel } = getPeriodMeta(range);
+    const currOrdersForTrend = filterByPeriod(ordersAll, getOrderDate, start, new Date(now.getTime() + 1));
+    const prevOrdersForTrend = filterByPeriod(ordersAll, getOrderDate, prevStart, prevEnd);
+    const revenueTrend = buildTrendText(sumOrderRevenue(currOrdersForTrend), sumOrderRevenue(prevOrdersForTrend), prevLabel);
+    const itemsTrend = buildTrendText(sumItemsSold(currOrdersForTrend), sumItemsSold(prevOrdersForTrend), prevLabel);
+    const currUsers = filterByPeriod(users, u => (u.createdAt ? new Date(u.createdAt) : new Date(0)), start, new Date(now.getTime() + 1)).length;
+    const prevUsers = filterByPeriod(users, u => (u.createdAt ? new Date(u.createdAt) : new Date(0)), prevStart, prevEnd).length;
+    const usersTrend = buildTrendText(currUsers, prevUsers, prevLabel);
+
+    setTrendElement(document.getElementById('analytics-revenue-trend'), revenueTrend);
+    setTrendElement(document.getElementById('analytics-items-trend'), itemsTrend);
+    setTrendElement(document.getElementById('analytics-users-trend'), usersTrend);
     
     const usersTotalEl = document.getElementById('analytics-users-total');
     const usersDetailEl = document.getElementById('analytics-users-detail');
@@ -368,11 +661,22 @@ function renderAnalytics() {
             <td>${s.remaining}</td>
             <td>${s.sold}</td>
             <td>${s.orders}</td>
-            <td>${s.revenue.toLocaleString('vi-VN')} VNĐ</td>
-            <td>${ratio.toFixed(1)}%</td>
+            <td>${formatCurrencyVnd(s.revenue)}</td>
+            <td>
+                <div class="revenue-ratio">
+                    <div class="revenue-bar">
+                        <div class="revenue-fill" style="width:${Math.max(0, Math.min(100, ratio)).toFixed(1)}%"></div>
+                    </div>
+                    <span>${ratio.toFixed(1)}%</span>
+                </div>
+            </td>
         `;
         tbody.appendChild(tr);
     });
+
+    renderRevenueChart(range, ordersAll);
+    renderRecentOrders(ordersAll);
+    renderTopProducts(orders);
 }
 
 // Tải hoạt động gần đây
