@@ -16,21 +16,22 @@
 
         .account-container {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr);
             gap: 30px;
+            align-items: flex-start;
         }
 
         .account-sidebar {
-            background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
             height: fit-content;
         }
 
         .account-avatar {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 24px;
         }
 
         .avatar-image {
@@ -39,7 +40,13 @@
             border-radius: 50%;
             object-fit: cover;
             border: 3px solid var(--primary-color);
-            margin-bottom: 15px;
+            margin-bottom: 16px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .account-avatar:hover .avatar-image {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.18);
         }
 
         .avatar-upload {
@@ -53,26 +60,72 @@
         }
 
         .avatar-upload label {
-            display: block;
-            background-color: var(--primary-color);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6d5dfc, #a855f7);
             color: white;
             padding: 8px 16px;
-            border-radius: 4px;
+            border-radius: 999px;
             cursor: pointer;
             text-align: center;
             font-weight: 500;
+            font-size: 14px;
             transition: var(--transition);
         }
 
         .avatar-upload label:hover {
-            background-color: var(--primary-dark);
+            filter: brightness(0.95);
+            transform: translateY(-1px);
+        }
+
+        .account-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-color);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .account-email {
+            font-size: 14px;
+            color: var(--gray-color);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .account-membership {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background-color: rgba(109, 93, 252, 0.08);
+            color: var(--primary-color);
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 auto 8px;
+        }
+
+        .account-membership i {
+            font-size: 12px;
+        }
+
+        .account-sidebar-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 16px;
         }
 
         .account-info-display {
             background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
         }
 
         .info-display-item {
@@ -99,9 +152,9 @@
 
         .account-edit-form {
             background: white;
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
             display: none;
         }
 
@@ -109,32 +162,44 @@
             display: block;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        .account-form-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 16px 24px;
+            margin-bottom: 16px;
+        }
+
+        .account-edit-form .form-group {
+            margin-bottom: 16px;
         }
 
         .form-group label {
             display: block;
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: #333;
-        }
-
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
             font-size: 14px;
         }
 
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+            transition: var(--transition);
+            background-color: #ffffff;
+        }
+
         .form-group input:focus,
-        .form-group textarea:focus {
+        .form-group textarea:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(82, 200, 126, 0.1);
+            box-shadow: 0 0 0 3px rgba(109, 93, 252, 0.12);
         }
 
         .form-group textarea {
@@ -142,80 +207,101 @@
             min-height: 100px;
         }
 
+        .form-group-spacer {
+            visibility: hidden;
+        }
+
         .form-actions {
             display: flex;
             gap: 15px;
-            margin-top: 30px;
+            margin-top: 24px;
         }
 
         .btn-save {
             flex: 1;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #6d5dfc, #a855f7);
             color: white;
             padding: 12px 24px;
             border: none;
-            border-radius: 4px;
+            border-radius: 999px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         .btn-save:hover {
-            background-color: var(--primary-dark);
+            filter: brightness(0.95);
+            transform: translateY(-1px);
         }
 
         .btn-cancel {
             flex: 1;
-            background-color: #f0f0f0;
-            color: #333;
+            background-color: #f3f4f6;
+            color: #374151;
             padding: 12px 24px;
             border: none;
-            border-radius: 4px;
-            font-weight: 600;
+            border-radius: 999px;
+            font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
         }
 
         .btn-cancel:hover {
-            background-color: #e0e0e0;
+            background-color: #e5e7eb;
         }
 
         .account-actions {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             margin-top: 20px;
         }
 
         .btn-edit {
             flex: 1;
-            background-color: var(--primary-color);
+            background: linear-gradient(135deg, #6d5dfc, #3b82f6);
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 999px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
         }
 
         .btn-edit:hover {
-            background-color: var(--primary-dark);
+            filter: brightness(0.96);
+            transform: translateY(-1px);
         }
 
         .btn-delete {
             flex: 1;
-            background-color: #dc3545;
+            background-color: #dc2626;
             color: white;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 999px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
         }
 
         .btn-delete:hover {
-            background-color: #c82333;
+            background-color: #b91c1c;
+            transform: translateY(-1px);
         }
 
         /* Modal */
@@ -270,21 +356,36 @@
         }
 
         .modal-btn-confirm {
-            background-color: #dc3545;
+            background-color: #dc2626;
             color: white;
         }
 
         .modal-btn-confirm:hover {
-            background-color: #c82333;
+            background-color: #b91c1c;
         }
 
         .modal-btn-cancel {
-            background-color: #f0f0f0;
-            color: #333;
+            background-color: #f3f4f6;
+            color: #111827;
         }
 
         .modal-btn-cancel:hover {
-            background-color: #e0e0e0;
+            background-color: #e5e7eb;
+        }
+
+        .orders-section-title {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .orders-empty-text {
+            color: var(--gray-color);
+            font-size: 14px;
+            display: none;
+        }
+
+        .order-card-detail {
+            display: none;
         }
 
         @media (max-width: 768px) {
@@ -339,7 +440,14 @@
                             </label>
                         </div>
                     </div>
-                    <div id="user-email-display" style="text-align: center; color: var(--gray-color); margin-bottom: 15px;"></div>
+                    <div class="account-sidebar-meta">
+                        <div class="account-name" id="user-name-display">--</div>
+                        <div class="account-email" id="user-email-display">--</div>
+                        <div class="account-membership" id="user-membership-badge">
+                            <i class="fas fa-gem"></i>
+                            <span>Membership: --</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Main Content -->
@@ -371,35 +479,38 @@
 
                     <!-- Edit Mode -->
                     <form class="account-edit-form" id="edit-form">
-                        <div class="form-group">
-                            <label for="edit-fullname">Họ Tên <span style="color: red;">*</span></label>
-                            <input type="text" id="edit-fullname" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-phone">Số Điện Thoại</label>
-                            <input type="tel" id="edit-phone">
-                        </div>
-                        
-                        <!-- Address Selection -->
-                        <div class="form-group">
-                            <label for="edit-province">Tỉnh/Thành phố</label>
-                            <select id="edit-province">
-                                <option value="">Chọn tỉnh/thành phố</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="edit-district">Quận/Huyện</label>
-                            <select id="edit-district">
-                                <option value="">Chọn quận/huyện</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="edit-ward">Phường/Xã</label>
-                            <select id="edit-ward">
-                                <option value="">Chọn phường/xã</option>
-                            </select>
+                        <div class="account-form-grid">
+                            <div class="form-group">
+                                <label for="edit-fullname">Họ Tên</label>
+                                <input type="text" id="edit-fullname" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-phone">Số Điện Thoại</label>
+                                <input type="tel" id="edit-phone">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-province">Tỉnh/Thành phố</label>
+                                <select id="edit-province">
+                                    <option value="">Chọn tỉnh/thành phố</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-district">Quận/Huyện</label>
+                                <select id="edit-district">
+                                    <option value="">Chọn quận/huyện</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="edit-ward">Phường/Xã</label>
+                                <select id="edit-ward">
+                                    <option value="">Chọn phường/xã</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group form-group-spacer"></div>
                         </div>
                         
                         <div class="form-group">
@@ -419,11 +530,11 @@
                     
                     <!-- My Orders -->
                     <div class="account-info-display" id="orders-section">
-                        <h2 class="section-title" style="text-align:left;">Đơn Hàng Của Tôi</h2>
+                        <h2 class="section-title orders-section-title">Đơn Hàng Của Tôi</h2>
                         <div id="orders-list">
                             <!-- Danh sách đơn hàng sẽ được tải bằng JavaScript -->
                         </div>
-                        <div id="orders-empty" style="display:none; color: var(--gray-color);">
+                        <div id="orders-empty" class="orders-empty-text">
                             Hiện chưa có đơn hàng nào.
                         </div>
                     </div>
