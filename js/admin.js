@@ -925,108 +925,153 @@ function editProduct(productId) {
             input.checked = checkedSizes.includes(input.value);
         });
     }
-    
-    const editImagePreview = document.getElementById('edit-image-preview');
-    const editImageInput = document.getElementById('edit-product-image');
-    const editUploadBtn = document.getElementById('edit-upload-btn');
-    let newImagesData = null;
-    if (editImagePreview) {
-        const currentImages = Array.isArray(product.images) && product.images.length ? product.images : (product.image ? [product.image] : []);
-        if (currentImages.length) {
-            editImagePreview.innerHTML = `<img src="${currentImages[0]}" alt="${product.name}">`;
-            editImagePreview.classList.add('has-image');
-        } else {
-            editImagePreview.innerHTML = `
-                <i class="fas fa-cloud-upload-alt"></i>
-                <p>Kéo thả hình ảnh vào đây hoặc nhấn để tải lên</p>
-            `;
-            editImagePreview.classList.remove('has-image');
-        }
-    }
-    if (editUploadBtn && editImageInput && editImagePreview) {
-        editUploadBtn.onclick = function() {
-            editImageInput.click();
-        };
-        editImageInput.onchange = function() {
-            const files = this.files ? Array.from(this.files) : [];
-            if (!files.length) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                editImagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                editImagePreview.classList.add('has-image');
-            };
-            reader.readAsDataURL(files[0]);
-            const imagesData = [];
-            let loaded = 0;
-            files.forEach(file => {
-                const r = new FileReader();
-                r.onload = function(ev) {
-                    imagesData.push(ev.target.result);
-                    loaded++;
-                    if (loaded === files.length) {
-                        newImagesData = imagesData;
-                    }
-                };
-                r.readAsDataURL(file);
-            });
-        };
-        editImagePreview.ondragover = function(e) {
-            e.preventDefault();
-            this.style.borderColor = 'var(--primary-color)';
-        };
-        editImagePreview.ondragleave = function(e) {
-            e.preventDefault();
-            this.style.borderColor = 'var(--border-color)';
-        };
-        editImagePreview.ondrop = function(e) {
-            e.preventDefault();
-            this.style.borderColor = 'var(--border-color)';
-            if (!e.dataTransfer.files.length) return;
-            editImageInput.files = e.dataTransfer.files;
-            const files = Array.from(e.dataTransfer.files);
-            const reader = new FileReader();
-            reader.onload = function(e2) {
-                editImagePreview.innerHTML = `<img src="${e2.target.result}" alt="Preview">`;
-                editImagePreview.classList.add('has-image');
-            };
-            reader.readAsDataURL(files[0]);
-            const imagesData = [];
-            let loaded = 0;
-            files.forEach(file => {
-                const r = new FileReader();
-                r.onload = function(ev) {
-                    imagesData.push(ev.target.result);
-                    loaded++;
-                    if (loaded === files.length) {
-                        newImagesData = imagesData;
-                    }
-                };
-                r.readAsDataURL(file);
-            });
-        };
-    }
 
     const modal = document.getElementById('edit-product-modal');
     modal.style.display = 'flex';
+
+    modal.querySelectorAll('.editor-toolbar [data-cmd]').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            const cmd = this.getAttribute('data-cmd');
+            if (!cmd) return;
+            const toolbar = this.closest('.editor-toolbar');
+            const editorId = toolbar ? toolbar.getAttribute('data-editor') : null;
+            const editor = editorId ? document.getElementById(editorId) : null;
+            if (editor) editor.focus();
+            document.execCommand(cmd, false, null);
+        };
+    });
+
+    const editImagePreview = document.getElementById('edit-image-preview');
+    const editImageGrid = document.getElementById('edit-image-preview-grid');
+    const editImageInput = document.getElementById('edit-product-image');
+    const editUploadBtn = document.getElementById('edit-upload-btn');
+
+    const originalImages = Array.isArray(product.images) && product.images.length
+        ? product.images.slice()
+        : (product.image ? [product.image] : []);
+
+    const imageItems = originalImages.map(src => ({ kind: 'existing', src }));
+    const objectUrls = new Set();
+
+    const fileToDataUrl = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('read_failed'));
+        reader.readAsDataURL(file);
+    });
+
+    const renderImages = () => {
+        if (!editImagePreview || !editImageGrid) return;
+        const placeholder = editImagePreview.querySelector('.dropzone-placeholder');
+        editImageGrid.innerHTML = '';
+        if (placeholder) {
+            placeholder.style.display = imageItems.length ? 'none' : '';
+        }
+        imageItems.forEach((it, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'preview-item';
+            const img = document.createElement('img');
+            img.src = it.kind === 'existing' ? it.src : it.previewUrl;
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'preview-delete-btn';
+            del.innerHTML = '&times;';
+            del.onclick = e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const removed = imageItems.splice(idx, 1)[0];
+                if (removed && removed.kind === 'file' && removed.previewUrl) {
+                    URL.revokeObjectURL(removed.previewUrl);
+                    objectUrls.delete(removed.previewUrl);
+                }
+                renderImages();
+            };
+            wrap.appendChild(img);
+            wrap.appendChild(del);
+            editImageGrid.appendChild(wrap);
+        });
+    };
+
+    const addFiles = files => {
+        const list = Array.isArray(files) ? files : [];
+        list.forEach(file => {
+            if (!file || !file.type || !file.type.startsWith('image/')) return;
+            const url = URL.createObjectURL(file);
+            objectUrls.add(url);
+            imageItems.push({ kind: 'file', file, previewUrl: url });
+        });
+        renderImages();
+    };
+
+    const cleanupObjectUrls = () => {
+        objectUrls.forEach(url => URL.revokeObjectURL(url));
+        objectUrls.clear();
+    };
+
+    const openFilePicker = () => {
+        if (editImageInput) editImageInput.click();
+    };
+
+    if (editUploadBtn) editUploadBtn.onclick = openFilePicker;
+
+    if (editImageInput) {
+        editImageInput.onchange = function() {
+            const files = this.files ? Array.from(this.files) : [];
+            if (!files.length) return;
+            addFiles(files);
+            this.value = '';
+        };
+    }
+
+    if (editImagePreview) {
+        editImagePreview.onclick = e => {
+            if (e.target.closest('.preview-delete-btn')) return;
+            openFilePicker();
+        };
+        editImagePreview.ondragover = e => {
+            e.preventDefault();
+            editImagePreview.classList.add('dragover');
+        };
+        editImagePreview.ondragleave = e => {
+            e.preventDefault();
+            editImagePreview.classList.remove('dragover');
+        };
+        editImagePreview.ondrop = e => {
+            e.preventDefault();
+            editImagePreview.classList.remove('dragover');
+            const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+            if (!files.length) return;
+            addFiles(files);
+        };
+        editImagePreview.onkeydown = e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openFilePicker();
+            }
+        };
+    }
+
+    renderImages();
     
     // Thêm sự kiện đóng modal
     const closeButtons = modal.querySelectorAll('.close-modal');
+    const closeModal = () => {
+        modal.style.display = 'none';
+        cleanupObjectUrls();
+    };
     closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            modal.style.display = 'none';
-        });
+        button.onclick = closeModal;
     });
     
     // Đóng modal khi click ra ngoài
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            modal.style.display = 'none';
-        }
-    });
+    modal.onclick = function(e) {
+        if (e.target === modal) closeModal();
+    };
     
     // Xử lý form chỉnh sửa
     const editForm = document.getElementById('edit-product-form');
-    editForm.onsubmit = function(e) {
+    editForm.onsubmit = async function(e) {
         e.preventDefault();
 
         const sizeContainer = document.getElementById('edit-product-sizes');
@@ -1036,11 +1081,17 @@ function editProduct(productId) {
         }
         const editDescEditorSubmit = document.getElementById('edit-product-description-editor');
         const updatedDescription = editDescEditorSubmit ? editDescEditorSubmit.innerHTML.trim() : product.description;
-
-        const existingImages = Array.isArray(product.images) && product.images.length
-            ? product.images
-            : (product.image ? [product.image] : []);
-        const finalImages = newImagesData && newImagesData.length ? newImagesData : existingImages;
+        
+        let finalImages = [];
+        try {
+            finalImages = await Promise.all(imageItems.map(it => {
+                if (it.kind === 'existing') return Promise.resolve(it.src);
+                return fileToDataUrl(it.file);
+            }));
+        } catch (err) {
+            showNotification('Không thể đọc hình ảnh. Vui lòng thử lại.', 'error');
+            return;
+        }
         const mainImage = finalImages && finalImages.length ? finalImages[0] : product.image;
 
         const updatedProduct = {
@@ -1064,7 +1115,7 @@ function editProduct(productId) {
             window.dispatchEvent(new Event('productsUpdated'));
             displayProductsTable(products);
             loadDashboardData();
-            modal.style.display = 'none';
+            closeModal();
             showNotification('Cập nhật sản phẩm thành công!', 'success');
         }
     };
