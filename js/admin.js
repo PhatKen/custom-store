@@ -193,7 +193,6 @@ function initAdminNavigation() {
 function initAdminScrollLock() {
     const main = document.querySelector('.admin-main');
     if (!main) return;
-    const sidebar = document.querySelector('.sidebar');
     const header = document.querySelector('.admin-header');
 
     const forwardWheel = e => {
@@ -201,7 +200,7 @@ function initAdminScrollLock() {
         e.preventDefault();
     };
 
-    [sidebar, header].forEach(el => {
+    [header].forEach(el => {
         if (!el) return;
         el.addEventListener('wheel', forwardWheel, { passive: false });
     });
