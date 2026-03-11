@@ -578,6 +578,38 @@
     color: var(--dark-color);
 }
 
+.analytics-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.analytics-section-header h3 {
+    margin: 0;
+}
+
+.analytics-chart-filter {
+    min-height: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: #fff;
+    padding: 8px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    width: 160px;
+}
+
+.analytics-chart-filter:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+}
+
 .analytics-table-container {
     overflow-x: auto;
     max-width: 100%;
