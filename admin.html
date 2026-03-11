@@ -324,75 +324,99 @@
             <!-- Add Product Section -->
             <section id="add-product" class="admin-section">
                 <h2><i class="fas fa-plus-circle"></i> Thêm sản phẩm mới</h2>
-                <form id="add-product-form">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="product-name">Tên sản phẩm *</label>
-                            <input type="text" id="product-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="product-category">Danh mục *</label>
-                            <select id="product-category" required>
-                                <option value="">Chọn danh mục</option>
-                                <option value="ao">Áo</option>
-                                <option value="quan">Quần</option>
-                                <option value="giay">Giày</option>
-                                <option value="non">Nón</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="product-price">Giá *</label>
-                            <input type="number" id="product-price" min="0" step="1000" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="product-quantity">Số lượng *</label>
-                            <input type="number" id="product-quantity" min="0" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Size áp dụng (Áo/Quần)</label>
-                        <div class="size-checkbox-group" id="product-sizes">
-                            <label><input type="checkbox" value="S" checked> S</label>
-                            <label><input type="checkbox" value="M" checked> M</label>
-                            <label><input type="checkbox" value="L" checked> L</label>
-                            <label><input type="checkbox" value="XL" checked> XL</label>
-                            <label><input type="checkbox" value="XXL" checked> XXL</label>
-                        </div>
-                        <small style="color:var(--gray-color);font-size:12px;">Nếu bỏ chọn hết, sản phẩm sẽ không có lựa chọn size.</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="product-description-editor">Mô tả sản phẩm *</label>
-                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">
-                            <button type="button" class="btn-secondary" data-cmd="bold"><i class="fas fa-bold"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="italic"><i class="fas fa-italic"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="underline"><i class="fas fa-underline"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="insertUnorderedList"><i class="fas fa-list-ul"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="insertOrderedList"><i class="fas fa-list-ol"></i></button>
-                        </div>
-                        <div id="product-description-editor" contenteditable="true" style="min-height:160px;border:1px solid var(--border-color);border-radius:var(--border-radius);padding:12px;background:#fff;"></div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="product-image">Hình ảnh sản phẩm *</label>
-                        <div class="image-upload-container">
-                            <div class="image-preview" id="image-preview">
-                                <i class="fas fa-cloud-upload-alt"></i>
-                                <p>Kéo thả nhiều hình ảnh vào đây hoặc nhấn để tải lên</p>
+                <form id="add-product-form" class="add-product-form">
+                    <div class="form-section">
+                        <div class="section-title">Thông tin cơ bản</div>
+                        <div class="form-grid form-grid-2">
+                            <div class="form-group span-2">
+                                <label for="product-name">Tên sản phẩm *</label>
+                                <input type="text" id="product-name" required>
+                                <div class="field-error" id="error-product-name"></div>
                             </div>
-                            <input type="file" id="product-image" accept="image/*" multiple hidden>
-                            <button type="button" class="btn-upload" id="upload-btn">Chọn hình ảnh</button>
+                            <div class="form-group">
+                                <label for="product-category">Danh mục *</label>
+                                <select id="product-category" required>
+                                    <option value="">Chọn danh mục</option>
+                                    <option value="ao">Áo</option>
+                                    <option value="quan">Quần</option>
+                                    <option value="giay">Giày</option>
+                                    <option value="non">Nón</option>
+                                </select>
+                                <div class="field-error" id="error-product-category"></div>
+                            </div>
                         </div>
-                        <p class="image-note">Có thể chọn nhiều hình (tối đa nên 8 hình). Kích thước đề xuất: 600x600px. Định dạng: JPG, PNG, GIF. Dung lượng tối đa: 2MB mỗi hình.</p>
                     </div>
-                    
+
+                    <div class="form-section">
+                        <div class="section-title">Giá &amp; Kho hàng</div>
+                        <div class="form-grid form-grid-2">
+                            <div class="form-group">
+                                <label for="product-price">Giá *</label>
+                                <input type="number" id="product-price" min="0" step="1000" required>
+                                <div class="field-error" id="error-product-price"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="product-quantity">Số lượng *</label>
+                                <input type="number" id="product-quantity" min="0" required>
+                                <div class="field-error" id="error-product-quantity"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">Thuộc tính sản phẩm</div>
+                        <div class="form-group">
+                            <label>Size áp dụng (Áo/Quần)</label>
+                            <div class="size-checkbox-group size-chip-group" id="product-sizes">
+                                <label class="size-chip"><input type="checkbox" value="S" checked><span>S</span></label>
+                                <label class="size-chip"><input type="checkbox" value="M" checked><span>M</span></label>
+                                <label class="size-chip"><input type="checkbox" value="L" checked><span>L</span></label>
+                                <label class="size-chip"><input type="checkbox" value="XL" checked><span>XL</span></label>
+                                <label class="size-chip"><input type="checkbox" value="XXL" checked><span>XXL</span></label>
+                            </div>
+                            <small class="field-hint">Nếu bỏ chọn hết, sản phẩm sẽ không có lựa chọn size.</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">Mô tả sản phẩm</div>
+                        <div class="form-group">
+                            <div class="editor-toolbar compact" data-editor="product-description-editor">
+                                <button type="button" class="btn-secondary" data-cmd="bold" title="Đậm"><i class="fas fa-bold"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="italic" title="Nghiêng"><i class="fas fa-italic"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="underline" title="Gạch chân"><i class="fas fa-underline"></i></button>
+                                <span class="editor-divider" aria-hidden="true"></span>
+                                <button type="button" class="btn-secondary" data-cmd="insertUnorderedList" title="Danh sách"><i class="fas fa-list-ul"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="insertOrderedList" title="Đánh số"><i class="fas fa-list-ol"></i></button>
+                            </div>
+                            <div id="product-description-editor" class="editor-surface" contenteditable="true"></div>
+                            <div class="field-error" id="error-product-description"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <div class="section-title">Hình ảnh sản phẩm</div>
+                        <div class="form-group">
+                            <div class="image-upload-container add-image-upload">
+                                <div class="image-dropzone" id="image-preview" tabindex="0">
+                                    <div class="dropzone-placeholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Kéo thả nhiều hình ảnh vào đây hoặc nhấn để tải lên</p>
+                                        <span class="field-hint">Có thể chọn nhiều ảnh</span>
+                                    </div>
+                                    <div class="image-preview-grid" id="add-image-preview-grid"></div>
+                                </div>
+                                <input type="file" id="product-image" accept="image/*" multiple hidden>
+                                <button type="button" class="btn-upload" id="upload-btn"><i class="fas fa-image"></i> Chọn hình ảnh</button>
+                            </div>
+                            <div class="field-error" id="error-product-images"></div>
+                            <p class="image-note">Có thể chọn nhiều hình (tối đa nên 8 hình). Kích thước đề xuất: 600x600px. Định dạng: JPG, PNG. Dung lượng tối đa: 2MB mỗi hình.</p>
+                        </div>
+                    </div>
+
                     <div class="form-actions">
-                        <button type="submit" class="btn-primary">Thêm sản phẩm</button>
-                        <button type="reset" class="btn-secondary">Làm mới</button>
+                        <button type="submit" class="btn-primary"><i class="fas fa-plus"></i> Thêm sản phẩm</button>
+                        <button type="button" class="btn-secondary" id="reset-add-product-btn">Làm mới</button>
                     </div>
                 </form>
             </section>
