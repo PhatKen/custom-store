@@ -350,6 +350,9 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
     const MM = String(now.getMonth() + 1).padStart(2, '0');
     const orderId = `${hh}${mm}${ss}${ms}${last2}${dd}${MM}`;
     const source = sessionStorage.getItem('trafficSource') || 'direct';
+    const methodKey = String(paymentMethod || '').toLowerCase();
+    const paymentType = methodKey === 'cod' ? 'cod' : 'online';
+    const paymentProvider = methodKey.startsWith('online_') ? methodKey.replace('online_', '') : (paymentType === 'online' ? methodKey : 'cod');
     const newOrder = {
         id: orderId,
         userId: currentUser.id,
@@ -361,6 +364,8 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
         total: total,
         paymentMethod: paymentMethod,
         paymentMethodName: paymentMethodName || 'Thanh toán khi nhận hàng',
+        paymentType: paymentType,
+        paymentProvider: paymentProvider,
         status: 'confirmed',
         source: source,
         createdAt: new Date().toISOString()

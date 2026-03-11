@@ -247,6 +247,9 @@ function initAnalytics() {
         if (!e) return;
         if (e.key === 'orders' || e.key === 'analyticsEvents' || e.key === 'analytics_events') renderAnalytics();
     });
+    window.addEventListener('ordersUpdated', function() {
+        renderAnalytics();
+    });
     renderAnalytics();
 }
 
@@ -561,15 +564,48 @@ function renderConfirmedOrdersSourceChart(range, ordersAll) {
     const ordersRaw = Array.isArray(ordersAll) ? ordersAll : [];
     const { start, end } = getRangeWindow(range);
     const inRange = filterByPeriod(ordersRaw, getOrderDate, start, end);
-    const confirmedStatuses = new Set(['confirmed', 'packing', 'shipping', 'delivered']);
-    const confirmed = inRange.filter(o => confirmedStatuses.has(String(o.status || '').toLowerCase()));
-    const sources = getSourcesList();
-    const counts = sources.map(s => confirmed.filter(o => normalizeSource(o.source) === s).length);
+
+    const getPaymentType = o => {
+        const t = String(o && o.paymentType ? o.paymentType : '').toLowerCase();
+        if (t === 'online' || t === 'cod') return t;
+        const m = String(o && o.paymentMethod ? o.paymentMethod : '').toLowerCase();
+        return m === 'cod' ? 'cod' : 'online';
+    };
+    const getPaymentLabel = o => {
+        const paymentType = getPaymentType(o);
+        if (paymentType === 'cod') return 'COD';
+        const method = String(o && o.paymentMethod ? o.paymentMethod : '').toLowerCase();
+        const map = {
+            'online_momo': 'Ví Momo',
+            'online_bank': 'Chuyển Khoản Ngân Hàng',
+            'online_visa': 'Thẻ Visa/MasterCard'
+        };
+        if (o && o.paymentMethodName && o.paymentMethodName !== 'Thanh toán khi nhận hàng') return String(o.paymentMethodName);
+        return map[method] || 'Online';
+    };
+
+    const eligible = inRange.filter(o => {
+        const status = String(o && o.status ? o.status : '').toLowerCase();
+        const paymentType = getPaymentType(o);
+        if (status === 'cancelled') return false;
+        if (paymentType === 'online') return true;
+        return paymentType === 'cod' && status === 'delivered';
+    });
+
+    const orderLabels = ['COD', 'Ví Momo', 'ZaloPay', 'Chuyển Khoản Ngân Hàng', 'Thẻ Visa/MasterCard', 'Online'];
+    const countsMap = {};
+    eligible.forEach(o => {
+        const label = getPaymentLabel(o);
+        countsMap[label] = (countsMap[label] || 0) + 1;
+    });
+    const dynamic = Object.keys(countsMap).filter(l => !orderLabels.includes(l)).sort((a, b) => a.localeCompare(b, 'vi'));
+    const labels = orderLabels.concat(dynamic).filter(l => (countsMap[l] || 0) > 0);
+    const counts = labels.map(l => countsMap[l] || 0);
     renderPieChart(
         'analytics-orders-source-chart',
         () => analyticsOrdersSourceChart,
         v => (analyticsOrdersSourceChart = v),
-        sources.map(getSourceLabel),
+        labels,
         counts,
         'Total Confirmed Orders per Source'
     );
@@ -3165,12 +3201,17 @@ function saveOrderStatus(orderId, newStatus) {
     
     // Lưu vào localStorage
     localStorage.setItem('orders', JSON.stringify(orders));
+    window.dispatchEvent(new Event('ordersUpdated'));
     
     // Cập nhật bảng đơn hàng
     loadOrders();
     
     // Cập nhật dashboard
     loadDashboardData();
+
+    if (document.getElementById('analytics-orders-source-chart')) {
+        renderAnalytics();
+    }
     
     // Hiển thị thông báo
     showNotification('Cập nhật trạng thái đơn hàng thành công!', 'success');
@@ -3203,6 +3244,7 @@ function deleteOrder(orderId) {
     
     // Lưu lại danh sách
     localStorage.setItem('orders', JSON.stringify(orders));
+    window.dispatchEvent(new Event('ordersUpdated'));
     
     // Hiển thị thông báo thành công
     showNotification('Xóa đơn hàng thành công', 'success');
@@ -3218,6 +3260,9 @@ function deleteOrder(orderId) {
     
     // Cập nhật dashboard
     loadDashboardData();
+    if (document.getElementById('analytics-orders-source-chart')) {
+        renderAnalytics();
+    }
 }
 
 // Bài viết
