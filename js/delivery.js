@@ -10,14 +10,48 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+function getOrderStatusText(status) {
+    const statusMap = {
+        pending: 'Chờ xử lý',
+        confirmed: 'Đã xác nhận',
+        packing: 'Đang đóng gói',
+        shipping: 'Đang vận chuyển',
+        delivered: 'Đã giao hàng',
+        cancelled: 'Đã hủy'
+    };
+    return statusMap[status] || status || '—';
+}
+
+function getTimelineIndex(status) {
+    const s = (status || '').toLowerCase();
+    if (s === 'delivered') return 3;
+    if (s === 'shipping') return 2;
+    if (s === 'packing') return 1;
+    if (s === 'cancelled') return -1;
+    return 0;
+}
+
+function formatDateTime(iso) {
+    const d = new Date(iso || '');
+    if (isNaN(d.getTime())) return '--';
+    return d.toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
 // Tải trạng thái giao hàng
 function loadDeliveryStatus() {
-    const lastOrder = JSON.parse(sessionStorage.getItem('lastOrder'));
-    
-    if (!lastOrder) {
-        window.location.href = 'cart.html';
-        return;
-    }
+    const url = new URL(window.location.href);
+    const fromSession = JSON.parse(sessionStorage.getItem('lastOrder') || 'null');
+    const idFromUrl = url.searchParams.get('id');
+    const orders = JSON.parse(localStorage.getItem('orders')) || [];
+    const fromStore = idFromUrl ? orders.find(o => String(o.id) === String(idFromUrl)) : null;
+    const lastOrder = fromSession || fromStore;
+    if (!lastOrder) return;
     
     // Hiển thị thông tin đơn hàng
     displayOrderInfo(lastOrder);
@@ -27,25 +61,56 @@ function loadDeliveryStatus() {
     
     // Hiển thị các mục đơn hàng
     displayOrderItems(lastOrder);
+
+    updateDeliveryTimeline(lastOrder);
+}
+
+function updateDeliveryTimeline(order) {
+    const status = (order && order.status) ? String(order.status) : 'confirmed';
+    const statusPill = document.getElementById('delivery-status-pill');
+    if (statusPill) statusPill.textContent = getOrderStatusText(status);
+
+    const idx = getTimelineIndex(status);
+    const items = document.querySelectorAll('.delivery-timeline-item[data-step]');
+    const steps = ['confirmed', 'packing', 'shipping', 'delivered'];
+    items.forEach(node => {
+        node.classList.remove('is-done', 'is-active', 'is-inactive');
+        const step = node.getAttribute('data-step');
+        const stepIdx = steps.indexOf(step);
+        if (idx === -1) {
+            node.classList.add('is-inactive');
+            return;
+        }
+        if (stepIdx < idx) node.classList.add('is-done');
+        else if (stepIdx === idx) node.classList.add('is-active');
+        else node.classList.add('is-inactive');
+    });
+
+    const created = order && order.createdAt ? order.createdAt : null;
+    const confirmedTime = document.getElementById('confirmed-time');
+    if (confirmedTime) confirmedTime.textContent = created ? formatDateTime(created) : '--';
+
+    const packingTime = document.getElementById('packing-time');
+    const shippingTime = document.getElementById('shipping-time');
+    const deliveredTime = document.getElementById('delivered-time');
+    if (packingTime) packingTime.textContent = idx >= 1 ? 'Đang cập nhật' : '--';
+    if (shippingTime) shippingTime.textContent = idx >= 2 ? 'Đang cập nhật' : '--';
+    if (deliveredTime) deliveredTime.textContent = idx >= 3 ? 'Đang cập nhật' : '--';
 }
 
 // Hiển thị thông tin đơn hàng
 function displayOrderInfo(order) {
-    const orderDate = new Date(order.createdAt);
-    const formattedDate = orderDate.toLocaleDateString('vi-VN', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    const formattedDate = formatDateTime(order.createdAt);
     
     document.getElementById('order-id-display').textContent = order.id;
+    const heroId = document.getElementById('order-id-hero');
+    if (heroId) heroId.textContent = order.id;
     document.getElementById('order-date-display').textContent = formattedDate;
     document.getElementById('order-total-display').textContent = order.total.toLocaleString('vi-VN') + ' ₫';
     
     // Hiển thị thời gian xác nhận
-    document.getElementById('confirmed-time').textContent = formattedDate;
+    const confirmedTime = document.getElementById('confirmed-time');
+    if (confirmedTime) confirmedTime.textContent = formattedDate;
 }
 
 // Hiển thị thông tin người nhận
