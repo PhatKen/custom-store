@@ -514,7 +514,7 @@ function createRecommendedProductCard(product) {
     card.className = 'product-card';
     
     // Format giá tiền
-    const formattedPrice = product.price.toLocaleString('vi-VN') + ' VNĐ';
+    const formattedPrice = product.price.toLocaleString('vi-VN') + '₫';
     
     // Lấy tên danh mục
     const categoryNames = {
@@ -526,36 +526,61 @@ function createRecommendedProductCard(product) {
     
     // Kiểm tra trạng thái đăng nhập
     const loggedIn = isUserLoggedIn();
+    const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
+    const mainImage = Array.isArray(product.images) && product.images.length ? product.images[0] : product.image;
+    const badge = (typeof getProductBadge === 'function') ? getProductBadge(product) : null;
+    const badgeHtml = badge ? `<div class="product-badge badge-${badge.type}">${badge.text}</div>` : '';
     
     card.innerHTML = `
         <div class="product-image">
-            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            <img src="${mainImage}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            ${badgeHtml}
+            ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+            <div class="product-quick-actions">
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                    </button>` 
+                    : 
+                    `<button class="btn-login-required" type="button">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </button>`
+                }
+                <button class="btn-view" data-product-id="${product.id}">
+                    <i class="fas fa-eye"></i> Xem nhanh
+                </button>
+            </div>
         </div>
         <div class="product-info">
             <span class="product-category">${categoryNames[product.category]}</span>
             <h3 class="product-name">${product.name}</h3>
             <div class="product-price">${formattedPrice}</div>
-            <div class="product-actions">
-                ${loggedIn ? 
-                    `<button class="btn-add-to-cart" data-product-id="${product.id}">
-                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                    </button>` 
-                    : 
-                    `<div class="btn-login-required">
-                        <i class="fas fa-lock"></i> Hãy đăng nhập
-                    </div>`
-                }
-            </div>
         </div>
     `;
-    
-    // Thêm sự kiện cho nút thêm vào giỏ nếu đã đăng nhập
-    if (loggedIn) {
+    if (loggedIn && !isOutOfStock) {
         const addToCartBtn = card.querySelector('.btn-add-to-cart');
         addToCartBtn.addEventListener('click', function() {
             addToCart(product.id);
         });
+    } else if (!loggedIn) {
+        const loginBtn = card.querySelector('.btn-login-required');
+        if (loginBtn) loginBtn.addEventListener('click', function(){ window.location.href = 'login.html'; });
     }
+    const viewBtn = card.querySelector('.btn-view');
+    if (viewBtn) {
+        viewBtn.addEventListener('click', function() {
+            viewProductDetail(product.id);
+        });
+    }
+    const img = card.querySelector('.product-image');
+    img.addEventListener('click', function(e) {
+        if (e.target.closest('.product-quick-actions')) return;
+        viewProductDetail(product.id);
+    });
+    const nameEl = card.querySelector('.product-name');
+    nameEl.addEventListener('click', function() {
+        viewProductDetail(product.id);
+    });
     
     return card;
 }

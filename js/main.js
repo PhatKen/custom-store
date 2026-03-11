@@ -1442,33 +1442,38 @@ function showProductDetailModal(product) {
 function createRecommendedCardForModal(recoProduct, currentProductId) {
     const card = document.createElement('div');
     card.className = 'product-card';
-    const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + ' VNĐ';
+    const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + '₫';
     const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón' };
     const loggedIn = JSON.parse(localStorage.getItem('currentUser')) !== null;
+    const isOutOfStock = recoProduct.status === 'out-of-stock' || recoProduct.quantity === 0;
     const recoImages = Array.isArray(recoProduct.images) && recoProduct.images.length ? recoProduct.images : [recoProduct.image];
     const recoMainImage = recoImages[0];
+    const badge = getProductBadge(recoProduct);
+    const badgeHtml = badge ? `<div class="product-badge badge-${badge.type}">${badge.text}</div>` : '';
     card.innerHTML = `
         <div class="product-image">
             <img src="${recoMainImage}" alt="${recoProduct.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            ${badgeHtml}
+            ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+            <div class="product-quick-actions">
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${recoProduct.id}" ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                    </button>` 
+                    : 
+                    `<button class="btn-login-required" type="button">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </button>`
+                }
+                <button class="btn-view" data-product-id="${recoProduct.id}">
+                    <i class="fas fa-eye"></i> Xem nhanh
+                </button>
+            </div>
         </div>
         <div class="product-info">
             <span class="product-category">${categoryNames[recoProduct.category]}</span>
             <h3 class="product-name">${recoProduct.name}</h3>
             <div class="product-price">${formattedPrice}</div>
-            <div class="product-actions">
-                ${loggedIn ? 
-                    `<button class="btn-add-to-cart" data-product-id="${recoProduct.id}">
-                        <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
-                    </button>` 
-                    : 
-                    `<div class="btn-login-required">
-                        <i class="fas fa-lock"></i> Hãy đăng nhập
-                    </div>`
-                }
-                <button class="btn-view" data-product-id="${recoProduct.id}">
-                    <i class="fas fa-eye"></i> Xem chi tiết
-                </button>
-            </div>
         </div>
     `;
     const viewBtn = card.querySelector('.btn-view');
@@ -1479,7 +1484,8 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
         viewProductDetail(recoProduct.id);
     });
     const img = card.querySelector('.product-image');
-    img.addEventListener('click', function() {
+    img.addEventListener('click', function(e) {
+        if (e.target.closest('.product-quick-actions')) return;
         const existing = document.getElementById('product-detail-modal');
         if (existing && typeof existing.__cleanup === 'function') existing.__cleanup();
         else if (existing) existing.remove();
@@ -1492,11 +1498,14 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
         else if (existing) existing.remove();
         viewProductDetail(recoProduct.id);
     });
-    if (loggedIn) {
+    if (loggedIn && !isOutOfStock) {
         const addBtn = card.querySelector('.btn-add-to-cart');
         addBtn.addEventListener('click', function() {
             addToCart(recoProduct.id);
         });
+    } else if (!loggedIn) {
+        const loginBtn = card.querySelector('.btn-login-required');
+        if (loginBtn) loginBtn.addEventListener('click', function(){ window.location.href = 'login.html'; });
     }
     return card;
 }
