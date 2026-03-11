@@ -4,9 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
     loadCheckoutData();
     initCheckoutEvents();
-    if (typeof window.logAnalyticsEvent === 'function') {
-        window.logAnalyticsEvent('checkout', { page: window.location.pathname });
-    }
 });
 
 // Tải dữ liệu giỏ hàng vào trang checkout
@@ -371,6 +368,10 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
     
     orders.push(newOrder);
     localStorage.setItem('orders', JSON.stringify(orders));
+
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('checkout', { order_id: String(orderId) });
+    }
     
     // Giảm số lượng tồn kho theo đơn hàng
     try {

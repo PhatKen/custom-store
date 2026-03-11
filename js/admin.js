@@ -245,7 +245,7 @@ function initAnalytics() {
     }
     window.addEventListener('storage', function(e) {
         if (!e) return;
-        if (e.key === 'orders' || e.key === 'analyticsEvents') renderAnalytics();
+        if (e.key === 'orders' || e.key === 'analyticsEvents' || e.key === 'analytics_events') renderAnalytics();
     });
     renderAnalytics();
 }
@@ -360,13 +360,30 @@ function sumOrderRevenue(orders) {
 }
 
 function getAnalyticsEvents() {
-    const raw = JSON.parse(localStorage.getItem('analyticsEvents') || '[]');
-    if (!Array.isArray(raw)) return [];
-    return raw.filter(e => e && typeof e === 'object' && typeof e.type === 'string' && typeof e.ts === 'string');
+    const rawTable = JSON.parse(localStorage.getItem('analytics_events') || '[]');
+    const rawLegacy = JSON.parse(localStorage.getItem('analyticsEvents') || '[]');
+    const source = Array.isArray(rawTable) && rawTable.length ? rawTable : (Array.isArray(rawLegacy) ? rawLegacy : []);
+    return source
+        .filter(e => e && typeof e === 'object')
+        .map(e => {
+            const eventName = e.event_name || e.type || '';
+            const createdAt = e.created_at || e.ts || '';
+            const sessionId = e.session_id || e.sessionId || '';
+            return {
+                ...e,
+                event_name: String(eventName || '').trim(),
+                type: String(eventName || '').trim(),
+                created_at: createdAt,
+                ts: createdAt,
+                session_id: sessionId,
+                sessionId: sessionId
+            };
+        })
+        .filter(e => e.event_name && e.created_at);
 }
 
 function getEventDate(ev) {
-    const d = ev && ev.ts ? new Date(ev.ts) : new Date(0);
+    const d = ev && (ev.created_at || ev.ts) ? new Date(ev.created_at || ev.ts) : new Date(0);
     return isNaN(d.getTime()) ? new Date(0) : d;
 }
 
@@ -527,7 +544,7 @@ function renderTrafficSourceChart(range) {
     const events = getAnalyticsEvents();
     const { start, end } = getRangeWindow(range);
     const inRange = filterByPeriod(events, getEventDate, start, end);
-    const pv = inRange.filter(e => e.type === 'page_view');
+    const pv = inRange.filter(e => e.event_name === 'page_view' || e.type === 'page_view');
     const sources = getSourcesList();
     const counts = sources.map(s => pv.filter(e => normalizeSource(e.source) === s).length);
     renderPieChart(
@@ -562,12 +579,11 @@ function renderCustomerFunnelChart(range) {
     const events = getAnalyticsEvents();
     const { start, end } = getRangeWindow(range);
     const inRange = filterByPeriod(events, getEventDate, start, end);
-    const sessionOf = e => String(e.sessionId || '');
-    const views = new Set(inRange.filter(e => e.type === 'view_product').map(sessionOf).filter(Boolean));
-    const adds = new Set(inRange.filter(e => e.type === 'add_to_cart').map(sessionOf).filter(Boolean));
-    const checkouts = new Set(inRange.filter(e => e.type === 'checkout').map(sessionOf).filter(Boolean));
-    const labels = ['view sản phẩm', 'add_to_cart', 'checkout'];
-    const values = [views.size, adds.size, checkouts.size];
+    const viewsCount = inRange.filter(e => e.event_name === 'view' || e.type === 'view').length;
+    const addsCount = inRange.filter(e => e.event_name === 'add_to_cart' || e.type === 'add_to_cart').length;
+    const checkoutsCount = inRange.filter(e => e.event_name === 'checkout' || e.type === 'checkout').length;
+    const labels = ['view', 'add_to_cart', 'checkout'];
+    const values = [viewsCount, addsCount, checkoutsCount];
     renderDoughnutChart(
         'analytics-funnel-chart',
         () => analyticsFunnelChart,

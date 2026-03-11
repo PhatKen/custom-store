@@ -120,6 +120,7 @@ initializeSampleData();
 
 const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
 const ANALYTICS_EVENTS_STORAGE_KEY = 'analyticsEvents';
+const ANALYTICS_EVENTS_TABLE_KEY = 'analytics_events';
 const ANALYTICS_SESSION_KEY = 'analyticsSessionId';
 const ANALYTICS_SOURCE_KEY = 'trafficSource';
 
@@ -166,18 +167,39 @@ function logAnalyticsEvent(type, data = {}) {
     if (!t) return;
     const sessionId = getAnalyticsSessionId();
     const source = detectTrafficSource();
-    const ev = {
-        type: t,
-        ts: new Date().toISOString(),
-        sessionId,
+    const createdAt = new Date().toISOString();
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const productId = (data && (data.product_id || data.productId)) != null ? String(data.product_id || data.productId) : null;
+
+    const base = {
+        id: (Math.random().toString(36).slice(2) + Date.now().toString(36)),
+        event_name: t,
+        product_id: productId,
+        user_id: currentUser && currentUser.id != null ? String(currentUser.id) : null,
+        created_at: createdAt,
         source,
+        session_id: sessionId,
         ...data
     };
+
+    const legacy = {
+        ...base,
+        type: base.event_name,
+        ts: base.created_at,
+        sessionId: base.session_id
+    };
+
     const raw = JSON.parse(localStorage.getItem(ANALYTICS_EVENTS_STORAGE_KEY) || '[]');
     const arr = Array.isArray(raw) ? raw : [];
-    arr.push(ev);
+    arr.push(legacy);
     if (arr.length > 5000) arr.splice(0, arr.length - 5000);
     localStorage.setItem(ANALYTICS_EVENTS_STORAGE_KEY, JSON.stringify(arr));
+
+    const rawTable = JSON.parse(localStorage.getItem(ANALYTICS_EVENTS_TABLE_KEY) || '[]');
+    const table = Array.isArray(rawTable) ? rawTable : [];
+    table.push(base);
+    if (table.length > 5000) table.splice(0, table.length - 5000);
+    localStorage.setItem(ANALYTICS_EVENTS_TABLE_KEY, JSON.stringify(table));
 }
 
 window.logAnalyticsEvent = logAnalyticsEvent;
@@ -1196,7 +1218,7 @@ function viewProductDetail(productId) {
     }
 
     if (typeof window.logAnalyticsEvent === 'function') {
-        window.logAnalyticsEvent('view_product', { productId: String(productId) });
+        window.logAnalyticsEvent('view', { productId: String(productId) });
     }
     
     // Hiển thị modal chi tiết sản phẩm
