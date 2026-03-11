@@ -409,7 +409,7 @@ function initChatbot() {
         typingTimer = setTimeout(() => {
             hideTyping();
             if (t.includes('tra cứu') || t.includes('đơn hàng')) {
-                addMsg('Vui lòng nhập mã đơn hàng để tôi kiểm tra.', 'bot');
+                addMsg('Vui lòng nhập mã đơn hàng để mình kiểm tra.', 'bot');
                 return;
             }
             const idMatch = t.match(/\b\d{6,}\b/);
