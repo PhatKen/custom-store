@@ -243,6 +243,10 @@ function initAnalytics() {
             renderAnalytics();
         });
     }
+    window.addEventListener('storage', function(e) {
+        if (!e) return;
+        if (e.key === 'orders' || e.key === 'analyticsEvents') renderAnalytics();
+    });
     renderAnalytics();
 }
 
@@ -285,6 +289,9 @@ function getRangeLabel(range) {
 }
 
 let analyticsRevenueChart = null;
+let analyticsTrafficSourceChart = null;
+let analyticsOrdersSourceChart = null;
+let analyticsFunnelChart = null;
 
 function formatCurrencyVnd(value) {
     const n = parseInt(value) || 0;
@@ -350,6 +357,224 @@ function filterByPeriod(items, dateGetter, start, end) {
 
 function sumOrderRevenue(orders) {
     return (orders || []).reduce((sum, o) => sum + (parseInt(o.total) || 0), 0);
+}
+
+function getAnalyticsEvents() {
+    const raw = JSON.parse(localStorage.getItem('analyticsEvents') || '[]');
+    if (!Array.isArray(raw)) return [];
+    return raw.filter(e => e && typeof e === 'object' && typeof e.type === 'string' && typeof e.ts === 'string');
+}
+
+function getEventDate(ev) {
+    const d = ev && ev.ts ? new Date(ev.ts) : new Date(0);
+    return isNaN(d.getTime()) ? new Date(0) : d;
+}
+
+function getRangeWindow(range) {
+    const now = new Date();
+    if (range === 'all') return { start: new Date(0), end: new Date(now.getTime() + 1) };
+    if (range === 'day') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        return { start, end: new Date(now.getTime() + 1) };
+    }
+    if (range === 'week') {
+        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+        return { start, end: new Date(now.getTime() + 1) };
+    }
+    if (range === 'month') {
+        const start = new Date(now.getFullYear(), now.getMonth(), 1);
+        return { start, end: new Date(now.getTime() + 1) };
+    }
+    if (range === 'year') {
+        const start = new Date(now.getFullYear(), 0, 1);
+        return { start, end: new Date(now.getTime() + 1) };
+    }
+    return { start: new Date(0), end: new Date(now.getTime() + 1) };
+}
+
+function getSourcesList() {
+    return ['direct', 'google', 'facebook', 'seo', 'affiliate', 'email', 'others'];
+}
+
+function normalizeSource(src) {
+    const s = String(src || '').toLowerCase().trim();
+    const allowed = new Set(getSourcesList());
+    if (allowed.has(s)) return s;
+    if (!s) return 'direct';
+    return 'others';
+}
+
+function getSourceLabel(src) {
+    const map = {
+        direct: 'direct',
+        google: 'google',
+        facebook: 'facebook',
+        seo: 'seo',
+        affiliate: 'affiliate',
+        email: 'email',
+        others: 'others'
+    };
+    return map[src] || src;
+}
+
+function getSourceColors() {
+    return [
+        '#6a5af9',
+        '#22c55e',
+        '#1877f2',
+        '#f59e0b',
+        '#a855f7',
+        '#06b6d4',
+        '#94a3b8'
+    ];
+}
+
+function renderPieChart(canvasId, chartRefGetter, chartRefSetter, labels, values, title) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    if (typeof Chart === 'undefined') return;
+
+    const prev = chartRefGetter();
+    if (prev) {
+        prev.destroy();
+        chartRefSetter(null);
+    }
+
+    const colors = getSourceColors();
+    const chart = new Chart(canvas, {
+        type: 'pie',
+        data: {
+            labels,
+            datasets: [
+                {
+                    data: values,
+                    backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                title: title ? { display: false, text: title } : { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const v = parseInt(ctx.raw) || 0;
+                            const total = (ctx.dataset.data || []).reduce((s, n) => s + (parseInt(n) || 0), 0);
+                            const pct = total ? Math.round((v / total) * 100) : 0;
+                            return `${ctx.label}: ${v} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    chartRefSetter(chart);
+}
+
+function renderDoughnutChart(canvasId, chartRefGetter, chartRefSetter, labels, values) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    if (typeof Chart === 'undefined') return;
+
+    const prev = chartRefGetter();
+    if (prev) {
+        prev.destroy();
+        chartRefSetter(null);
+    }
+
+    const colors = ['#6a5af9', '#22c55e', '#f59e0b'];
+    const chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [
+                {
+                    data: values,
+                    backgroundColor: labels.map((_, i) => colors[i % colors.length]),
+                    borderColor: '#ffffff',
+                    borderWidth: 2
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const v = parseInt(ctx.raw) || 0;
+                            const total = (ctx.dataset.data || []).reduce((s, n) => s + (parseInt(n) || 0), 0);
+                            const pct = total ? Math.round((v / total) * 100) : 0;
+                            return `${ctx.label}: ${v} (${pct}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+    chartRefSetter(chart);
+}
+
+function renderTrafficSourceChart(range) {
+    const events = getAnalyticsEvents();
+    const { start, end } = getRangeWindow(range);
+    const inRange = filterByPeriod(events, getEventDate, start, end);
+    const pv = inRange.filter(e => e.type === 'page_view');
+    const sources = getSourcesList();
+    const counts = sources.map(s => pv.filter(e => normalizeSource(e.source) === s).length);
+    renderPieChart(
+        'analytics-traffic-source-chart',
+        () => analyticsTrafficSourceChart,
+        v => (analyticsTrafficSourceChart = v),
+        sources.map(getSourceLabel),
+        counts,
+        'Total Page View per Source'
+    );
+}
+
+function renderConfirmedOrdersSourceChart(range, ordersAll) {
+    const ordersRaw = Array.isArray(ordersAll) ? ordersAll : [];
+    const { start, end } = getRangeWindow(range);
+    const inRange = filterByPeriod(ordersRaw, getOrderDate, start, end);
+    const confirmedStatuses = new Set(['confirmed', 'packing', 'shipping', 'delivered']);
+    const confirmed = inRange.filter(o => confirmedStatuses.has(String(o.status || '').toLowerCase()));
+    const sources = getSourcesList();
+    const counts = sources.map(s => confirmed.filter(o => normalizeSource(o.source) === s).length);
+    renderPieChart(
+        'analytics-orders-source-chart',
+        () => analyticsOrdersSourceChart,
+        v => (analyticsOrdersSourceChart = v),
+        sources.map(getSourceLabel),
+        counts,
+        'Total Confirmed Orders per Source'
+    );
+}
+
+function renderCustomerFunnelChart(range) {
+    const events = getAnalyticsEvents();
+    const { start, end } = getRangeWindow(range);
+    const inRange = filterByPeriod(events, getEventDate, start, end);
+    const sessionOf = e => String(e.sessionId || '');
+    const views = new Set(inRange.filter(e => e.type === 'view_product').map(sessionOf).filter(Boolean));
+    const adds = new Set(inRange.filter(e => e.type === 'add_to_cart').map(sessionOf).filter(Boolean));
+    const checkouts = new Set(inRange.filter(e => e.type === 'checkout').map(sessionOf).filter(Boolean));
+    const labels = ['view sản phẩm', 'add_to_cart', 'checkout'];
+    const values = [views.size, adds.size, checkouts.size];
+    renderDoughnutChart(
+        'analytics-funnel-chart',
+        () => analyticsFunnelChart,
+        v => (analyticsFunnelChart = v),
+        labels,
+        values
+    );
 }
 
 function sumItemsSold(orders) {
@@ -698,6 +923,9 @@ function renderAnalytics() {
     renderRevenueChart(granularity, ordersAll);
     renderRecentOrders(ordersAll);
     renderTopProducts(orders);
+    renderTrafficSourceChart(range);
+    renderConfirmedOrdersSourceChart(range, ordersAll);
+    renderCustomerFunnelChart(range);
 }
 
 // Tải hoạt động gần đây

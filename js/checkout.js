@@ -4,6 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
     loadCheckoutData();
     initCheckoutEvents();
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('checkout', { page: window.location.pathname });
+    }
 });
 
 // Tải dữ liệu giỏ hàng vào trang checkout
@@ -349,6 +352,7 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
     const dd = String(now.getDate()).padStart(2, '0');
     const MM = String(now.getMonth() + 1).padStart(2, '0');
     const orderId = `${hh}${mm}${ss}${ms}${last2}${dd}${MM}`;
+    const source = sessionStorage.getItem('trafficSource') || 'direct';
     const newOrder = {
         id: orderId,
         userId: currentUser.id,
@@ -361,6 +365,7 @@ function submitOrder(paymentMethod, paymentMethodName = null) {
         paymentMethod: paymentMethod,
         paymentMethodName: paymentMethodName || 'Thanh toán khi nhận hàng',
         status: 'confirmed',
+        source: source,
         createdAt: new Date().toISOString()
     };
     

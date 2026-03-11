@@ -119,6 +119,68 @@ function initializeSampleData() {
 initializeSampleData();
 
 const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
+const ANALYTICS_EVENTS_STORAGE_KEY = 'analyticsEvents';
+const ANALYTICS_SESSION_KEY = 'analyticsSessionId';
+const ANALYTICS_SOURCE_KEY = 'trafficSource';
+
+function getAnalyticsSessionId() {
+    let id = sessionStorage.getItem(ANALYTICS_SESSION_KEY);
+    if (!id) {
+        id = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        sessionStorage.setItem(ANALYTICS_SESSION_KEY, id);
+    }
+    return id;
+}
+
+function normalizeTrafficSource(src) {
+    const s = String(src || '').toLowerCase().trim();
+    const allowed = new Set(['direct', 'google', 'facebook', 'seo', 'affiliate', 'email', 'others']);
+    if (allowed.has(s)) return s;
+    if (!s) return 'direct';
+    return 'others';
+}
+
+function detectTrafficSource() {
+    const existing = sessionStorage.getItem(ANALYTICS_SOURCE_KEY);
+    if (existing) return normalizeTrafficSource(existing);
+    const url = new URL(window.location.href);
+    const p = url.searchParams;
+    const raw = p.get('utm_source') || p.get('source') || p.get('ref') || '';
+    if (raw) {
+        const normalized = normalizeTrafficSource(raw);
+        sessionStorage.setItem(ANALYTICS_SOURCE_KEY, normalized);
+        return normalized;
+    }
+    const ref = document.referrer || '';
+    const r = ref.toLowerCase();
+    let src = 'direct';
+    if (r.includes('google.')) src = 'google';
+    else if (r.includes('facebook.') || r.includes('fb.')) src = 'facebook';
+    else if (r) src = 'others';
+    sessionStorage.setItem(ANALYTICS_SOURCE_KEY, src);
+    return src;
+}
+
+function logAnalyticsEvent(type, data = {}) {
+    const t = String(type || '').trim();
+    if (!t) return;
+    const sessionId = getAnalyticsSessionId();
+    const source = detectTrafficSource();
+    const ev = {
+        type: t,
+        ts: new Date().toISOString(),
+        sessionId,
+        source,
+        ...data
+    };
+    const raw = JSON.parse(localStorage.getItem(ANALYTICS_EVENTS_STORAGE_KEY) || '[]');
+    const arr = Array.isArray(raw) ? raw : [];
+    arr.push(ev);
+    if (arr.length > 5000) arr.splice(0, arr.length - 5000);
+    localStorage.setItem(ANALYTICS_EVENTS_STORAGE_KEY, JSON.stringify(arr));
+}
+
+window.logAnalyticsEvent = logAnalyticsEvent;
 
 function getDefaultContactInfo() {
     return {
@@ -286,6 +348,9 @@ document.addEventListener('DOMContentLoaded', function() {
     updateProductButtons();
 
     initHomeNews();
+
+    detectTrafficSource();
+    logAnalyticsEvent('page_view', { page: window.location.pathname });
 
     renderSiteFooter();
     initContactPage();
@@ -1111,6 +1176,10 @@ function addToCart(productId) {
     // Cập nhật số lượng giỏ hàng
     updateCartCount();
     
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('add_to_cart', { productId: String(productId) });
+    }
+
     // Hiển thị thông báo
     showNotification(`Đã thêm ${product.name} vào giỏ hàng!`, 'success');
 }
@@ -1124,6 +1193,10 @@ function viewProductDetail(productId) {
     if (!product) {
         showNotification('Sản phẩm không tồn tại!', 'error');
         return;
+    }
+
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('view_product', { productId: String(productId) });
     }
     
     // Hiển thị modal chi tiết sản phẩm
