@@ -233,6 +233,16 @@ function initAnalytics() {
     const rangeSelect = document.getElementById('analytics-range');
     if (!rangeSelect) return;
     rangeSelect.addEventListener('change', renderAnalytics);
+
+    const granularitySelect = document.getElementById('analytics-revenue-granularity');
+    if (granularitySelect) {
+        const saved = localStorage.getItem('analyticsRevenueGranularity');
+        if (saved) granularitySelect.value = saved;
+        granularitySelect.addEventListener('change', function() {
+            localStorage.setItem('analyticsRevenueGranularity', this.value);
+            renderAnalytics();
+        });
+    }
     renderAnalytics();
 }
 
@@ -365,7 +375,7 @@ function setTrendElement(el, trend) {
     if (trend.sign === 'negative') el.classList.add('negative');
 }
 
-function buildRevenueSeries(range, ordersAll) {
+function buildRevenueSeries(granularity, ordersAll) {
     const now = new Date();
     const orders = Array.isArray(ordersAll) ? ordersAll : [];
     const points = [];
@@ -374,33 +384,39 @@ function buildRevenueSeries(range, ordersAll) {
         return { labels: [], values: [] };
     }
 
-    if (range === 'day') {
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        for (let h = 0; h < 24; h++) {
-            const label = String(h).padStart(2, '0') + ':00';
-            points.push({ label, start: new Date(start.getTime() + h * 3600000), end: new Date(start.getTime() + (h + 1) * 3600000) });
+    if (granularity === '12h') {
+        const endHour = new Date(now.getTime());
+        endHour.setMinutes(0, 0, 0);
+        const startHour = new Date(endHour.getTime() - 11 * 3600000);
+        for (let i = 0; i < 12; i++) {
+            const s = new Date(startHour.getTime() + i * 3600000);
+            const e = new Date(startHour.getTime() + (i + 1) * 3600000);
+            points.push({ label: String(s.getHours()).padStart(2, '0') + ':00', start: s, end: e });
         }
-    } else if (range === 'week') {
-        const start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
-            const label = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-            points.push({ label, start: d, end: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) });
-        }
-    } else if (range === 'month') {
+    } else if (granularity === 'day') {
         const start = new Date(now.getFullYear(), now.getMonth(), 1);
-        const days = Math.max(1, now.getDate());
+        const endMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const days = Math.round((endMonth.getTime() - start.getTime()) / 86400000);
         for (let i = 0; i < days; i++) {
             const d = new Date(start.getFullYear(), start.getMonth(), start.getDate() + i);
             points.push({ label: String(d.getDate()), start: d, end: new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1) });
         }
-    } else if (range === 'year') {
+    } else if (granularity === 'month') {
         for (let m = 0; m < 12; m++) {
             const start = new Date(now.getFullYear(), m, 1);
             const end = new Date(now.getFullYear(), m + 1, 1);
-            const label = start.toLocaleDateString('vi-VN', { month: 'short' });
+            const label = 'T' + String(m + 1);
             points.push({ label, start, end });
         }
+    } else if (granularity === 'year') {
+        const years = Array.from(new Set(orders.map(o => getOrderDate(o).getFullYear()))).sort((a, b) => a - b);
+        const list = years.length ? years : [now.getFullYear()];
+        const slice = list.length > 8 ? list.slice(list.length - 8) : list;
+        slice.forEach(y => {
+            const start = new Date(y, 0, 1);
+            const end = new Date(y + 1, 0, 1);
+            points.push({ label: String(y), start, end });
+        });
     } else {
         for (let i = 11; i >= 0; i--) {
             const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
@@ -419,12 +435,12 @@ function buildRevenueSeries(range, ordersAll) {
     return { labels, values };
 }
 
-function renderRevenueChart(range, ordersAll) {
+function renderRevenueChart(granularity, ordersAll) {
     const canvas = document.getElementById('analytics-revenue-chart');
     if (!canvas) return;
     if (typeof Chart === 'undefined') return;
 
-    const { labels, values } = buildRevenueSeries(range, ordersAll);
+    const { labels, values } = buildRevenueSeries(granularity, ordersAll);
 
     if (analyticsRevenueChart) {
         analyticsRevenueChart.destroy();
@@ -677,7 +693,9 @@ function renderAnalytics() {
         tbody.appendChild(tr);
     });
 
-    renderRevenueChart(range, ordersAll);
+    const granularitySelect = document.getElementById('analytics-revenue-granularity');
+    const granularity = granularitySelect ? granularitySelect.value : (localStorage.getItem('analyticsRevenueGranularity') || '12h');
+    renderRevenueChart(granularity, ordersAll);
     renderRecentOrders(ordersAll);
     renderTopProducts(orders);
 }
