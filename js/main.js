@@ -588,7 +588,7 @@ function createProductCard(product) {
     card.setAttribute('data-category', product.category);
     
     // Format giá tiền
-    const formattedPrice = product.price.toLocaleString('vi-VN') + ' VNĐ';
+    const formattedPrice = product.price.toLocaleString('vi-VN') + '₫';
     
     // Lấy tên danh mục
     const categoryNames = {
@@ -603,31 +603,36 @@ function createProductCard(product) {
     
     // Kiểm tra trạng thái hàng
     const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
+
+    const mainImage = Array.isArray(product.images) && product.images.length ? product.images[0] : product.image;
+    const badge = getProductBadge(product);
+    const badgeHtml = badge ? `<div class="product-badge badge-${badge.type}">${badge.text}</div>` : '';
     
     card.innerHTML = `
         <div class="product-image">
-            <img src="${product.image}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            <img src="${mainImage}" alt="${product.name}" onerror="this.src='https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'">
+            ${badgeHtml}
             ${isOutOfStock ? '<div class="out-of-stock-badge">Hết hàng</div>' : ''}
+            <div class="product-quick-actions">
+                ${loggedIn ? 
+                    `<button class="btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
+                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
+                    </button>` 
+                    : 
+                    `<button class="btn-login-required" type="button">
+                        <i class="fas fa-lock"></i> Hãy đăng nhập
+                    </button>`
+                }
+                <button class="btn-view" data-product-id="${product.id}">
+                    <i class="fas fa-eye"></i> Xem nhanh
+                </button>
+            </div>
         </div>
         <div class="product-info">
             <span class="product-category">${categoryNames[product.category]}</span>
             <h3 class="product-name">${product.name}</h3>
             <p class="product-description">${product.description}</p>
             <div class="product-price">${formattedPrice}</div>
-            <div class="product-actions">
-                ${loggedIn ? 
-                    `<button class="btn-add-to-cart" data-product-id="${product.id}" ${isOutOfStock ? 'disabled' : ''}>
-                        <i class="fas fa-shopping-cart"></i> ${isOutOfStock ? 'Hết hàng' : 'Thêm vào giỏ'}
-                    </button>` 
-                    : 
-                    `<div class="btn-login-required">
-                        <i class="fas fa-lock"></i> Hãy đăng nhập
-                    </div>`
-                }
-                <button class="btn-view" data-product-id="${product.id}">
-                    <i class="fas fa-eye"></i> Xem chi tiết
-                </button>
-            </div>
         </div>
     `;
     
@@ -637,6 +642,14 @@ function createProductCard(product) {
         addToCartBtn.addEventListener('click', function() {
             addToCart(product.id);
         });
+    } else if (!loggedIn) {
+        const loginBtn = card.querySelector('.btn-login-required');
+        if (loginBtn) {
+            loginBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'login.html';
+            });
+        }
     }
     
     // Thêm sự kiện cho nút xem chi tiết
@@ -647,7 +660,8 @@ function createProductCard(product) {
     
     // Thêm sự kiện cho hình ảnh sản phẩm
     const productImage = card.querySelector('.product-image');
-    productImage.addEventListener('click', function() {
+    productImage.addEventListener('click', function(e) {
+        if (e.target.closest('.product-quick-actions')) return;
         viewProductDetail(product.id);
     });
     
@@ -658,6 +672,22 @@ function createProductCard(product) {
     });
     
     return card;
+}
+
+function getProductBadge(product) {
+    const createdAt = product && product.createdAt ? new Date(product.createdAt) : null;
+    const now = new Date();
+    if (createdAt && !isNaN(createdAt.getTime())) {
+        const diffDays = Math.floor((now.getTime() - createdAt.getTime()) / 86400000);
+        if (diffDays <= 14) return { text: 'NEW', type: 'new' };
+    }
+    if (typeof product.quantity === 'number' && product.quantity <= 10 && product.quantity > 0) {
+        return { text: 'HOT', type: 'hot' };
+    }
+    if (typeof product.price === 'number' && product.price <= 300000) {
+        return { text: 'SALE', type: 'sale' };
+    }
+    return null;
 }
 
 // Thêm sản phẩm vào giỏ hàng
