@@ -2,12 +2,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     updateUserHeader();
     updateCartCount();
-    const url = new URL(window.location.href);
-    const view = url.searchParams.get('view');
-    const isContactView = view === 'contact' || /#lien-he|#contact/i.test(url.hash || '');
-    if (!isContactView) {
-        loadDeliveryStatus();
-    }
+    loadDeliveryStatus();
 });
 
 function getOrderStatusText(status) {

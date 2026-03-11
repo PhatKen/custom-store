@@ -183,7 +183,7 @@ function renderSiteFooter() {
                     <ul>
                         <li><a href="index.html">Trang chủ</a></li>
                         <li><a href="about.html">Về chúng tôi</a></li>
-                        <li><a href="delivery.html?view=contact">Liên hệ</a></li>
+                        <li><a href="contact.html">Liên hệ</a></li>
                         <li><a href="cart.html">Giỏ hàng</a></li>
                     </ul>
                 </div>
@@ -204,49 +204,34 @@ function renderSiteFooter() {
     `;
 }
 
-function initContactViewOnDeliveryPage() {
-    const isDelivery = /\/delivery\.html$/i.test(window.location.pathname);
-    if (!isDelivery) return;
+function initContactPage() {
+    const isContact = /\/contact\.html$/i.test(window.location.pathname);
+    if (!isContact) return;
 
-    const url = new URL(window.location.href);
-    const view = url.searchParams.get('view');
-    const isContactView = view === 'contact' || /#lien-he|#contact/i.test(url.hash || '');
-    const deliverySection = document.querySelector('.delivery-section');
-    const contactSection = document.getElementById('contact-view');
-    if (!deliverySection || !contactSection) return;
+    const c = getContactInfo();
+    const setText = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value || '';
+    };
+    setText('contact-page-address', c.address || '');
+    setText('contact-page-phone', c.phone || '');
+    setText('contact-page-email', c.email || '');
 
-    if (isContactView) {
-        deliverySection.style.display = 'none';
-        contactSection.style.display = '';
-
-        const c = getContactInfo();
-        const setText = (id, value) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = value || '';
-        };
-        setText('contact-page-address', c.address || '');
-        setText('contact-page-phone', c.phone || '');
-        setText('contact-page-email', c.email || '');
-
-        const setLink = (id, href) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            const v = (href || '').trim();
-            if (!v) {
-                el.style.display = 'none';
-                return;
-            }
-            el.style.display = '';
-            el.href = v;
-        };
-        setLink('contact-page-facebook', c.facebook);
-        setLink('contact-page-twitter', c.twitter);
-        setLink('contact-page-instagram', c.instagram);
-        setLink('contact-page-youtube', c.youtube);
-    } else {
-        contactSection.style.display = 'none';
-        deliverySection.style.display = '';
-    }
+    const setLink = (id, href) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const v = (href || '').trim();
+        if (!v) {
+            el.style.display = 'none';
+            return;
+        }
+        el.style.display = '';
+        el.href = v;
+    };
+    setLink('contact-page-facebook', c.facebook);
+    setLink('contact-page-twitter', c.twitter);
+    setLink('contact-page-instagram', c.instagram);
+    setLink('contact-page-youtube', c.youtube);
 }
 
 // Khởi tạo ứng dụng
@@ -275,16 +260,16 @@ document.addEventListener('DOMContentLoaded', function() {
     initHomeNews();
 
     renderSiteFooter();
-    initContactViewOnDeliveryPage();
+    initContactPage();
 
     window.addEventListener('contactInfoUpdated', function() {
         renderSiteFooter();
-        initContactViewOnDeliveryPage();
+        initContactPage();
     });
     window.addEventListener('storage', function(e) {
         if (e && e.key === CONTACT_INFO_STORAGE_KEY) {
             renderSiteFooter();
-            initContactViewOnDeliveryPage();
+            initContactPage();
         }
     });
 });
@@ -665,7 +650,7 @@ function initChatbot() {
                     instagram ? `Instagram: ${instagram}` : '',
                     youtube ? `YouTube: ${youtube}` : '',
                     '',
-                    'Bạn cũng có thể xem trang Liên hệ tại: delivery.html?view=contact'
+                    'Bạn cũng có thể xem trang Liên hệ tại: contact.html'
                 ].filter(Boolean);
                 addMsg(lines.join('\n'), 'bot');
                 return;
