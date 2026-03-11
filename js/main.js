@@ -677,8 +677,7 @@ function initChatbot() {
                     twitter ? `X (Twitter): ${twitter}` : '',
                     instagram ? `Instagram: ${instagram}` : '',
                     youtube ? `YouTube: ${youtube}` : '',
-                    '',
-                    'Bạn cũng có thể xem trang Liên hệ tại: contact.html'
+                    ''
                 ].filter(Boolean);
                 addMsg(lines.join('\n'), 'bot');
                 return;
