@@ -292,7 +292,7 @@ function getRangeLabel(range) {
 }
 
 let analyticsRevenueChart = null;
-let analyticsTrafficSourceChart = null;
+let analyticsTrafficChart = null;
 let analyticsOrdersSourceChart = null;
 let analyticsFunnelChart = null;
 
@@ -543,20 +543,98 @@ function renderDoughnutChart(canvasId, chartRefGetter, chartRefSetter, labels, v
     chartRefSetter(chart);
 }
 
-function renderTrafficSourceChart(range) {
+function renderBarChart(canvasId, chartRefGetter, chartRefSetter, labels, datasets, tooltipType) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    if (typeof Chart === 'undefined') return;
+
+    const prev = chartRefGetter();
+    if (prev) {
+        prev.destroy();
+        chartRefSetter(null);
+    }
+
+    const chart = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => {
+                            const v = parseInt(ctx.raw) || 0;
+                            if (tooltipType === 'currency') return `${ctx.dataset.label}: ${formatCurrencyVnd(v)}`;
+                            return `${ctx.dataset.label}: ${v}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(148, 163, 184, 0.25)' }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+    chartRefSetter(chart);
+}
+
+function renderTrafficChart(range) {
     const events = getAnalyticsEvents();
     const { start, end } = getRangeWindow(range);
     const inRange = filterByPeriod(events, getEventDate, start, end);
     const pv = inRange.filter(e => e.event_name === 'page_view' || e.type === 'page_view');
-    const sources = getSourcesList();
-    const counts = sources.map(s => pv.filter(e => normalizeSource(e.source) === s).length);
-    renderPieChart(
-        'analytics-traffic-source-chart',
-        () => analyticsTrafficSourceChart,
-        v => (analyticsTrafficSourceChart = v),
-        sources.map(getSourceLabel),
-        counts,
-        'Total Page View per Source'
+    const byPage = new Map();
+    pv.forEach(e => {
+        const page = String(e.page || e.path || e.url || e.pathname || '').trim() || '(unknown)';
+        const sessionId = String(e.session_id || e.sessionId || '').trim() || '(unknown)';
+        if (!byPage.has(page)) byPage.set(page, { pageViews: 0, sessions: new Set() });
+        const row = byPage.get(page);
+        row.pageViews += 1;
+        row.sessions.add(sessionId);
+    });
+
+    const rows = Array.from(byPage.entries())
+        .map(([page, v]) => ({ page, pageViews: v.pageViews, sessions: v.sessions.size }))
+        .sort((a, b) => b.pageViews - a.pageViews);
+    const top = rows.slice(0, 8);
+
+    const labels = top.map(r => r.page);
+    const datasets = [
+        {
+            label: 'Sessions',
+            data: top.map(r => r.sessions),
+            backgroundColor: 'rgba(34, 197, 94, 0.55)',
+            borderColor: '#22c55e',
+            borderWidth: 1,
+            borderRadius: 8
+        },
+        {
+            label: 'Page Views',
+            data: top.map(r => r.pageViews),
+            backgroundColor: 'rgba(106, 90, 249, 0.55)',
+            borderColor: '#6a5af9',
+            borderWidth: 1,
+            borderRadius: 8
+        }
+    ];
+
+    renderBarChart(
+        'analytics-traffic-chart',
+        () => analyticsTrafficChart,
+        v => (analyticsTrafficChart = v),
+        labels,
+        datasets
     );
 }
 
@@ -975,7 +1053,7 @@ function renderAnalytics() {
     renderRevenueChart(granularity, ordersAll);
     renderRecentOrders(ordersAll);
     renderTopProducts(orders);
-    renderTrafficSourceChart(range);
+    renderTrafficChart(range);
     renderConfirmedOrdersSourceChart(range, ordersAll);
     renderCustomerFunnelChart(range);
 }
