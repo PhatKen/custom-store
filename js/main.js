@@ -815,10 +815,6 @@ function showProductDetailModal(product) {
                         </div>
                     </div>
                     <div class="product-detail-info">
-                        <div class="product-detail-top">
-                            <span class="product-category">${categoryNames[product.category]}</span>
-                            <span class="stock-pill ${isOutOfStock ? 'is-out' : 'is-in'}">${isOutOfStock ? 'Hết hàng' : 'Còn hàng'}</span>
-                        </div>
                         <h2 class="product-title">${product.name}</h2>
                         <div class="product-price">${currentPrice.toLocaleString('vi-VN')} VNĐ</div>
                         ${sizeOptionsHTML}
