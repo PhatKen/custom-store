@@ -290,9 +290,27 @@
                     <div class="form-section">
                         <div class="section-title">Thông tin cửa hàng</div>
                         <div class="form-grid form-grid-2">
-                            <div class="form-group span-2">
-                                <label for="contact-address">Địa chỉ cửa hàng</label>
-                                <input type="text" id="contact-address" placeholder="Nhập địa chỉ">
+                            <div class="form-group">
+                                <label for="contact-city">Tỉnh / Thành phố</label>
+                                <select id="contact-city">
+                                    <option value="">Chọn tỉnh/thành phố</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-district">Quận / Huyện</label>
+                                <select id="contact-district" disabled>
+                                    <option value="">Chọn quận/huyện</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-ward">Phường / Xã</label>
+                                <select id="contact-ward" disabled>
+                                    <option value="">Chọn phường/xã</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="contact-address-detail">Địa chỉ chi tiết</label>
+                                <input type="text" id="contact-address-detail" placeholder="Nhập số nhà, tên đường,...">
                             </div>
                             <div class="form-group">
                                 <label for="contact-phone">Số điện thoại</label>
