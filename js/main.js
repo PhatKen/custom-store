@@ -783,7 +783,7 @@ function showProductDetailModal(product) {
             <span class="stock-label">Size:</span>
             <div class="size-options">
                 ${sizes.map((size, index) => `
-                    <button class="size-option${index === 0 ? ' active' : ''}" data-size="${size}" data-index="${index}">${size}</button>
+                    <button class="size-option${index === 0 ? ' active' : ''}" data-size="${size}" data-index="${index}" ${isOutOfStock ? 'disabled' : ''}>${size}</button>
                 `).join('')}
             </div>
         </div>
@@ -815,13 +815,17 @@ function showProductDetailModal(product) {
                         </div>
                     </div>
                     <div class="product-detail-info">
-                        <span class="product-category">${categoryNames[product.category]}</span>
-                        <h2>${product.name}</h2>
+                        <div class="product-detail-top">
+                            <span class="product-category">${categoryNames[product.category]}</span>
+                            <span class="stock-pill ${isOutOfStock ? 'is-out' : 'is-in'}">${isOutOfStock ? 'Hết hàng' : 'Còn hàng'}</span>
+                        </div>
+                        <h2 class="product-title">${product.name}</h2>
                         <div class="product-price">${currentPrice.toLocaleString('vi-VN')} VNĐ</div>
                         ${sizeOptionsHTML}
                         <div class="product-description">
                             <h4>Mô tả sản phẩm</h4>
-                            <div class="product-description-content">${product.description}</div>
+                            <div class="product-description-content is-collapsed" id="product-description-content">${product.description}</div>
+                            <button type="button" class="btn-desc-toggle" id="product-desc-toggle" style="display:none;">Xem thêm</button>
                         </div>
                         <div class="product-stock">
                             <span class="stock-label">Tình trạng:</span>
@@ -845,8 +849,8 @@ function showProductDetailModal(product) {
                 </div>
                 <div class="modal-body">
                     <div class="recommended-products">
-                        <h3>Có thể bạn quan tâm</h3>
-                        <div class="recommended-grid" id="product-recommended-products"></div>
+                        <h3>Sản phẩm liên quan</h3>
+                        <div class="recommended-grid product-related-grid" id="product-recommended-products"></div>
                     </div>
                 </div>
             </div>
@@ -890,6 +894,7 @@ function showProductDetailModal(product) {
     if (hasSizes && sizeButtons.length) {
         sizeButtons.forEach(btn => {
             btn.addEventListener('click', function() {
+                if (this.hasAttribute('disabled')) return;
                 sizeButtons.forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 const idx = parseInt(this.getAttribute('data-index'), 10) || 0;
@@ -904,12 +909,36 @@ function showProductDetailModal(product) {
         }
     }
     
+    let descResizeHandler = null;
+    const closeProductDetailModal = () => {
+        const el = document.getElementById('product-detail-modal');
+        if (el && typeof el.__cleanup === 'function') {
+            el.__cleanup();
+            return;
+        }
+        if (descResizeHandler) {
+            window.removeEventListener('resize', descResizeHandler);
+            descResizeHandler = null;
+        }
+        const existing = document.getElementById('product-detail-modal');
+        if (existing) existing.remove();
+        document.body.classList.remove('modal-open');
+    };
+    modal.__cleanup = () => {
+        if (descResizeHandler) {
+            window.removeEventListener('resize', descResizeHandler);
+            descResizeHandler = null;
+        }
+        const existing = document.getElementById('product-detail-modal');
+        if (existing) existing.remove();
+        document.body.classList.remove('modal-open');
+    };
+
     // Thêm sự kiện cho nút đóng
     const closeButtons = document.querySelectorAll('#product-detail-modal .close-modal');
     closeButtons.forEach(button => {
         button.addEventListener('click', function() {
-            document.getElementById('product-detail-modal').remove();
-            document.body.classList.remove('modal-open');
+            closeProductDetailModal();
         });
     });
     
@@ -933,8 +962,7 @@ function showProductDetailModal(product) {
             }
             
             addToCart(product.id);
-            document.getElementById('product-detail-modal').remove();
-            document.body.classList.remove('modal-open');
+            closeProductDetailModal();
         });
     }
     
@@ -961,8 +989,7 @@ function showProductDetailModal(product) {
             addToCart(product.id);
             
             // Đóng modal và chuyển hướng đến trang checkout
-            document.getElementById('product-detail-modal').remove();
-            document.body.classList.remove('modal-open');
+            closeProductDetailModal();
             setTimeout(() => {
                 window.location.href = 'checkout.html';
             }, 300);
@@ -972,10 +999,38 @@ function showProductDetailModal(product) {
     // Đóng modal khi click ra ngoài
     document.getElementById('product-detail-modal').addEventListener('click', function(e) {
         if (e.target === this) {
-            this.remove();
-            document.body.classList.remove('modal-open');
+            closeProductDetailModal();
         }
     });
+
+    const descContent = document.getElementById('product-description-content');
+    const descToggle = document.getElementById('product-desc-toggle');
+    if (descContent && descToggle) {
+        const refreshToggleVisibility = () => {
+            descContent.classList.add('is-collapsed');
+            const hasOverflow = descContent.scrollHeight - descContent.clientHeight > 4;
+            descToggle.style.display = hasOverflow ? '' : 'none';
+            if (!hasOverflow) {
+                descContent.classList.remove('is-collapsed');
+                descToggle.textContent = 'Xem thêm';
+            } else {
+                descToggle.textContent = 'Xem thêm';
+            }
+        };
+        requestAnimationFrame(refreshToggleVisibility);
+        descToggle.addEventListener('click', function() {
+            const expanded = !descContent.classList.contains('is-collapsed');
+            if (expanded) {
+                descContent.classList.add('is-collapsed');
+                this.textContent = 'Xem thêm';
+            } else {
+                descContent.classList.remove('is-collapsed');
+                this.textContent = 'Thu gọn';
+            }
+        });
+        descResizeHandler = refreshToggleVisibility;
+        window.addEventListener('resize', descResizeHandler);
+    }
 
     const recoContainer = document.getElementById('product-recommended-products');
     if (recoContainer) {
@@ -1031,19 +1086,22 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
     const viewBtn = card.querySelector('.btn-view');
     viewBtn.addEventListener('click', function() {
         const existing = document.getElementById('product-detail-modal');
-        if (existing) existing.remove();
+        if (existing && typeof existing.__cleanup === 'function') existing.__cleanup();
+        else if (existing) existing.remove();
         viewProductDetail(recoProduct.id);
     });
     const img = card.querySelector('.product-image');
     img.addEventListener('click', function() {
         const existing = document.getElementById('product-detail-modal');
-        if (existing) existing.remove();
+        if (existing && typeof existing.__cleanup === 'function') existing.__cleanup();
+        else if (existing) existing.remove();
         viewProductDetail(recoProduct.id);
     });
     const nameEl = card.querySelector('.product-name');
     nameEl.addEventListener('click', function() {
         const existing = document.getElementById('product-detail-modal');
-        if (existing) existing.remove();
+        if (existing && typeof existing.__cleanup === 'function') existing.__cleanup();
+        else if (existing) existing.remove();
         viewProductDetail(recoProduct.id);
     });
     if (loggedIn) {
