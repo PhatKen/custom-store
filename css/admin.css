@@ -1164,15 +1164,78 @@
     width: 160px;
 }
 
-#edit-product-modal .editor-select[data-cmd="fontSizePx"] {
-    width: 80px;
-}
-
 #edit-product-modal .editor-select:focus {
     outline: none;
     border-color: #6a5af9;
     box-shadow: 0 0 0 4px rgba(106, 90, 249, 0.12);
     background: #fff;
+}
+
+#edit-product-modal .editor-fontsize {
+    width: 80px;
+    height: 36px;
+    display: grid;
+    grid-template-columns: 1fr 28px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    transition: 0.2s;
+}
+
+#edit-product-modal .editor-fontsize:focus-within {
+    border-color: #6a5af9;
+    box-shadow: 0 0 0 4px rgba(106, 90, 249, 0.12);
+}
+
+#edit-product-modal .editor-fontsize-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    padding: 6px 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    background: transparent;
+    text-align: center;
+}
+
+#edit-product-modal .editor-fontsize-input::-webkit-outer-spin-button,
+#edit-product-modal .editor-fontsize-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#edit-product-modal .editor-fontsize-input[type=number] {
+    -moz-appearance: textfield;
+}
+
+#edit-product-modal .editor-fontsize-buttons {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    border-left: 1px solid rgba(148, 163, 184, 0.35);
+    background: #f8fafc;
+}
+
+#edit-product-modal .editor-fontsize-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+    color: #64748b;
+    font-size: 10px;
+}
+
+#edit-product-modal .editor-fontsize-btn:hover {
+    background: rgba(106, 90, 249, 0.12);
+    color: #4f46e5;
+}
+
+#edit-product-modal .editor-fontsize-btn:active {
+    transform: translateY(0);
 }
 
 #edit-product-modal .editor-divider {
