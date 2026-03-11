@@ -930,6 +930,19 @@ function editProduct(productId) {
     modal.style.display = 'flex';
 
     const editDescEditorForToolbar = document.getElementById('edit-product-description-editor');
+    let editDescSavedRange = null;
+    if (editDescEditorForToolbar) {
+        const saveSelection = () => {
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return;
+            const r = sel.getRangeAt(0);
+            if (!editDescEditorForToolbar.contains(r.commonAncestorContainer)) return;
+            editDescSavedRange = r.cloneRange();
+        };
+        editDescEditorForToolbar.onmouseup = saveSelection;
+        editDescEditorForToolbar.onkeyup = saveSelection;
+        editDescEditorForToolbar.ontouchend = saveSelection;
+    }
 
     const focusEditorFromToolbar = el => {
         const toolbar = el.closest('.editor-toolbar');
@@ -941,6 +954,14 @@ function editProduct(productId) {
 
     const applyInlineStyleAtSelection = (editor, styleString) => {
         if (!editor) return;
+        if (editDescSavedRange) {
+            const sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(editDescSavedRange);
+            }
+        }
+        editor.focus();
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0) return;
         const range = selection.getRangeAt(0);
@@ -957,6 +978,7 @@ function editProduct(productId) {
             nextRange.collapse(true);
             selection.removeAllRanges();
             selection.addRange(nextRange);
+            editDescSavedRange = nextRange.cloneRange();
             return;
         }
     };
@@ -974,34 +996,79 @@ function editProduct(productId) {
 
     const applyFontFamily = (editor, font) => {
         if (!font) return;
+        if (editDescSavedRange) {
+            const sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(editDescSavedRange);
+            }
+        }
         const selection = window.getSelection();
         const hasSelection = selection && selection.rangeCount && !selection.getRangeAt(0).collapsed;
         if (hasSelection) {
             editor.focus();
             document.execCommand('fontName', false, font);
             normalizeFontTags(editor);
+            const sel = window.getSelection();
+            if (sel && sel.rangeCount) editDescSavedRange = sel.getRangeAt(0).cloneRange();
             return;
         }
         applyInlineStyleAtSelection(editor, `font-family:${font};`);
     };
 
-    const applyFontSizePx = (editor, px) => {
-        if (!px) return;
-        const selection = window.getSelection();
-        const hasSelection = selection && selection.rangeCount && !selection.getRangeAt(0).collapsed;
-        if (!hasSelection) {
-            applyInlineStyleAtSelection(editor, `font-size:${px}px;`);
-            return;
-        }
-        editor.focus();
-        document.execCommand('styleWithCSS', false, true);
-        document.execCommand('fontSize', false, '7');
-        editor.querySelectorAll('font[size="7"]').forEach(node => {
+    const stripFontSizeStyles = root => {
+        if (!root) return;
+        root.querySelectorAll('[style]').forEach(el => {
+            if (!el.style) return;
+            if (el.style.fontSize) {
+                el.style.fontSize = '';
+                if (!el.getAttribute('style')) el.removeAttribute('style');
+            }
+        });
+        root.querySelectorAll('font[size]').forEach(node => {
             const span = document.createElement('span');
-            span.style.fontSize = `${px}px`;
+            const face = node.getAttribute('face');
+            const color = node.getAttribute('color');
+            if (face) span.style.fontFamily = face;
+            if (color) span.style.color = color;
             span.innerHTML = node.innerHTML;
             node.replaceWith(span);
         });
+    };
+
+    const applyFontSizePx = (editor, px) => {
+        if (!px) return;
+        if (!editor) return;
+        if (editDescSavedRange) {
+            const sel = window.getSelection();
+            if (sel) {
+                sel.removeAllRanges();
+                sel.addRange(editDescSavedRange);
+            }
+        }
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0) return;
+        const range = selection.getRangeAt(0);
+        if (!editor.contains(range.commonAncestorContainer)) return;
+        editor.focus();
+        if (range.collapsed) {
+            applyInlineStyleAtSelection(editor, `font-size:${px}px;`);
+            return;
+        }
+
+        const extracted = range.extractContents();
+        const wrapper = document.createElement('span');
+        wrapper.style.fontSize = `${px}px`;
+        wrapper.appendChild(extracted);
+        stripFontSizeStyles(wrapper);
+        range.insertNode(wrapper);
+
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        newRange.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+        editDescSavedRange = newRange.cloneRange();
     };
 
     modal.querySelectorAll('.editor-toolbar button[data-cmd]').forEach(btn => {
