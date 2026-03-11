@@ -1205,8 +1205,8 @@
     margin: 0;
 }
 
-#edit-product-modal .editor-fontsize-input[type=number] {
-    -moz-appearance: textfield;
+#edit-product-modal .editor-fontsize-input[type="number"] {
+    appearance: textfield;
 }
 
 #edit-product-modal .editor-fontsize-buttons {
