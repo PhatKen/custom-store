@@ -765,9 +765,276 @@
 /* Add Product Form */
 #add-product-form {
     background-color: white;
-    border-radius: var(--border-radius);
-    padding: 30px;
-    box-shadow: var(--shadow);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 14px 30px rgba(17, 24, 39, 0.08);
+}
+
+#add-product-form .form-section {
+    background: #fff;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    margin-bottom: 20px;
+}
+
+#add-product-form .section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--dark-color);
+}
+
+#add-product-form .form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 20px;
+}
+
+#add-product-form .span-2 {
+    grid-column: 1 / -1;
+}
+
+#add-product-form .form-group label {
+    display: block;
+    font-weight: 500;
+    color: var(--dark-color);
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+#add-product-form .form-group input,
+#add-product-form .form-group select {
+    width: 100%;
+    min-height: 44px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    transition: 0.2s;
+    background: #fff;
+}
+
+#add-product-form .form-group select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 34px;
+}
+
+#add-product-form .form-group input:focus,
+#add-product-form .form-group select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+}
+
+#add-product-form .field-hint {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--gray-color);
+}
+
+#add-product-form .field-error {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #dc2626;
+    min-height: 16px;
+}
+
+#add-product-form .is-invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.10) !important;
+}
+
+#add-product-form .size-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#add-product-form .size-chip input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+#add-product-form .size-chip span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark-color);
+    background: #fff;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+#add-product-form .size-chip span:hover {
+    border-color: var(--primary-color);
+    background: rgba(109, 93, 252, 0.08);
+}
+
+#add-product-form .size-chip input:checked + span {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+    box-shadow: 0 8px 18px rgba(109, 93, 252, 0.18);
+}
+
+#add-product-form .editor-toolbar.compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    border-radius: 12px;
+    background: #fff;
+}
+
+#add-product-form .editor-toolbar.compact .btn-secondary {
+    padding: 8px 10px;
+    border-radius: 10px;
+    transition: 0.2s;
+}
+
+#add-product-form .editor-toolbar.compact .btn-secondary:hover {
+    background: rgba(109, 93, 252, 0.12);
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+#add-product-form .editor-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(148, 163, 184, 0.45);
+    margin: 0 2px;
+}
+
+#add-product-form .editor-surface {
+    min-height: 200px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    border: 1px solid #ddd;
+    transition: 0.2s;
+    line-height: 1.6;
+    font-size: 14px;
+    overflow-y: auto;
+}
+
+#add-product-form .editor-surface:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+}
+
+#add-product-form .add-image-upload {
+    border: none;
+    padding: 0;
+    text-align: left;
+    cursor: default;
+    margin-bottom: 0;
+}
+
+#add-product-form .image-dropzone {
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    padding: 26px 18px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #fff;
+    outline: none;
+}
+
+#add-product-form .image-dropzone.dragover {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+}
+
+#add-product-form .dropzone-placeholder i {
+    font-size: 46px;
+    color: #94a3b8;
+    margin-bottom: 10px;
+}
+
+#add-product-form .dropzone-placeholder p {
+    color: var(--gray-color);
+    margin-bottom: 6px;
+}
+
+#add-product-form .image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 12px;
+    margin-top: 14px;
+    text-align: left;
+}
+
+#add-product-form .preview-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    background: #f8fafc;
+    aspect-ratio: 1 / 1;
+}
+
+#add-product-form .preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+#add-product-form .preview-delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: #ef4444;
+    color: #fff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+#add-product-form .preview-delete-btn:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+#add-product-form .btn-upload {
+    border-radius: 12px;
+    padding: 10px 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    #add-product-form .form-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    #add-product-form .span-2 {
+        grid-column: auto;
+    }
 }
 
 .image-upload-container {
