@@ -931,6 +931,7 @@ function editProduct(productId) {
 
     const editDescEditorForToolbar = document.getElementById('edit-product-description-editor');
     let editDescSavedRange = null;
+    let detachEditorSelectionTracking = null;
     if (editDescEditorForToolbar) {
         const saveSelection = () => {
             const sel = window.getSelection();
@@ -942,6 +943,16 @@ function editProduct(productId) {
         editDescEditorForToolbar.onmouseup = saveSelection;
         editDescEditorForToolbar.onkeyup = saveSelection;
         editDescEditorForToolbar.ontouchend = saveSelection;
+
+        const onSelectionChange = () => {
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return;
+            const r = sel.getRangeAt(0);
+            if (!editDescEditorForToolbar.contains(r.commonAncestorContainer)) return;
+            editDescSavedRange = r.cloneRange();
+        };
+        document.addEventListener('selectionchange', onSelectionChange);
+        detachEditorSelectionTracking = () => document.removeEventListener('selectionchange', onSelectionChange);
     }
 
     const focusEditorFromToolbar = el => {
@@ -1088,11 +1099,57 @@ function editProduct(productId) {
             const editor = focusEditorFromToolbar(this) || editDescEditorForToolbar;
             if (cmd === 'fontName') {
                 applyFontFamily(editor, this.value);
-            } else if (cmd === 'fontSizePx') {
-                applyFontSizePx(editor, parseInt(this.value, 10));
             }
         };
     });
+
+    const fontSizeInput = modal.querySelector('.editor-fontsize-input');
+    const applyFontSizeFromControl = nextValue => {
+        const n = parseInt(nextValue, 10);
+        if (Number.isNaN(n)) return;
+        const clamped = Math.max(1, Math.min(72, n));
+        if (fontSizeInput) fontSizeInput.value = String(clamped);
+        applyFontSizePx(editDescEditorForToolbar, clamped);
+    };
+
+    const bumpFontSize = delta => {
+        const current = fontSizeInput ? parseInt(fontSizeInput.value, 10) : 14;
+        const base = Number.isNaN(current) ? 14 : current;
+        applyFontSizeFromControl(base + delta);
+    };
+
+    const fontSizeButtons = modal.querySelectorAll('.editor-fontsize-btn[data-action]');
+    fontSizeButtons.forEach(btn => {
+        btn.onmousedown = e => {
+            e.preventDefault();
+        };
+        btn.onclick = e => {
+            e.preventDefault();
+            const action = btn.getAttribute('data-action');
+            if (action === 'inc') bumpFontSize(1);
+            if (action === 'dec') bumpFontSize(-1);
+        };
+    });
+
+    if (fontSizeInput) {
+        fontSizeInput.onmousedown = e => {
+            e.stopPropagation();
+        };
+        fontSizeInput.onkeydown = e => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                bumpFontSize(1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                bumpFontSize(-1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFontSizeFromControl(fontSizeInput.value);
+            }
+        };
+        fontSizeInput.onchange = () => applyFontSizeFromControl(fontSizeInput.value);
+        fontSizeInput.onblur = () => applyFontSizeFromControl(fontSizeInput.value);
+    }
 
     const editImagePreview = document.getElementById('edit-image-preview');
     const editImageGrid = document.getElementById('edit-image-preview-grid');
@@ -1211,6 +1268,7 @@ function editProduct(productId) {
     const closeModal = () => {
         modal.style.display = 'none';
         cleanupObjectUrls();
+        if (detachEditorSelectionTracking) detachEditorSelectionTracking();
     };
     closeButtons.forEach(button => {
         button.onclick = closeModal;
