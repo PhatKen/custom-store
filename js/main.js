@@ -165,6 +165,10 @@ function detectTrafficSource() {
 function logAnalyticsEvent(type, data = {}) {
     const t = String(type || '').trim();
     if (!t) return;
+
+    if (data == null || typeof data !== 'object' || Array.isArray(data)) {
+        data = { productId: data != null ? String(data) : null };
+    }
     const sessionId = getAnalyticsSessionId();
     const source = detectTrafficSource();
     const createdAt = new Date().toISOString();
@@ -1216,10 +1220,6 @@ function viewProductDetail(productId) {
         showNotification('Sản phẩm không tồn tại!', 'error');
         return;
     }
-
-    if (typeof window.logAnalyticsEvent === 'function') {
-        window.logAnalyticsEvent('view', { productId: String(productId) });
-    }
     
     // Hiển thị modal chi tiết sản phẩm
     showProductDetailModal(product);
@@ -1227,6 +1227,9 @@ function viewProductDetail(productId) {
 
 // Hiển thị modal chi tiết sản phẩm
 function showProductDetailModal(product) {
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('view', String(product?.id ?? ''));
+    }
     const storedProducts = JSON.parse(localStorage.getItem('products')) || [];
     const stored = storedProducts.find(p => p.id == product.id);
     if (stored && typeof stored.description === 'string') {

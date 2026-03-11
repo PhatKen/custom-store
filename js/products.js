@@ -452,6 +452,10 @@ function addToCart(productId) {
     
     // Cập nhật số lượng giỏ hàng
     updateCartCount();
+
+    if (typeof window.logAnalyticsEvent === 'function') {
+        window.logAnalyticsEvent('add_to_cart', String(productId));
+    }
     
     // Hiển thị thông báo
     showNotification(`Đã thêm "${product.name}" vào giỏ hàng!`, 'success');
