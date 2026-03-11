@@ -1557,6 +1557,60 @@ function initAddProductForm() {
         });
     };
 
+    const stripFontFamilyStyles = root => {
+        if (!root) return;
+        root.querySelectorAll('[style]').forEach(el => {
+            if (!el.style) return;
+            if (el.style.fontFamily) {
+                el.style.fontFamily = '';
+                if (!el.getAttribute('style')) el.removeAttribute('style');
+            }
+        });
+        root.querySelectorAll('font[face]').forEach(node => {
+            const span = document.createElement('span');
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+    };
+
+    const applyFontFamily = font => {
+        if (!descEditor) return;
+        if (!font) return;
+        ensureSelection();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        if (!descEditor.contains(range.commonAncestorContainer)) return;
+
+        if (range.collapsed) {
+            const span = document.createElement('span');
+            span.style.fontFamily = font;
+            const text = document.createTextNode('\u200B');
+            span.appendChild(text);
+            range.insertNode(span);
+            const nextRange = document.createRange();
+            nextRange.setStart(text, 1);
+            nextRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            savedRange = nextRange.cloneRange();
+            return;
+        }
+
+        const extracted = range.extractContents();
+        const wrapper = document.createElement('span');
+        wrapper.style.fontFamily = font;
+        wrapper.appendChild(extracted);
+        stripFontFamilyStyles(wrapper);
+        range.insertNode(wrapper);
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        newRange.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        savedRange = newRange.cloneRange();
+    };
+
     const applyFontSizePx = px => {
         if (!descEditor) return;
         const n = parseInt(px, 10);
@@ -1608,6 +1662,14 @@ function initAddProductForm() {
             document.execCommand(cmd, false, null);
         };
     });
+
+    const fontFamilySelect = document.getElementById('add-product-fontfamily');
+    if (fontFamilySelect) {
+        fontFamilySelect.onmousedown = e => e.stopPropagation();
+        fontFamilySelect.onchange = function() {
+            applyFontFamily(this.value);
+        };
+    }
 
     const fontSizeInput = form.querySelector('.editor-fontsize-input');
     const fontSizeButtons = form.querySelectorAll('.editor-fontsize-btn[data-action]');
