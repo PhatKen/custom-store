@@ -2522,7 +2522,7 @@ function displayPostsTable(posts) {
             <td>${formattedDate}</td>
             <td>
                 <span class="status-badge ${post.status === 'visible' ? 'status-in-stock' : 'status-out-of-stock'}">
-                    ${post.status === 'visible' ? 'Công khai' : 'Ẩn'}
+                    ${post.status === 'visible' ? 'Công khai' : 'Nháp'}
                 </span>
             </td>
             <td>
@@ -2539,51 +2539,254 @@ function initPostEvents() {
     const closeBtns = modal ? modal.querySelectorAll('.close-modal') : [];
     if (!addBtn || !modal || !form) return;
     if (!hasPermission('posts', 'manage')) return;
-    document.querySelectorAll('.editor-toolbar [data-cmd]').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const cmd = this.getAttribute('data-cmd');
-            document.execCommand(cmd, false, null);
-        });
-    });
-    const colorInput = document.getElementById('editor-color');
-    if (colorInput) {
-        colorInput.addEventListener('input', function() {
-            document.execCommand('foreColor', false, this.value);
-        });
-    }
+    const editor = document.getElementById('post-content');
     const fontfamilySelect = document.getElementById('editor-fontfamily');
-    if (fontfamilySelect) {
-        fontfamilySelect.addEventListener('change', function() {
-            if (this.value) {
-                document.execCommand('fontName', false, this.value);
-            }
-        });
-    }
     const sizeSelect = document.getElementById('editor-fontsize');
-    if (sizeSelect) {
-        sizeSelect.addEventListener('change', function() {
-            if (this.value) {
-                document.execCommand('fontSize', false, this.value);
+    const imageInput = document.getElementById('editor-image');
+    const imageDropzone = document.getElementById('post-image-dropzone');
+    const imageGrid = document.getElementById('post-image-preview-grid');
+    const insertImageBtn = document.getElementById('post-insert-image-btn');
+
+    let savedRange = null;
+    const uploadedImages = new Map();
+
+    const saveSelection = () => {
+        if (!editor) return;
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const r = sel.getRangeAt(0);
+        if (!editor.contains(r.commonAncestorContainer)) return;
+        savedRange = r.cloneRange();
+    };
+
+    if (editor) {
+        editor.onmouseup = saveSelection;
+        editor.onkeyup = saveSelection;
+        editor.ontouchend = saveSelection;
+        const onSelectionChange = () => saveSelection();
+        document.addEventListener('selectionchange', onSelectionChange);
+    }
+
+    const ensureSelection = () => {
+        if (!editor) return;
+        editor.focus();
+        const sel = window.getSelection();
+        if (!sel) return;
+        if (savedRange) {
+            sel.removeAllRanges();
+            sel.addRange(savedRange);
+            return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        savedRange = range.cloneRange();
+    };
+
+    const stripStyleProp = (root, prop) => {
+        if (!root) return;
+        root.querySelectorAll('[style]').forEach(el => {
+            if (!el.style) return;
+            if (prop === 'font-size' && el.style.fontSize) {
+                el.style.fontSize = '';
+                if (!el.getAttribute('style')) el.removeAttribute('style');
+            }
+            if (prop === 'font-family' && el.style.fontFamily) {
+                el.style.fontFamily = '';
+                if (!el.getAttribute('style')) el.removeAttribute('style');
             }
         });
+        root.querySelectorAll('font[face]').forEach(node => {
+            const span = document.createElement('span');
+            span.style.fontFamily = node.getAttribute('face') || '';
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+        root.querySelectorAll('font[size]').forEach(node => {
+            const span = document.createElement('span');
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+    };
+
+    const applyInlineStyle = styleString => {
+        if (!editor) return;
+        ensureSelection();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        if (!editor.contains(range.commonAncestorContainer)) return;
+
+        if (range.collapsed) {
+            const span = document.createElement('span');
+            span.setAttribute('style', styleString);
+            const text = document.createTextNode('\u200B');
+            span.appendChild(text);
+            range.insertNode(span);
+            const nextRange = document.createRange();
+            nextRange.setStart(text, 1);
+            nextRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            savedRange = nextRange.cloneRange();
+            return;
+        }
+
+        const extracted = range.extractContents();
+        const wrapper = document.createElement('span');
+        wrapper.setAttribute('style', styleString);
+        wrapper.appendChild(extracted);
+        stripStyleProp(wrapper, styleString.startsWith('font-size') ? 'font-size' : 'font-family');
+        range.insertNode(wrapper);
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        newRange.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        savedRange = newRange.cloneRange();
+    };
+
+    const applyFontFamily = font => {
+        if (!font) return;
+        const sel = window.getSelection();
+        const hasSel = sel && sel.rangeCount && !sel.getRangeAt(0).collapsed;
+        if (hasSel) {
+            ensureSelection();
+            document.execCommand('fontName', false, font);
+            saveSelection();
+            return;
+        }
+        applyInlineStyle(`font-family:${font};`);
+    };
+
+    const applyFontSize = px => {
+        if (!px) return;
+        applyInlineStyle(`font-size:${px}px;`);
+    };
+
+    modal.querySelectorAll('.editor-toolbar button[data-cmd]').forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            ensureSelection();
+            const cmd = this.getAttribute('data-cmd');
+            if (!cmd) return;
+            document.execCommand(cmd, false, null);
+            saveSelection();
+        };
+    });
+    if (fontfamilySelect) {
+        fontfamilySelect.onchange = function() {
+            applyFontFamily(this.value);
+        };
     }
-    const imageInput = document.getElementById('editor-image');
-    if (imageInput) {
-        imageInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (!file) return;
+    if (sizeSelect) {
+        sizeSelect.onchange = function() {
+            applyFontSize(parseInt(this.value, 10));
+        };
+    }
+    const renderUploadedPreviews = () => {
+        if (!imageDropzone || !imageGrid) return;
+        const placeholder = imageDropzone.querySelector('.dropzone-placeholder');
+        imageGrid.innerHTML = '';
+        const entries = Array.from(uploadedImages.entries());
+        if (placeholder) placeholder.style.display = entries.length ? 'none' : '';
+        entries.forEach(([id, data]) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'preview-item';
+            const img = document.createElement('img');
+            img.src = data.dataUrl;
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'preview-delete-btn';
+            del.innerHTML = '&times;';
+            del.onclick = e => {
+                e.preventDefault();
+                e.stopPropagation();
+                uploadedImages.delete(id);
+                if (editor) {
+                    const node = editor.querySelector(`img[data-upload-id="${id}"]`);
+                    if (node) node.remove();
+                }
+                renderUploadedPreviews();
+            };
+            wrap.appendChild(img);
+            wrap.appendChild(del);
+            imageGrid.appendChild(wrap);
+        });
+    };
+
+    const insertImageAtCaret = (dataUrl, uploadId) => {
+        if (!editor) return;
+        ensureSelection();
+        const imgHtml = `<img src="${dataUrl}" data-upload-id="${uploadId}" style="max-width:100%;border-radius:12px;display:block;margin:10px 0;" />`;
+        document.execCommand('insertHTML', false, imgHtml);
+        saveSelection();
+    };
+
+    const addImageFiles = files => {
+        const list = Array.isArray(files) ? files : [];
+        list.forEach(file => {
+            if (!file || !file.type || !file.type.startsWith('image/')) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = document.createElement('img');
-                img.src = e.target.result;
-                img.style.maxWidth = '100%';
-                img.style.margin = '8px 0';
-                const editor = document.getElementById('post-content');
-                editor.appendChild(img);
+            const id = 'up_' + Date.now() + '_' + Math.random().toString(16).slice(2);
+            reader.onload = e => {
+                const dataUrl = e.target.result;
+                uploadedImages.set(id, { dataUrl });
+                insertImageAtCaret(dataUrl, id);
+                renderUploadedPreviews();
             };
             reader.readAsDataURL(file);
-            imageInput.value = '';
         });
+    };
+
+    const openFilePicker = () => {
+        if (imageInput) imageInput.click();
+    };
+
+    if (insertImageBtn) {
+        insertImageBtn.onclick = e => {
+            e.preventDefault();
+            openFilePicker();
+        };
+    }
+
+    if (imageInput) {
+        imageInput.onchange = function() {
+            const files = this.files ? Array.from(this.files) : [];
+            if (!files.length) return;
+            addImageFiles(files);
+            this.value = '';
+        };
+    }
+
+    if (imageDropzone) {
+        imageDropzone.onclick = e => {
+            if (e.target.closest('.preview-delete-btn')) return;
+            openFilePicker();
+        };
+        imageDropzone.ondragover = e => {
+            e.preventDefault();
+            imageDropzone.classList.add('dragover');
+        };
+        imageDropzone.ondragleave = e => {
+            e.preventDefault();
+            imageDropzone.classList.remove('dragover');
+        };
+        imageDropzone.ondrop = e => {
+            e.preventDefault();
+            imageDropzone.classList.remove('dragover');
+            const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+            if (!files.length) return;
+            addImageFiles(files);
+        };
+        imageDropzone.onkeydown = e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openFilePicker();
+            }
+        };
     }
     addBtn.addEventListener('click', function() {
         document.getElementById('post-editor-title').textContent = 'Thêm bài viết';
@@ -2592,13 +2795,21 @@ function initPostEvents() {
         document.getElementById('post-author').value = '';
         document.getElementById('post-status').value = 'visible';
         document.getElementById('post-content').innerHTML = '';
+        uploadedImages.clear();
+        renderUploadedPreviews();
         modal.style.display = 'flex';
     });
     closeBtns.forEach(btn => btn.addEventListener('click', function() {
         modal.style.display = 'none';
+        uploadedImages.clear();
+        renderUploadedPreviews();
     }));
     window.addEventListener('click', function(e) {
-        if (e.target === modal) modal.style.display = 'none';
+        if (e.target === modal) {
+            modal.style.display = 'none';
+            uploadedImages.clear();
+            renderUploadedPreviews();
+        }
     });
     form.addEventListener('submit', function(e) {
         e.preventDefault();
@@ -2661,6 +2872,8 @@ function initPostEvents() {
             document.getElementById('post-author').value = post.author;
             document.getElementById('post-status').value = post.status || 'visible';
             document.getElementById('post-content').innerHTML = post.content || '';
+            uploadedImages.clear();
+            renderUploadedPreviews();
             modal.style.display = 'flex';
         }
         if (deleteBtn) {
