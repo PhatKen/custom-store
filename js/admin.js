@@ -1369,125 +1369,248 @@ function initAddProductForm() {
     const uploadBtn = document.getElementById('upload-btn');
     const imageInput = document.getElementById('product-image');
     const imagePreview = document.getElementById('image-preview');
+    const imageGrid = document.getElementById('add-image-preview-grid');
+    const resetBtn = document.getElementById('reset-add-product-btn');
+    const descEditor = document.getElementById('product-description-editor');
     
     if (!form) return;
     if (!hasPermission('products', 'manage')) return;
-    
-    // Xử lý upload hình ảnh
-    uploadBtn.addEventListener('click', function() {
-        imageInput.click();
+
+    const nameInput = document.getElementById('product-name');
+    const categorySelect = document.getElementById('product-category');
+    const priceInput = document.getElementById('product-price');
+    const quantityInput = document.getElementById('product-quantity');
+
+    const nameErr = document.getElementById('error-product-name');
+    const categoryErr = document.getElementById('error-product-category');
+    const priceErr = document.getElementById('error-product-price');
+    const quantityErr = document.getElementById('error-product-quantity');
+    const descErr = document.getElementById('error-product-description');
+    const imagesErr = document.getElementById('error-product-images');
+
+    const setFieldError = (el, errEl, message) => {
+        if (errEl) errEl.textContent = message || '';
+        if (!el) return;
+        if (message) el.classList.add('is-invalid');
+        else el.classList.remove('is-invalid');
+    };
+
+    const clearAllErrors = () => {
+        setFieldError(nameInput, nameErr, '');
+        setFieldError(categorySelect, categoryErr, '');
+        setFieldError(priceInput, priceErr, '');
+        setFieldError(quantityInput, quantityErr, '');
+        if (descErr) descErr.textContent = '';
+        if (imagesErr) imagesErr.textContent = '';
+    };
+
+    const fileToDataUrl = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('read_failed'));
+        reader.readAsDataURL(file);
     });
-    
-    imageInput.addEventListener('change', function() {
-        if (this.files && this.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                imagePreview.classList.add('has-image');
+
+    let imageItems = [];
+    const objectUrls = new Set();
+
+    const cleanupObjectUrls = () => {
+        objectUrls.forEach(url => URL.revokeObjectURL(url));
+        objectUrls.clear();
+    };
+
+    const renderImages = () => {
+        if (!imagePreview || !imageGrid) return;
+        const placeholder = imagePreview.querySelector('.dropzone-placeholder');
+        imageGrid.innerHTML = '';
+        if (placeholder) placeholder.style.display = imageItems.length ? 'none' : '';
+        imageItems.forEach((it, idx) => {
+            const wrap = document.createElement('div');
+            wrap.className = 'preview-item';
+            const img = document.createElement('img');
+            img.src = it.previewUrl;
+            const del = document.createElement('button');
+            del.type = 'button';
+            del.className = 'preview-delete-btn';
+            del.innerHTML = '&times;';
+            del.onclick = e => {
+                e.preventDefault();
+                e.stopPropagation();
+                const removed = imageItems.splice(idx, 1)[0];
+                if (removed && removed.previewUrl) {
+                    URL.revokeObjectURL(removed.previewUrl);
+                    objectUrls.delete(removed.previewUrl);
+                }
+                renderImages();
             };
-            reader.readAsDataURL(this.files[0]);
-        }
+            wrap.appendChild(img);
+            wrap.appendChild(del);
+            imageGrid.appendChild(wrap);
+        });
+    };
+
+    const addFiles = files => {
+        const list = Array.isArray(files) ? files : [];
+        list.forEach(file => {
+            if (!file || !file.type || !file.type.startsWith('image/')) return;
+            if (imageItems.length >= 8) return;
+            const url = URL.createObjectURL(file);
+            objectUrls.add(url);
+            imageItems.push({ file, previewUrl: url });
+        });
+        renderImages();
+    };
+
+    const openFilePicker = () => {
+        if (imageInput) imageInput.click();
+    };
+
+    if (uploadBtn) uploadBtn.onclick = openFilePicker;
+
+    if (imageInput) {
+        imageInput.onchange = function() {
+            const files = this.files ? Array.from(this.files) : [];
+            if (!files.length) return;
+            addFiles(files);
+            this.value = '';
+        };
+    }
+
+    if (imagePreview) {
+        imagePreview.onclick = e => {
+            if (e.target.closest('.preview-delete-btn')) return;
+            openFilePicker();
+        };
+        imagePreview.ondragover = e => {
+            e.preventDefault();
+            imagePreview.classList.add('dragover');
+        };
+        imagePreview.ondragleave = e => {
+            e.preventDefault();
+            imagePreview.classList.remove('dragover');
+        };
+        imagePreview.ondrop = e => {
+            e.preventDefault();
+            imagePreview.classList.remove('dragover');
+            const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+            if (!files.length) return;
+            addFiles(files);
+        };
+        imagePreview.onkeydown = e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openFilePicker();
+            }
+        };
+    }
+
+    const editorToolbar = form.querySelectorAll('.editor-toolbar [data-cmd]');
+    editorToolbar.forEach(btn => {
+        btn.onclick = function(e) {
+            e.preventDefault();
+            const cmd = this.getAttribute('data-cmd');
+            if (!cmd) return;
+            if (descEditor) descEditor.focus();
+            document.execCommand(cmd, false, null);
+        };
     });
-    
-    // Kéo thả hình ảnh
-    imagePreview.addEventListener('dragover', function(e) {
+
+    const resetFormUI = () => {
+        clearAllErrors();
+        form.reset();
+        if (descEditor) descEditor.innerHTML = '';
+        cleanupObjectUrls();
+        imageItems = [];
+        renderImages();
+    };
+
+    if (resetBtn) {
+        resetBtn.onclick = e => {
+            e.preventDefault();
+            resetFormUI();
+        };
+    }
+
+    renderImages();
+
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        this.style.borderColor = 'var(--primary-color)';
-    });
-    
-    imagePreview.addEventListener('dragleave', function(e) {
-        e.preventDefault();
-        this.style.borderColor = 'var(--border-color)';
-    });
-    
-    imagePreview.addEventListener('drop', function(e) {
-        e.preventDefault();
-        this.style.borderColor = 'var(--border-color)';
+        clearAllErrors();
         
-        if (e.dataTransfer.files.length) {
-            imageInput.files = e.dataTransfer.files;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                imagePreview.classList.add('has-image');
-            };
-            reader.readAsDataURL(e.dataTransfer.files[0]);
-        }
-    });
-    
-    // Xử lý submit form
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Lấy dữ liệu từ form
-        const productName = document.getElementById('product-name').value;
-        const productCategory = document.getElementById('product-category').value;
-        const productPrice = parseInt(document.getElementById('product-price').value);
-        const productQuantity = parseInt(document.getElementById('product-quantity').value);
-        const productDescription = document.getElementById('product-description-editor').innerHTML.trim();
-        const imageFiles = imageInput.files ? Array.from(imageInput.files) : [];
+        const productName = (nameInput ? nameInput.value : '').trim();
+        const productCategory = categorySelect ? categorySelect.value : '';
+        const productPrice = parseInt(priceInput ? priceInput.value : '', 10);
+        const productQuantity = parseInt(quantityInput ? quantityInput.value : '', 10);
+        const productDescription = descEditor ? descEditor.innerHTML.trim() : '';
         const sizeContainer = document.getElementById('product-sizes');
         let sizes = [];
         if (sizeContainer) {
             sizes = Array.from(sizeContainer.querySelectorAll('input[type="checkbox"]:checked')).map(i => i.value);
         }
-        
-        // Kiểm tra dữ liệu
-        if (!productName || !productCategory || !productPrice || !productQuantity || !productDescription) {
-            showNotification('Vui lòng điền đầy đủ thông tin!', 'error');
+
+        let hasError = false;
+        if (!productName) {
+            setFieldError(nameInput, nameErr, 'Tên sản phẩm không được trống');
+            hasError = true;
+        }
+        if (!productCategory) {
+            setFieldError(categorySelect, categoryErr, 'Vui lòng chọn danh mục');
+            hasError = true;
+        }
+        if (Number.isNaN(productPrice) || productPrice <= 0) {
+            setFieldError(priceInput, priceErr, 'Giá phải là số lớn hơn 0');
+            hasError = true;
+        }
+        if (Number.isNaN(productQuantity) || productQuantity < 0) {
+            setFieldError(quantityInput, quantityErr, 'Số lượng phải ≥ 0');
+            hasError = true;
+        }
+        const plainDesc = (descEditor ? descEditor.textContent : '').trim();
+        if (!plainDesc) {
+            if (descErr) descErr.textContent = 'Mô tả sản phẩm không được trống';
+            hasError = true;
+        }
+        if (!imageItems.length) {
+            if (imagesErr) imagesErr.textContent = 'Vui lòng chọn ít nhất một hình ảnh sản phẩm';
+            hasError = true;
+        }
+        if (hasError) return;
+
+        let imagesData = [];
+        try {
+            imagesData = await Promise.all(imageItems.map(it => fileToDataUrl(it.file)));
+        } catch (err) {
+            showNotification('Không thể đọc hình ảnh. Vui lòng thử lại.', 'error');
             return;
         }
+        const mainImage = imagesData[0];
         
-        if (!imageFiles.length) {
-            showNotification('Vui lòng chọn ít nhất một hình ảnh sản phẩm!', 'error');
-            return;
+        const newProduct = {
+            id: generateProductId(),
+            name: productName,
+            category: productCategory,
+            price: productPrice,
+            quantity: productQuantity,
+            description: productDescription,
+            image: mainImage,
+            images: imagesData,
+            createdAt: new Date().toISOString(),
+            sizes: sizes.length ? sizes : undefined
+        };
+        
+        let products = JSON.parse(localStorage.getItem('products')) || [];
+        products.push(newProduct);
+        localStorage.setItem('products', JSON.stringify(products));
+        window.dispatchEvent(new Event('productsUpdated'));
+        
+        resetFormUI();
+        displayProductsTable(products);
+        loadDashboardData();
+        showNotification('Thêm sản phẩm thành công!', 'success');
+        const productsTab = document.querySelector('a[data-section="products-management"]');
+        if (productsTab) {
+            productsTab.click();
         }
-
-        const imagesData = [];
-        let loadedCount = 0;
-
-        imageFiles.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imagesData.push(e.target.result);
-                loadedCount++;
-                if (loadedCount === imageFiles.length) {
-                    const mainImage = imagesData[0];
-                    const newProduct = {
-                        id: generateProductId(),
-                        name: productName,
-                        category: productCategory,
-                        price: productPrice,
-                        quantity: productQuantity,
-                        description: productDescription,
-                        image: mainImage,
-                        images: imagesData,
-                        createdAt: new Date().toISOString(),
-                        sizes: sizes.length ? sizes : undefined
-                    };
-                    
-                    let products = JSON.parse(localStorage.getItem('products')) || [];
-                    products.push(newProduct);
-                    localStorage.setItem('products', JSON.stringify(products));
-                    window.dispatchEvent(new Event('productsUpdated'));
-                    form.reset();
-                    imagePreview.innerHTML = `
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Kéo thả nhiều hình ảnh vào đây hoặc nhấn để tải lên</p>
-                    `;
-                    imagePreview.classList.remove('has-image');
-                    displayProductsTable(products);
-                    loadDashboardData();
-                    showNotification('Thêm sản phẩm thành công!', 'success');
-                    const productsTab = document.querySelector('a[data-section="products-management"]');
-                    if (productsTab) {
-                        productsTab.click();
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        });
     });
 }
 
