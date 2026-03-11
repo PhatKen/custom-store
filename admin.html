@@ -788,75 +788,86 @@
 
     <!-- Post Editor Modal -->
     <div id="post-editor-modal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content">
             <div class="modal-header">
                 <h3 id="post-editor-title">Thêm bài viết</h3>
                 <span class="close-modal">&times;</span>
             </div>
             <div class="modal-body">
-                <form id="post-editor-form">
+                <form id="post-editor-form" class="post-editor-form">
                     <input type="hidden" id="post-id">
-                    <div class="form-group">
-                        <label for="post-title">Tiêu đề bài viết</label>
-                        <input type="text" id="post-title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="post-author">Tác giả</label>
-                        <input type="text" id="post-author" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="post-status">Trạng thái</label>
-                        <select id="post-status" required>
-                            <option value="visible">Công khai</option>
-                            <option value="hidden">Ẩn</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Nội dung</label>
-                        <div class="editor-toolbar" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;align-items:center;">
-                            <select id="editor-fontfamily" title="Kiểu chữ" class="editor-select">
-                                <option value="">Kiểu chữ</option>
-                                <option value="Arial">Arial</option>
-                                <option value="Times New Roman">Times New Roman</option>
-                                <option value="Courier New">Courier New</option>
-                                <option value="Georgia">Georgia</option>
-                                <option value="Verdana">Verdana</option>
-                                <option value="Comic Sans MS">Comic Sans MS</option>
-                                <option value="Trebuchet MS">Trebuchet MS</option>
-                                <option value="Impact">Impact</option>
-                            </select>
-                            <select id="editor-fontsize" title="Cỡ chữ" class="editor-select">
-                                <option value="">Cỡ chữ</option>
-                                <option value="1">8px</option>
-                                <option value="2">9px</option>
-                                <option value="3">10px</option>
-                                <option value="4">11px</option>
-                                <option value="5">12px</option>
-                                <option value="6">14px</option>
-                                <option value="7">16px</option>
-                                <option value="8">18px</option>
-                                <option value="9">20px</option>
-                                <option value="10">24px</option>
-                                <option value="11">26px</option>
-                                <option value="12">28px</option>
-                                <option value="13">36px</option>
-                                <option value="14">48px</option>
-                                <option value="15">72px</option>
-                            </select>
-                            <button type="button" class="btn-secondary" data-cmd="bold"><i class="fas fa-bold"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="italic"><i class="fas fa-italic"></i></button>
-                            <button type="button" class="btn-secondary" data-cmd="underline"><i class="fas fa-underline"></i></button>
-                            <input type="color" id="editor-color" title="Màu chữ">
-                            <label class="btn-secondary" style="cursor:pointer;">
-                                <i class="fas fa-image"></i> Ảnh
-                                <input type="file" id="editor-image" accept="image/*" style="display:none;">
-                            </label>
+                    <div class="form-section">
+                        <div class="section-title">Thông tin bài viết</div>
+                        <div class="form-grid form-grid-2">
+                            <div class="form-group span-2">
+                                <label for="post-title">Tiêu đề bài viết</label>
+                                <input type="text" id="post-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="post-author">Tác giả</label>
+                                <input type="text" id="post-author" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="post-status">Trạng thái</label>
+                                <select id="post-status" required>
+                                    <option value="visible">Công khai</option>
+                                    <option value="hidden">Nháp</option>
+                                </select>
+                            </div>
                         </div>
-                        <div id="post-content" contenteditable="true" style="min-height:300px;border:1px solid var(--border-color);border-radius:var(--border-radius);padding:12px;background:#fff;"></div>
                     </div>
-                    <div class="form-actions">
-                        <button type="submit" class="btn-primary">Lưu bài viết</button>
+
+                    <div class="form-section">
+                        <div class="section-title">Nội dung bài viết</div>
+                        <div class="form-group">
+                            <div class="editor-toolbar compact" data-editor="post-content">
+                                <select id="editor-fontfamily" class="editor-select" data-cmd="fontName" aria-label="Font">
+                                    <option value="">Font</option>
+                                    <option value="Arial">Arial</option>
+                                    <option value="Times New Roman">Times New Roman</option>
+                                    <option value="Roboto">Roboto</option>
+                                    <option value="Inter">Inter</option>
+                                    <option value="Verdana">Verdana</option>
+                                </select>
+                                <select id="editor-fontsize" class="editor-select" data-cmd="fontSizePx" aria-label="Cỡ chữ">
+                                    <option value="">Size</option>
+                                    <option value="12">12</option>
+                                    <option value="14">14</option>
+                                    <option value="16">16</option>
+                                    <option value="18">18</option>
+                                    <option value="24">24</option>
+                                    <option value="32">32</option>
+                                </select>
+                                <span class="editor-divider" aria-hidden="true"></span>
+                                <button type="button" class="btn-secondary" data-cmd="bold" title="Đậm"><i class="fas fa-bold"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="italic" title="Nghiêng"><i class="fas fa-italic"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="underline" title="Gạch chân"><i class="fas fa-underline"></i></button>
+                                <span class="editor-divider" aria-hidden="true"></span>
+                                <button type="button" class="btn-secondary" data-cmd="insertUnorderedList" title="Danh sách"><i class="fas fa-list-ul"></i></button>
+                                <button type="button" class="btn-secondary" data-cmd="insertOrderedList" title="Đánh số"><i class="fas fa-list-ol"></i></button>
+                                <span class="editor-divider" aria-hidden="true"></span>
+                                <button type="button" class="btn-secondary" id="post-insert-image-btn" title="Chèn ảnh"><i class="fas fa-image"></i> Ảnh</button>
+                            </div>
+
+                            <div class="post-image-upload">
+                                <div class="image-dropzone" id="post-image-dropzone" tabindex="0">
+                                    <div class="dropzone-placeholder">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>Kéo thả ảnh vào đây hoặc nhấn để tải lên</p>
+                                        <span class="field-hint">Ảnh sẽ được chèn vào nội dung</span>
+                                    </div>
+                                    <div class="image-preview-grid" id="post-image-preview-grid"></div>
+                                </div>
+                                <input type="file" id="editor-image" accept="image/*" multiple hidden>
+                            </div>
+
+                            <div id="post-content" class="editor-surface post-editor-content" contenteditable="true"></div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer post-modal-footer">
                         <button type="button" class="btn-secondary close-modal">Hủy</button>
+                        <button type="submit" class="btn-primary">Lưu bài viết</button>
                     </div>
                 </form>
             </div>
