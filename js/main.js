@@ -189,17 +189,26 @@ function initChatbot() {
     panel.id = 'chat-panel';
     panel.innerHTML = `
         <div class="chat-header">
-            <div style="display:flex;align-items:center;gap:8px;">
-                <i class="fas fa-robot"></i>
-                <span>Trợ lý Custom Store</span>
+            <div class="chat-header-left">
+                <div class="chat-header-avatar" aria-hidden="true">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="chat-header-meta">
+                    <div class="chat-header-title">Trợ lý Custom Store</div>
+                    <div class="chat-header-status">
+                        <span class="chat-online-dot" aria-hidden="true"></span>
+                        <span class="chat-online-text">Đang hoạt động</span>
+                    </div>
+                </div>
             </div>
-            <button style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;" id="chat-close">×</button>
+            <button class="chat-close" id="chat-close" type="button" aria-label="Đóng">×</button>
         </div>
-        <div class="chat-body" id="chat-body">
-        </div>
+        <div class="chat-body" id="chat-body"></div>
         <div class="chat-input">
-            <input type="text" id="chat-input-text" placeholder="Nhập câu hỏi của bạn...">
-            <button id="chat-send">Gửi</button>
+            <input type="text" id="chat-input-text" placeholder="Nhập câu hỏi của bạn…" autocomplete="off">
+            <button id="chat-send" type="button" aria-label="Gửi">
+                <i class="fas fa-paper-plane"></i>
+            </button>
         </div>
     `;
     document.body.appendChild(fab);
@@ -207,7 +216,10 @@ function initChatbot() {
     const body = panel.querySelector('#chat-body');
     const input = panel.querySelector('#chat-input-text');
     let lastDateKey = null;
-    function addMsg(text, who) {
+    let typingEl = null;
+    let typingTimer = null;
+
+    function addDateSeparator() {
         const now = new Date();
         const dateKey = now.toISOString().slice(0, 10);
         if (lastDateKey !== dateKey) {
@@ -219,37 +231,171 @@ function initChatbot() {
             sep.textContent = `${dateLabel} • ${timeLabel}`;
             body.appendChild(sep);
         }
-        const timeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-        const div = document.createElement('div');
-        div.className = `chat-message ${who}`;
-        div.innerHTML = `<div class="chat-message-text">${text}</div><span class="chat-message-time">${timeLabel}</span>`;
-        body.appendChild(div);
+    }
+
+    function scrollToBottom() {
         body.scrollTop = body.scrollHeight;
     }
-    function greet() {
-        addMsg('Xin chào! Tôi có thể giúp gì cho bạn?', 'bot');
+
+    function addMsg(content, who) {
+        addDateSeparator();
+        const now = new Date();
+        const timeLabel = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        const row = document.createElement('div');
+        row.className = `chat-message chat-message--${who}`;
+
+        if (who === 'bot') {
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-message-avatar';
+            avatar.setAttribute('aria-hidden', 'true');
+            avatar.innerHTML = '<i class="fas fa-robot"></i>';
+            row.appendChild(avatar);
+        }
+
+        const bubbleWrap = document.createElement('div');
+        bubbleWrap.className = 'chat-message-bubblewrap';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-message-bubble';
+
+        if (typeof content === 'string') {
+            const textEl = document.createElement('div');
+            textEl.className = 'chat-message-text';
+            textEl.textContent = content;
+            bubble.appendChild(textEl);
+        } else if (content instanceof HTMLElement) {
+            bubble.appendChild(content);
+        }
+
+        const time = document.createElement('div');
+        time.className = 'chat-message-time';
+        time.textContent = timeLabel;
+
+        bubbleWrap.appendChild(bubble);
+        bubbleWrap.appendChild(time);
+        row.appendChild(bubbleWrap);
+        body.appendChild(row);
+        scrollToBottom();
+    }
+
+    function showTyping() {
+        if (typingEl) return;
+        addDateSeparator();
+        const row = document.createElement('div');
+        row.className = 'chat-message chat-message--bot chat-message--typing';
+        row.setAttribute('aria-live', 'polite');
+        const avatar = document.createElement('div');
+        avatar.className = 'chat-message-avatar';
+        avatar.setAttribute('aria-hidden', 'true');
+        avatar.innerHTML = '<i class="fas fa-robot"></i>';
+        const bubbleWrap = document.createElement('div');
+        bubbleWrap.className = 'chat-message-bubblewrap';
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-message-bubble';
+        const text = document.createElement('div');
+        text.className = 'chat-typing';
+        text.innerHTML = `<span>Bot đang trả lời</span><span class="chat-dots" aria-hidden="true"><i></i><i></i><i></i></span>`;
+        bubble.appendChild(text);
+        bubbleWrap.appendChild(bubble);
+        row.appendChild(avatar);
+        row.appendChild(bubbleWrap);
+        typingEl = row;
+        body.appendChild(row);
+        scrollToBottom();
+    }
+
+    function hideTyping() {
+        if (typingTimer) {
+            clearTimeout(typingTimer);
+            typingTimer = null;
+        }
+        if (!typingEl) return;
+        typingEl.remove();
+        typingEl = null;
+    }
+
+    function createQuickActions() {
         const quick = document.createElement('div');
         quick.className = 'chat-quick';
         const chips = [
-            {t:'Tra cứu đơn hàng',q:'tra cứu đơn hàng'},
-            {t:'Sản phẩm rẻ nhất',q:'sản phẩm rẻ nhất'},
-            {t:'Sản phẩm mắc nhất',q:'sản phẩm mắc nhất'},
-            {t:'Danh mục Áo',q:'xem sản phẩm áo'},
-            {t:'Danh mục Quần',q:'xem sản phẩm quần'},
-            {t:'Danh mục Giày',q:'xem sản phẩm giày'},
-            {t:'Danh mục Nón',q:'xem sản phẩm nón'},
-            {t:'Phí vận chuyển',q:'phí vận chuyển'},
-            {t:'Chính sách đổi trả',q:'chính sách đổi trả'},
-            {t:'Liên hệ',q:'liên hệ cửa hàng'}
+            { t: 'Tra cứu đơn hàng', q: 'tra cứu đơn hàng', i: '📦' },
+            { t: 'Sản phẩm rẻ nhất', q: 'sản phẩm rẻ nhất', i: '🏷️' },
+            { t: 'Sản phẩm mắc nhất', q: 'sản phẩm mắc nhất', i: '💎' },
+            { t: 'Danh mục Áo', q: 'xem sản phẩm áo', i: '👕' },
+            { t: 'Danh mục Quần', q: 'xem sản phẩm quần', i: '👖' },
+            { t: 'Danh mục Giày', q: 'xem sản phẩm giày', i: '👟' },
+            { t: 'Danh mục Nón', q: 'xem sản phẩm nón', i: '🧢' },
+            { t: 'Phí vận chuyển', q: 'phí vận chuyển', i: '🚚' },
+            { t: 'Chính sách đổi trả', q: 'chính sách đổi trả', i: '🔁' },
+            { t: 'Liên hệ', q: 'liên hệ cửa hàng', i: '☎️' }
         ];
-        chips.forEach(c=>{
-            const chip = document.createElement('div');
+        chips.forEach(c => {
+            const chip = document.createElement('button');
+            chip.type = 'button';
             chip.className = 'chat-chip';
-            chip.textContent = c.t;
-            chip.addEventListener('click', function(){ handleUser(c.q); });
+            chip.innerHTML = `<span class="chat-chip-icon" aria-hidden="true">${c.i}</span><span class="chat-chip-text"></span>`;
+            chip.querySelector('.chat-chip-text').textContent = c.t;
+            chip.addEventListener('click', function() { handleUser(c.q); });
             quick.appendChild(chip);
         });
-        body.appendChild(quick);
+        return quick;
+    }
+
+    function createProductResult(products, options = {}) {
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-product-result';
+        const grid = document.createElement('div');
+        grid.className = 'chat-product-grid';
+        (products || []).forEach(p => {
+            const card = document.createElement('div');
+            card.className = 'chat-product-card';
+            const img = document.createElement('img');
+            const src = Array.isArray(p.images) && p.images.length ? p.images[0] : p.image;
+            img.src = src || '';
+            img.alt = p.name || 'Sản phẩm';
+            img.onerror = function() {
+                this.src = 'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
+            };
+            const meta = document.createElement('div');
+            meta.className = 'chat-product-meta';
+            const name = document.createElement('div');
+            name.className = 'chat-product-name';
+            name.textContent = p.name || '';
+            const price = document.createElement('div');
+            price.className = 'chat-product-price';
+            price.textContent = (typeof p.price === 'number' ? p.price.toLocaleString('vi-VN') + '₫' : '');
+            const actions = document.createElement('div');
+            actions.className = 'chat-product-actions';
+            const view = document.createElement('button');
+            view.type = 'button';
+            view.className = 'chat-product-view';
+            view.innerHTML = '<i class="fas fa-eye"></i><span>Xem sản phẩm</span>';
+            view.addEventListener('click', function() {
+                viewProductDetail(p.id);
+            });
+            actions.appendChild(view);
+            meta.appendChild(name);
+            meta.appendChild(price);
+            meta.appendChild(actions);
+            card.appendChild(img);
+            card.appendChild(meta);
+            grid.appendChild(card);
+        });
+        wrap.appendChild(grid);
+        if (options.link) {
+            const more = document.createElement('a');
+            more.className = 'chat-more-link';
+            more.href = options.link;
+            more.textContent = options.linkText || 'Xem thêm';
+            wrap.appendChild(more);
+        }
+        return wrap;
+    }
+
+    function greet() {
+        addMsg('Xin chào! Bạn muốn tìm sản phẩm, tra cứu đơn hàng hay xem chính sách?', 'bot');
+        body.appendChild(createQuickActions());
+        scrollToBottom();
     }
     function handleUser(text) {
         if (!text) return;
@@ -257,72 +403,77 @@ function initChatbot() {
         respond(text);
     }
     function respond(text) {
+        hideTyping();
+        showTyping();
         const t = text.toLowerCase();
-        if (t.includes('tra cứu') || t.includes('đơn hàng')) {
-            addMsg('Vui lòng nhập mã đơn hàng để tôi kiểm tra.', 'bot');
-            return;
-        }
-        const idMatch = t.match(/\b\d{6,}\b/);
-        if (idMatch) {
-            const id = idMatch[0];
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const order = orders.find(o=>String(o.id)===String(id));
-            if (!order) {
-                addMsg(`Không tìm thấy đơn hàng ${id}.`, 'bot');
-            } else {
-                addMsg(`Đơn ${id} hiện trạng thái: ${order.status}. Tổng: ${order.total.toLocaleString('vi-VN')} VNĐ.`, 'bot');
+        typingTimer = setTimeout(() => {
+            hideTyping();
+            if (t.includes('tra cứu') || t.includes('đơn hàng')) {
+                addMsg('Vui lòng nhập mã đơn hàng để tôi kiểm tra.', 'bot');
+                return;
             }
-            return;
-        }
-        const products = JSON.parse(localStorage.getItem('products')) || [];
-        if (t.includes('rẻ nhất')) {
-            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
-            const cheapest = products.reduce((min,p)=>p.price<min.price?p:min,products[0]);
-            addMsg(`Sản phẩm rẻ nhất: ${cheapest.name} • ${cheapest.price.toLocaleString('vi-VN')} VNĐ.`, 'bot');
-            return;
-        }
-        if (t.includes('mắc nhất') || t.includes('đắt nhất')) {
-            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
-            const mostExpensive = products.reduce((max,p)=>p.price>max.price?p:max,products[0]);
-            addMsg(`Sản phẩm mắc nhất: ${mostExpensive.name} • ${mostExpensive.price.toLocaleString('vi-VN')} VNĐ.`, 'bot');
-            return;
-        }
-        if (t.includes('còn không')) {
-            if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
-            const found = products.find(p=>t.includes(p.name.toLowerCase()));
-            if (!found) {
-                addMsg('Bạn vui lòng nói rõ tên sản phẩm để tôi kiểm tra tồn kho.', 'bot');
-            } else {
-                addMsg(`${found.name}: ${found.quantity > 0 ? 'Còn hàng' : 'Hết hàng'} (Số lượng: ${found.quantity}).`, 'bot');
+            const idMatch = t.match(/\b\d{6,}\b/);
+            if (idMatch) {
+                const id = idMatch[0];
+                const orders = JSON.parse(localStorage.getItem('orders')) || [];
+                const order = orders.find(o => String(o.id) === String(id));
+                if (!order) {
+                    addMsg(`Không tìm thấy đơn hàng ${id}.`, 'bot');
+                } else {
+                    addMsg(`Đơn ${id}: ${order.status}. Tổng: ${order.total.toLocaleString('vi-VN')}₫.`, 'bot');
+                }
+                return;
             }
-            return;
-        }
-        const prodMatch = t.match(/(áo|quần|giày|nón)/);
-        if (prodMatch) {
-            const catMap = { 'áo':'ao', 'quần':'quan', 'giày':'giay', 'nón':'non' };
-            const cat = catMap[prodMatch[1]];
-            const listItems = products.filter(p=>p.category===cat);
-            if (listItems.length === 0) {
-                addMsg(`Chưa có sản phẩm trong danh mục ${prodMatch[1]}.`, 'bot');
-            } else {
-                const list = listItems.map(p=>`${p.name} • ${p.price.toLocaleString('vi-VN')} VNĐ`).join('<br>');
-                addMsg(`Các sản phẩm ${prodMatch[1]}:<br>${list}`, 'bot');
+            const products = JSON.parse(localStorage.getItem('products')) || [];
+            if (t.includes('rẻ nhất')) {
+                if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+                const cheapest = products.reduce((min, p) => p.price < min.price ? p : min, products[0]);
+                addMsg(createProductResult([cheapest]), 'bot');
+                return;
             }
-            return;
-        }
-        if (t.includes('phí vận chuyển') || t.includes('vận chuyển') || t.includes('ship')) {
-            addMsg('Phí vận chuyển nội thành mặc định 20.000 VNĐ, có thể thay đổi theo khuyến mãi.', 'bot');
-            return;
-        }
-        if (t.includes('đổi trả') || t.includes('chính sách')) {
-            addMsg('Đổi trả trong 7 ngày cho sản phẩm chưa qua sử dụng, còn tag và hóa đơn.', 'bot');
-            return;
-        }
-        if (t.includes('liên hệ') || t.includes('hotline') || t.includes('số điện thoại')) {
-            addMsg('Bạn liên hệ: 0123 456 789 hoặc email: info@customstore.com.', 'bot');
-            return;
-        }
-        addMsg('Tôi chưa hiểu yêu cầu. Bạn có thể thử: "tra cứu đơn hàng 16403013210203" hoặc "tồn kho áo".', 'bot');
+            if (t.includes('mắc nhất') || t.includes('đắt nhất')) {
+                if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+                const mostExpensive = products.reduce((max, p) => p.price > max.price ? p : max, products[0]);
+                addMsg(createProductResult([mostExpensive]), 'bot');
+                return;
+            }
+            if (t.includes('còn không')) {
+                if (products.length === 0) { addMsg('Hiện chưa có dữ liệu sản phẩm.', 'bot'); return; }
+                const found = products.find(p => t.includes((p.name || '').toLowerCase()));
+                if (!found) {
+                    addMsg('Bạn vui lòng nói rõ tên sản phẩm để tôi kiểm tra tồn kho.', 'bot');
+                } else {
+                    addMsg(`${found.name}: ${found.quantity > 0 ? 'Còn hàng' : 'Hết hàng'} (Số lượng: ${found.quantity}).`, 'bot');
+                }
+                return;
+            }
+            const prodMatch = t.match(/(áo|quần|giày|nón)/);
+            if (prodMatch) {
+                const catMap = { 'áo': 'ao', 'quần': 'quan', 'giày': 'giay', 'nón': 'non' };
+                const cat = catMap[prodMatch[1]];
+                const listItems = products.filter(p => p.category === cat);
+                if (listItems.length === 0) {
+                    addMsg(`Chưa có sản phẩm trong danh mục ${prodMatch[1]}.`, 'bot');
+                } else {
+                    const top = listItems.slice(0, 4);
+                    addMsg(createProductResult(top, { link: `products.html?category=${cat}`, linkText: 'Xem thêm trong danh mục' }), 'bot');
+                }
+                return;
+            }
+            if (t.includes('phí vận chuyển') || t.includes('vận chuyển') || t.includes('ship')) {
+                addMsg('Phí vận chuyển nội thành mặc định 20.000₫, có thể thay đổi theo khuyến mãi.', 'bot');
+                return;
+            }
+            if (t.includes('đổi trả') || t.includes('chính sách')) {
+                addMsg('Đổi trả trong 7 ngày cho sản phẩm chưa qua sử dụng, còn tag và hóa đơn.', 'bot');
+                return;
+            }
+            if (t.includes('liên hệ') || t.includes('hotline') || t.includes('số điện thoại')) {
+                addMsg('Bạn liên hệ: 0123 456 789 hoặc email: info@customstore.com.', 'bot');
+                return;
+            }
+            addMsg('Tôi chưa hiểu yêu cầu. Bạn có thể thử: "tra cứu đơn hàng 16403013210203" hoặc "xem sản phẩm áo".', 'bot');
+        }, 550);
     }
     fab.addEventListener('click', function(){
         panel.style.display = 'flex';
@@ -330,6 +481,7 @@ function initChatbot() {
     });
     panel.querySelector('#chat-close').addEventListener('click', function(){
         panel.style.display = 'none';
+        hideTyping();
     });
     panel.querySelector('#chat-send').addEventListener('click', function(){
         const v = input.value.trim();
