@@ -164,7 +164,15 @@
                 </div>
 
                 <div class="analytics-section">
-                    <h3>Doanh thu theo thời gian</h3>
+                    <div class="analytics-section-header">
+                        <h3>Doanh thu theo thời gian</h3>
+                        <select id="analytics-revenue-granularity" class="analytics-chart-filter" aria-label="Lọc doanh thu theo thời gian">
+                            <option value="12h">12 tiếng trước</option>
+                            <option value="day">Theo ngày</option>
+                            <option value="month">Theo tháng</option>
+                            <option value="year">Theo năm</option>
+                        </select>
+                    </div>
                     <div class="analytics-chart-container">
                         <canvas id="analytics-revenue-chart"></canvas>
                     </div>
