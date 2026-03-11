@@ -1504,16 +1504,155 @@ function initAddProductForm() {
         };
     }
 
-    const editorToolbar = form.querySelectorAll('.editor-toolbar [data-cmd]');
+    let savedRange = null;
+    if (descEditor) {
+        const saveSelection = () => {
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return;
+            const r = sel.getRangeAt(0);
+            if (!descEditor.contains(r.commonAncestorContainer)) return;
+            savedRange = r.cloneRange();
+        };
+        descEditor.onmouseup = saveSelection;
+        descEditor.onkeyup = saveSelection;
+        descEditor.ontouchend = saveSelection;
+        document.addEventListener('selectionchange', saveSelection);
+    }
+
+    const ensureSelection = () => {
+        if (!descEditor) return;
+        descEditor.focus();
+        const sel = window.getSelection();
+        if (!sel) return;
+        if (savedRange) {
+            sel.removeAllRanges();
+            sel.addRange(savedRange);
+            return;
+        }
+        const range = document.createRange();
+        range.selectNodeContents(descEditor);
+        range.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(range);
+        savedRange = range.cloneRange();
+    };
+
+    const stripFontSizeStyles = root => {
+        if (!root) return;
+        root.querySelectorAll('[style]').forEach(el => {
+            if (!el.style) return;
+            if (el.style.fontSize) {
+                el.style.fontSize = '';
+                if (!el.getAttribute('style')) el.removeAttribute('style');
+            }
+        });
+        root.querySelectorAll('font[size]').forEach(node => {
+            const span = document.createElement('span');
+            const face = node.getAttribute('face');
+            const color = node.getAttribute('color');
+            if (face) span.style.fontFamily = face;
+            if (color) span.style.color = color;
+            span.innerHTML = node.innerHTML;
+            node.replaceWith(span);
+        });
+    };
+
+    const applyFontSizePx = px => {
+        if (!descEditor) return;
+        const n = parseInt(px, 10);
+        if (Number.isNaN(n)) return;
+        const size = Math.max(1, Math.min(72, n));
+        ensureSelection();
+        const sel = window.getSelection();
+        if (!sel || sel.rangeCount === 0) return;
+        const range = sel.getRangeAt(0);
+        if (!descEditor.contains(range.commonAncestorContainer)) return;
+
+        if (range.collapsed) {
+            const span = document.createElement('span');
+            span.style.fontSize = `${size}px`;
+            const text = document.createTextNode('\u200B');
+            span.appendChild(text);
+            range.insertNode(span);
+            const nextRange = document.createRange();
+            nextRange.setStart(text, 1);
+            nextRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(nextRange);
+            savedRange = nextRange.cloneRange();
+            return;
+        }
+
+        const extracted = range.extractContents();
+        const wrapper = document.createElement('span');
+        wrapper.style.fontSize = `${size}px`;
+        wrapper.appendChild(extracted);
+        stripFontSizeStyles(wrapper);
+        range.insertNode(wrapper);
+        const newRange = document.createRange();
+        newRange.selectNodeContents(wrapper);
+        newRange.collapse(false);
+        sel.removeAllRanges();
+        sel.addRange(newRange);
+        savedRange = newRange.cloneRange();
+    };
+
+    const editorToolbar = form.querySelectorAll('.editor-toolbar button[data-cmd]');
     editorToolbar.forEach(btn => {
+        btn.onmousedown = e => e.preventDefault();
         btn.onclick = function(e) {
             e.preventDefault();
             const cmd = this.getAttribute('data-cmd');
             if (!cmd) return;
-            if (descEditor) descEditor.focus();
+            ensureSelection();
             document.execCommand(cmd, false, null);
         };
     });
+
+    const fontSizeInput = form.querySelector('.editor-fontsize-input');
+    const fontSizeButtons = form.querySelectorAll('.editor-fontsize-btn[data-action]');
+
+    const applyFontSizeFromControl = nextValue => {
+        const n = parseInt(nextValue, 10);
+        if (Number.isNaN(n)) return;
+        const clamped = Math.max(1, Math.min(72, n));
+        if (fontSizeInput) fontSizeInput.value = String(clamped);
+        applyFontSizePx(clamped);
+    };
+
+    const bumpFontSize = delta => {
+        const current = fontSizeInput ? parseInt(fontSizeInput.value, 10) : 14;
+        const base = Number.isNaN(current) ? 14 : current;
+        applyFontSizeFromControl(base + delta);
+    };
+
+    fontSizeButtons.forEach(btn => {
+        btn.onmousedown = e => e.preventDefault();
+        btn.onclick = e => {
+            e.preventDefault();
+            const action = btn.getAttribute('data-action');
+            if (action === 'inc') bumpFontSize(1);
+            if (action === 'dec') bumpFontSize(-1);
+        };
+    });
+
+    if (fontSizeInput) {
+        fontSizeInput.onmousedown = e => e.stopPropagation();
+        fontSizeInput.onkeydown = e => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                bumpFontSize(1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                bumpFontSize(-1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFontSizeFromControl(fontSizeInput.value);
+            }
+        };
+        fontSizeInput.onchange = () => applyFontSizeFromControl(fontSizeInput.value);
+        fontSizeInput.onblur = () => applyFontSizeFromControl(fontSizeInput.value);
+    }
 
     const resetFormUI = () => {
         clearAllErrors();
@@ -1522,6 +1661,7 @@ function initAddProductForm() {
         cleanupObjectUrls();
         imageItems = [];
         renderImages();
+        if (fontSizeInput) fontSizeInput.value = '14';
     };
 
     if (resetBtn) {
@@ -2541,7 +2681,8 @@ function initPostEvents() {
     if (!hasPermission('posts', 'manage')) return;
     const editor = document.getElementById('post-content');
     const fontfamilySelect = document.getElementById('editor-fontfamily');
-    const sizeSelect = document.getElementById('editor-fontsize');
+    const fontSizeInput = modal.querySelector('.editor-fontsize-input');
+    const fontSizeButtons = modal.querySelectorAll('.editor-fontsize-btn[data-action]');
     const imageInput = document.getElementById('editor-image');
     const imageDropzone = document.getElementById('post-image-dropzone');
     const imageGrid = document.getElementById('post-image-preview-grid');
@@ -2681,10 +2822,47 @@ function initPostEvents() {
             applyFontFamily(this.value);
         };
     }
-    if (sizeSelect) {
-        sizeSelect.onchange = function() {
-            applyFontSize(parseInt(this.value, 10));
+
+    const applyFontSizeFromControl = nextValue => {
+        const n = parseInt(nextValue, 10);
+        if (Number.isNaN(n)) return;
+        const clamped = Math.max(1, Math.min(72, n));
+        if (fontSizeInput) fontSizeInput.value = String(clamped);
+        applyFontSize(clamped);
+    };
+
+    const bumpFontSize = delta => {
+        const current = fontSizeInput ? parseInt(fontSizeInput.value, 10) : 14;
+        const base = Number.isNaN(current) ? 14 : current;
+        applyFontSizeFromControl(base + delta);
+    };
+
+    fontSizeButtons.forEach(btn => {
+        btn.onmousedown = e => e.preventDefault();
+        btn.onclick = e => {
+            e.preventDefault();
+            const action = btn.getAttribute('data-action');
+            if (action === 'inc') bumpFontSize(1);
+            if (action === 'dec') bumpFontSize(-1);
         };
+    });
+
+    if (fontSizeInput) {
+        fontSizeInput.onmousedown = e => e.stopPropagation();
+        fontSizeInput.onkeydown = e => {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                bumpFontSize(1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                bumpFontSize(-1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                applyFontSizeFromControl(fontSizeInput.value);
+            }
+        };
+        fontSizeInput.onchange = () => applyFontSizeFromControl(fontSizeInput.value);
+        fontSizeInput.onblur = () => applyFontSizeFromControl(fontSizeInput.value);
     }
     const renderUploadedPreviews = () => {
         if (!imageDropzone || !imageGrid) return;
@@ -2795,6 +2973,7 @@ function initPostEvents() {
         document.getElementById('post-author').value = '';
         document.getElementById('post-status').value = 'visible';
         document.getElementById('post-content').innerHTML = '';
+        if (fontSizeInput) fontSizeInput.value = '14';
         uploadedImages.clear();
         renderUploadedPreviews();
         modal.style.display = 'flex';
@@ -2872,6 +3051,7 @@ function initPostEvents() {
             document.getElementById('post-author').value = post.author;
             document.getElementById('post-status').value = post.status || 'visible';
             document.getElementById('post-content').innerHTML = post.content || '';
+            if (fontSizeInput) fontSizeInput.value = '14';
             uploadedImages.clear();
             renderUploadedPreviews();
             modal.style.display = 'flex';
