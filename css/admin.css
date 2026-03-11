@@ -913,6 +913,30 @@
     transform: translateY(-1px);
 }
 
+#add-product-form .editor-select {
+    height: 36px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    background: #f8fafc;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: 0.2s;
+    width: auto;
+}
+
+#add-product-form .editor-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+    background: #fff;
+}
+
+#add-product-form #add-product-fontfamily {
+    width: 160px;
+}
+
 #add-product-form .editor-fontsize {
     width: 80px;
     height: 36px;
