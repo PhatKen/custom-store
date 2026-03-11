@@ -1156,8 +1156,16 @@
     font-size: 13px;
     cursor: pointer;
     transition: 0.2s;
-    min-width: 140px;
+    min-width: 0;
     width: auto;
+}
+
+#edit-product-modal .editor-select[data-cmd="fontName"] {
+    width: 160px;
+}
+
+#edit-product-modal .editor-select[data-cmd="fontSizePx"] {
+    width: 80px;
 }
 
 #edit-product-modal .editor-select:focus {
@@ -1175,12 +1183,15 @@
 }
 
 #edit-product-modal .editor-surface {
-    min-height: 160px;
+    min-height: 200px;
     background: #fff;
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 10px;
+    padding: 16px;
     border: 1px solid #ddd;
     transition: 0.2s;
+    line-height: 1.6;
+    font-size: 14px;
+    overflow-y: auto;
 }
 
 #edit-product-modal .editor-surface:focus {
