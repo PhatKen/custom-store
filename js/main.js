@@ -118,6 +118,137 @@ function initializeSampleData() {
 // Gọi hàm khởi tạo dữ liệu
 initializeSampleData();
 
+const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
+
+function getDefaultContactInfo() {
+    return {
+        address: '123 Đường ABC, Quận XYZ, TP.HCM',
+        phone: '0123 456 789',
+        email: 'info@customstore.com',
+        facebook: '',
+        twitter: '',
+        instagram: '',
+        youtube: ''
+    };
+}
+
+function getContactInfo() {
+    const defaults = getDefaultContactInfo();
+    const stored = JSON.parse(localStorage.getItem(CONTACT_INFO_STORAGE_KEY) || 'null');
+    if (!stored || typeof stored !== 'object') return defaults;
+    return { ...defaults, ...stored };
+}
+
+function renderSiteFooter() {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const c = getContactInfo();
+    const year = new Date().getFullYear();
+    const safe = v => (v || '').trim();
+    const address = safe(c.address);
+    const phone = safe(c.phone);
+    const email = safe(c.email);
+    const facebook = safe(c.facebook);
+    const twitter = safe(c.twitter);
+    const instagram = safe(c.instagram);
+    const youtube = safe(c.youtube);
+
+    const socialItem = (href, iconClass) => {
+        const url = safe(href);
+        if (!url) return '';
+        return `<a href="${url}" target="_blank" rel="noopener"><i class="${iconClass}"></i></a>`;
+    };
+
+    footer.innerHTML = `
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <h3>Custom Store</h3>
+                    <p>Địa chỉ: ${address}</p>
+                    <p>Email: ${email}</p>
+                    <p>Điện thoại: ${phone}</p>
+                </div>
+                <div class="footer-col">
+                    <h3>Danh mục</h3>
+                    <ul>
+                        <li><a href="products.html?category=ao">Áo</a></li>
+                        <li><a href="products.html?category=quan">Quần</a></li>
+                        <li><a href="products.html?category=giay">Giày</a></li>
+                        <li><a href="products.html?category=non">Nón</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Liên kết</h3>
+                    <ul>
+                        <li><a href="index.html">Trang chủ</a></li>
+                        <li><a href="about.html">Về chúng tôi</a></li>
+                        <li><a href="delivery.html?view=contact">Liên hệ</a></li>
+                        <li><a href="cart.html">Giỏ hàng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Theo dõi chúng tôi</h3>
+                    <div class="social-icons">
+                        ${socialItem(facebook, 'fab fa-facebook')}
+                        ${socialItem(instagram, 'fab fa-instagram')}
+                        ${socialItem(twitter, 'fab fa-twitter')}
+                        ${socialItem(youtube, 'fab fa-youtube')}
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; ${year} Custom Store. Tất cả các quyền được bảo lưu.</p>
+            </div>
+        </div>
+    `;
+}
+
+function initContactViewOnDeliveryPage() {
+    const isDelivery = /\/delivery\.html$/i.test(window.location.pathname);
+    if (!isDelivery) return;
+
+    const url = new URL(window.location.href);
+    const view = url.searchParams.get('view');
+    const isContactView = view === 'contact' || /#lien-he|#contact/i.test(url.hash || '');
+    const deliverySection = document.querySelector('.delivery-section');
+    const contactSection = document.getElementById('contact-view');
+    if (!deliverySection || !contactSection) return;
+
+    if (isContactView) {
+        deliverySection.style.display = 'none';
+        contactSection.style.display = '';
+
+        const c = getContactInfo();
+        const setText = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = value || '';
+        };
+        setText('contact-page-address', c.address || '');
+        setText('contact-page-phone', c.phone || '');
+        setText('contact-page-email', c.email || '');
+
+        const setLink = (id, href) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const v = (href || '').trim();
+            if (!v) {
+                el.style.display = 'none';
+                return;
+            }
+            el.style.display = '';
+            el.href = v;
+        };
+        setLink('contact-page-facebook', c.facebook);
+        setLink('contact-page-twitter', c.twitter);
+        setLink('contact-page-instagram', c.instagram);
+        setLink('contact-page-youtube', c.youtube);
+    } else {
+        contactSection.style.display = 'none';
+        deliverySection.style.display = '';
+    }
+}
+
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', function() {
     // Khởi tạo menu mobile
@@ -142,6 +273,20 @@ document.addEventListener('DOMContentLoaded', function() {
     updateProductButtons();
 
     initHomeNews();
+
+    renderSiteFooter();
+    initContactViewOnDeliveryPage();
+
+    window.addEventListener('contactInfoUpdated', function() {
+        renderSiteFooter();
+        initContactViewOnDeliveryPage();
+    });
+    window.addEventListener('storage', function(e) {
+        if (e && e.key === CONTACT_INFO_STORAGE_KEY) {
+            renderSiteFooter();
+            initContactViewOnDeliveryPage();
+        }
+    });
 });
 
 // Khởi tạo menu mobile
@@ -468,8 +613,61 @@ function initChatbot() {
                 addMsg('Đổi trả trong 7 ngày cho sản phẩm chưa qua sử dụng, còn tag và hóa đơn.', 'bot');
                 return;
             }
-            if (t.includes('liên hệ') || t.includes('hotline') || t.includes('số điện thoại')) {
-                addMsg('Bạn liên hệ: 0123 456 789 hoặc email: info@customstore.com.', 'bot');
+            if (t.includes('liên hệ') || t.includes('hotline') || t.includes('số điện thoại') || t.includes('địa chỉ') || t.includes('email') || t.includes('facebook') || t.includes('instagram') || t.includes('youtube') || t.includes('twitter') || /\bx\b/.test(t)) {
+                const ci = getContactInfo();
+                const v = s => (s || '').trim();
+                const address = v(ci.address);
+                const phone = v(ci.phone);
+                const email = v(ci.email);
+                const facebook = v(ci.facebook);
+                const twitter = v(ci.twitter);
+                const instagram = v(ci.instagram);
+                const youtube = v(ci.youtube);
+
+                if (t.includes('facebook')) {
+                    addMsg(facebook ? `Facebook của Custom Store: ${facebook}` : 'Hiện chưa có link Facebook của cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('instagram')) {
+                    addMsg(instagram ? `Instagram của Custom Store: ${instagram}` : 'Hiện chưa có link Instagram của cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('youtube')) {
+                    addMsg(youtube ? `YouTube của Custom Store: ${youtube}` : 'Hiện chưa có link YouTube của cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('twitter') || /\bx\b/.test(t)) {
+                    addMsg(twitter ? `X (Twitter) của Custom Store: ${twitter}` : 'Hiện chưa có link X (Twitter) của cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('email')) {
+                    addMsg(email ? `Email cửa hàng: ${email}` : 'Hiện chưa có email của cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('địa chỉ')) {
+                    addMsg(address ? `📍 Địa chỉ cửa hàng: ${address}` : 'Hiện chưa có địa chỉ cửa hàng.', 'bot');
+                    return;
+                }
+                if (t.includes('hotline') || t.includes('số điện thoại')) {
+                    addMsg(phone ? `📞 Số điện thoại cửa hàng: ${phone}` : 'Hiện chưa có số điện thoại cửa hàng.', 'bot');
+                    return;
+                }
+
+                const lines = [
+                    'Bạn có thể liên hệ Custom Store qua:',
+                    address ? `📍 Địa chỉ: ${address}` : '',
+                    phone ? `📞 Số điện thoại: ${phone}` : '',
+                    email ? `📧 Email: ${email}` : '',
+                    '',
+                    'Theo dõi chúng tôi tại:',
+                    facebook ? `Facebook: ${facebook}` : '',
+                    twitter ? `X (Twitter): ${twitter}` : '',
+                    instagram ? `Instagram: ${instagram}` : '',
+                    youtube ? `YouTube: ${youtube}` : '',
+                    '',
+                    'Bạn cũng có thể xem trang Liên hệ tại: delivery.html?view=contact'
+                ].filter(Boolean);
+                addMsg(lines.join('\n'), 'bot');
                 return;
             }
             addMsg('Tôi chưa hiểu yêu cầu. Bạn có thể thử: "tra cứu đơn hàng 16403013210203" hoặc "xem sản phẩm áo".', 'bot');

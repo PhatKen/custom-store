@@ -2,7 +2,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     updateUserHeader();
     updateCartCount();
-    loadDeliveryStatus();
+    const url = new URL(window.location.href);
+    const view = url.searchParams.get('view');
+    const isContactView = view === 'contact' || /#lien-he|#contact/i.test(url.hash || '');
+    if (!isContactView) {
+        loadDeliveryStatus();
+    }
 });
 
 // Tải trạng thái giao hàng

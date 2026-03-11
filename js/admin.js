@@ -1,11 +1,12 @@
 const ADMIN_ROLE_CONFIG = {
     admin: {
-        sections: ['dashboard', 'analytics', 'products-management', 'add-product', 'orders', 'purchase-history', 'users', 'posts'],
+        sections: ['dashboard', 'analytics', 'products-management', 'add-product', 'orders', 'purchase-history', 'users', 'posts', 'contact-management'],
         permissions: {
             products: { manage: true },
             orders: { delete: true, updateStatus: true },
             users: { manage: true },
-            posts: { manage: true }
+            posts: { manage: true },
+            contact: { manage: true }
         }
     },
     staff_products: {
@@ -25,9 +26,10 @@ const ADMIN_ROLE_CONFIG = {
         permissions: {}
     },
     staff_marketing: {
-        sections: ['dashboard', 'posts'],
+        sections: ['dashboard', 'posts', 'contact-management'],
         permissions: {
-            posts: { manage: true }
+            posts: { manage: true },
+            contact: { manage: true }
         }
     }
 };
@@ -118,6 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadDashboardData();
     loadProductsForAdmin();
     initAddProductForm();
+    initContactManagement();
     loadOrders();
     loadUsers();
     initUserTableEvents();
@@ -1813,6 +1816,102 @@ function initAddProductForm() {
         if (productsTab) {
             productsTab.click();
         }
+    });
+}
+
+const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
+
+function getDefaultContactInfo() {
+    return {
+        address: '123 Đường ABC, Quận XYZ, TP.HCM',
+        phone: '0123 456 789',
+        email: 'info@customstore.com',
+        facebook: '',
+        twitter: '',
+        instagram: '',
+        youtube: ''
+    };
+}
+
+function getContactInfo() {
+    const defaults = getDefaultContactInfo();
+    const stored = JSON.parse(localStorage.getItem(CONTACT_INFO_STORAGE_KEY) || 'null');
+    if (!stored || typeof stored !== 'object') return defaults;
+    return { ...defaults, ...stored };
+}
+
+function saveContactInfo(next) {
+    localStorage.setItem(CONTACT_INFO_STORAGE_KEY, JSON.stringify(next));
+    window.dispatchEvent(new Event('contactInfoUpdated'));
+}
+
+function initContactManagement() {
+    const form = document.getElementById('contact-info-form');
+    const resetBtn = document.getElementById('contact-reset-btn');
+    if (!form) return;
+    if (!hasPermission('contact', 'manage') && !canAccessSection('contact-management')) return;
+
+    const addressInput = document.getElementById('contact-address');
+    const phoneInput = document.getElementById('contact-phone');
+    const emailInput = document.getElementById('contact-email');
+    const facebookInput = document.getElementById('contact-facebook');
+    const twitterInput = document.getElementById('contact-twitter');
+    const instagramInput = document.getElementById('contact-instagram');
+    const youtubeInput = document.getElementById('contact-youtube');
+
+    const fillForm = () => {
+        const data = getContactInfo();
+        if (addressInput) addressInput.value = data.address || '';
+        if (phoneInput) phoneInput.value = data.phone || '';
+        if (emailInput) emailInput.value = data.email || '';
+        if (facebookInput) facebookInput.value = data.facebook || '';
+        if (twitterInput) twitterInput.value = data.twitter || '';
+        if (instagramInput) instagramInput.value = data.instagram || '';
+        if (youtubeInput) youtubeInput.value = data.youtube || '';
+    };
+
+    fillForm();
+
+    if (resetBtn) {
+        resetBtn.onclick = e => {
+            e.preventDefault();
+            fillForm();
+            showNotification('Đã làm mới dữ liệu liên hệ', 'success');
+        };
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (!hasPermission('contact', 'manage') && !canAccessSection('contact-management')) {
+            showNotification('Bạn không có quyền quản lý liên hệ', 'error');
+            return;
+        }
+
+        const next = {
+            address: (addressInput ? addressInput.value : '').trim(),
+            phone: (phoneInput ? phoneInput.value : '').trim(),
+            email: (emailInput ? emailInput.value : '').trim(),
+            facebook: (facebookInput ? facebookInput.value : '').trim(),
+            twitter: (twitterInput ? twitterInput.value : '').trim(),
+            instagram: (instagramInput ? instagramInput.value : '').trim(),
+            youtube: (youtubeInput ? youtubeInput.value : '').trim()
+        };
+
+        if (!next.address) {
+            showNotification('Địa chỉ cửa hàng không được trống', 'error');
+            return;
+        }
+        if (!next.phone) {
+            showNotification('Số điện thoại không được trống', 'error');
+            return;
+        }
+        if (!next.email) {
+            showNotification('Email không được trống', 'error');
+            return;
+        }
+
+        saveContactInfo(next);
+        showNotification('Lưu thay đổi liên hệ thành công!', 'success');
     });
 }
 
