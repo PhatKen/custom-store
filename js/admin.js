@@ -1820,10 +1820,18 @@ function initAddProductForm() {
 }
 
 const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
+const CONTACT_PROVINCES_API_BASE = 'https://provinces.open-api.vn/api';
+let contactProvinces = null;
+const contactDistrictsByProvince = {};
+const contactWardsByDistrict = {};
 
 function getDefaultContactInfo() {
     return {
-        address: '123 Đường ABC, Quận XYZ, TP.HCM',
+        store_city: 'Thành phố Hồ Chí Minh',
+        store_district: 'Quận 1',
+        store_ward: 'Phường Bến Nghé',
+        store_address_detail: '123 Đường ABC',
+        address: '',
         phone: '0123 456 789',
         email: 'info@customstore.com',
         facebook: '',
@@ -1837,12 +1845,42 @@ function getContactInfo() {
     const defaults = getDefaultContactInfo();
     const stored = JSON.parse(localStorage.getItem(CONTACT_INFO_STORAGE_KEY) || 'null');
     if (!stored || typeof stored !== 'object') return defaults;
-    return { ...defaults, ...stored };
+    const merged = { ...defaults, ...stored };
+    if ((!merged.store_city && !merged.store_district && !merged.store_ward && !merged.store_address_detail) && typeof merged.address === 'string' && merged.address.includes(',')) {
+        const parts = merged.address.split(',').map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 4) {
+            merged.store_city = parts[parts.length - 1];
+            merged.store_district = parts[parts.length - 2];
+            merged.store_ward = parts[parts.length - 3];
+            merged.store_address_detail = parts.slice(0, parts.length - 3).join(', ');
+        } else if (parts.length === 3) {
+            merged.store_city = parts[2];
+            merged.store_district = parts[1];
+            merged.store_address_detail = parts[0];
+        } else if (parts.length === 2) {
+            merged.store_city = parts[1];
+            merged.store_address_detail = parts[0];
+        }
+    }
+    return merged;
 }
 
 function saveContactInfo(next) {
     localStorage.setItem(CONTACT_INFO_STORAGE_KEY, JSON.stringify(next));
     window.dispatchEvent(new Event('contactInfoUpdated'));
+}
+
+async function contactFetchJson(url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+        throw new Error('Request failed: ' + res.status);
+    }
+    return res.json();
+}
+
+function formatAddressParts(detail, ward, district, city) {
+    const safe = v => (v || '').trim();
+    return [safe(detail), safe(ward), safe(district), safe(city)].filter(Boolean).join(', ');
 }
 
 function initContactManagement() {
@@ -1851,7 +1889,10 @@ function initContactManagement() {
     if (!form) return;
     if (!hasPermission('contact', 'manage') && !canAccessSection('contact-management')) return;
 
-    const addressInput = document.getElementById('contact-address');
+    const citySelect = document.getElementById('contact-city');
+    const districtSelect = document.getElementById('contact-district');
+    const wardSelect = document.getElementById('contact-ward');
+    const addressDetailInput = document.getElementById('contact-address-detail');
     const phoneInput = document.getElementById('contact-phone');
     const emailInput = document.getElementById('contact-email');
     const facebookInput = document.getElementById('contact-facebook');
@@ -1859,9 +1900,127 @@ function initContactManagement() {
     const instagramInput = document.getElementById('contact-instagram');
     const youtubeInput = document.getElementById('contact-youtube');
 
+    const setSelectState = (select, placeholder, disabled) => {
+        if (!select) return;
+        select.innerHTML = `<option value="">${placeholder}</option>`;
+        select.disabled = !!disabled;
+    };
+
+    const loadWards = async (districtCode, applyInitial) => {
+        if (!wardSelect) return;
+        if (!districtCode) {
+            setSelectState(wardSelect, 'Chọn phường/xã', true);
+            return;
+        }
+        const initialWardName = wardSelect.dataset.initialName || '';
+        setSelectState(wardSelect, 'Đang tải phường/xã...', true);
+        try {
+            if (!contactWardsByDistrict[districtCode]) {
+                const data = await contactFetchJson(`${CONTACT_PROVINCES_API_BASE}/d/${districtCode}?depth=2`);
+                contactWardsByDistrict[districtCode] = data.wards || [];
+            }
+            const wards = contactWardsByDistrict[districtCode];
+            wardSelect.innerHTML = '<option value="">Chọn phường/xã</option>';
+            wards
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+                .forEach(w => {
+                    const opt = document.createElement('option');
+                    opt.value = String(w.code);
+                    opt.textContent = w.name;
+                    wardSelect.appendChild(opt);
+                });
+            wardSelect.disabled = false;
+            if (applyInitial && initialWardName) {
+                const opt = Array.from(wardSelect.options).find(o => o.textContent === initialWardName);
+                if (opt) wardSelect.value = opt.value;
+            }
+        } catch (err) {
+            setSelectState(wardSelect, 'Không tải được phường/xã', true);
+            showNotification('Không tải được danh sách phường/xã. Vui lòng thử lại.', 'error');
+        }
+    };
+
+    const loadDistricts = async (provinceCode, applyInitial) => {
+        if (!districtSelect || !wardSelect) return;
+        if (!provinceCode) {
+            setSelectState(districtSelect, 'Chọn quận/huyện', true);
+            setSelectState(wardSelect, 'Chọn phường/xã', true);
+            return;
+        }
+        const initialDistrictName = districtSelect.dataset.initialName || '';
+        setSelectState(districtSelect, 'Đang tải quận/huyện...', true);
+        setSelectState(wardSelect, 'Chọn phường/xã', true);
+        try {
+            if (!contactDistrictsByProvince[provinceCode]) {
+                const data = await contactFetchJson(`${CONTACT_PROVINCES_API_BASE}/p/${provinceCode}?depth=2`);
+                contactDistrictsByProvince[provinceCode] = data.districts || [];
+            }
+            const districts = contactDistrictsByProvince[provinceCode];
+            districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
+            districts
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+                .forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = String(d.code);
+                    opt.textContent = d.name;
+                    districtSelect.appendChild(opt);
+                });
+            districtSelect.disabled = false;
+            if (applyInitial && initialDistrictName) {
+                const opt = Array.from(districtSelect.options).find(o => o.textContent === initialDistrictName);
+                if (opt) {
+                    districtSelect.value = opt.value;
+                    await loadWards(opt.value, true);
+                }
+            }
+        } catch (err) {
+            setSelectState(districtSelect, 'Không tải được quận/huyện', true);
+            showNotification('Không tải được danh sách quận/huyện. Vui lòng thử lại.', 'error');
+        }
+    };
+
+    const loadProvinces = async () => {
+        if (!citySelect || !districtSelect || !wardSelect) return;
+        const initialCityName = citySelect.dataset.initialName || '';
+        setSelectState(citySelect, 'Đang tải tỉnh/thành...', true);
+        setSelectState(districtSelect, 'Chọn quận/huyện', true);
+        setSelectState(wardSelect, 'Chọn phường/xã', true);
+        try {
+            if (!contactProvinces) {
+                contactProvinces = await contactFetchJson(`${CONTACT_PROVINCES_API_BASE}/p/`);
+            }
+            citySelect.innerHTML = '<option value="">Chọn tỉnh/thành phố</option>';
+            contactProvinces
+                .slice()
+                .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+                .forEach(p => {
+                    const opt = document.createElement('option');
+                    opt.value = String(p.code);
+                    opt.textContent = p.name;
+                    citySelect.appendChild(opt);
+                });
+            citySelect.disabled = false;
+            if (initialCityName) {
+                const opt = Array.from(citySelect.options).find(o => o.textContent === initialCityName);
+                if (opt) {
+                    citySelect.value = opt.value;
+                    await loadDistricts(opt.value, true);
+                }
+            }
+        } catch (err) {
+            setSelectState(citySelect, 'Không tải được tỉnh/thành', true);
+            showNotification('Không tải được danh sách tỉnh/thành. Vui lòng thử lại.', 'error');
+        }
+    };
+
     const fillForm = () => {
         const data = getContactInfo();
-        if (addressInput) addressInput.value = data.address || '';
+        if (citySelect) citySelect.dataset.initialName = data.store_city || '';
+        if (districtSelect) districtSelect.dataset.initialName = data.store_district || '';
+        if (wardSelect) wardSelect.dataset.initialName = data.store_ward || '';
+        if (addressDetailInput) addressDetailInput.value = data.store_address_detail || '';
         if (phoneInput) phoneInput.value = data.phone || '';
         if (emailInput) emailInput.value = data.email || '';
         if (facebookInput) facebookInput.value = data.facebook || '';
@@ -1871,11 +2030,25 @@ function initContactManagement() {
     };
 
     fillForm();
+    loadProvinces();
+
+    if (citySelect && districtSelect && wardSelect) {
+        citySelect.addEventListener('change', function() {
+            districtSelect.dataset.initialName = '';
+            wardSelect.dataset.initialName = '';
+            loadDistricts(this.value, false);
+        });
+        districtSelect.addEventListener('change', function() {
+            wardSelect.dataset.initialName = '';
+            loadWards(this.value, false);
+        });
+    }
 
     if (resetBtn) {
         resetBtn.onclick = e => {
             e.preventDefault();
             fillForm();
+            loadProvinces();
             showNotification('Đã làm mới dữ liệu liên hệ', 'success');
         };
     }
@@ -1887,8 +2060,18 @@ function initContactManagement() {
             return;
         }
 
+        const city = citySelect && citySelect.selectedIndex > 0 ? citySelect.options[citySelect.selectedIndex].textContent : '';
+        const district = districtSelect && districtSelect.selectedIndex > 0 ? districtSelect.options[districtSelect.selectedIndex].textContent : '';
+        const ward = wardSelect && wardSelect.selectedIndex > 0 ? wardSelect.options[wardSelect.selectedIndex].textContent : '';
+        const addressDetail = (addressDetailInput ? addressDetailInput.value : '').trim();
+        const address = formatAddressParts(addressDetail, ward, district, city);
+
         const next = {
-            address: (addressInput ? addressInput.value : '').trim(),
+            store_city: city.trim(),
+            store_district: district.trim(),
+            store_ward: ward.trim(),
+            store_address_detail: addressDetail,
+            address,
             phone: (phoneInput ? phoneInput.value : '').trim(),
             email: (emailInput ? emailInput.value : '').trim(),
             facebook: (facebookInput ? facebookInput.value : '').trim(),
@@ -1897,8 +2080,8 @@ function initContactManagement() {
             youtube: (youtubeInput ? youtubeInput.value : '').trim()
         };
 
-        if (!next.address) {
-            showNotification('Địa chỉ cửa hàng không được trống', 'error');
+        if (!next.store_city || !next.store_district || !next.store_ward || !next.store_address_detail) {
+            showNotification('Vui lòng nhập đầy đủ địa chỉ cửa hàng', 'error');
             return;
         }
         if (!next.phone) {

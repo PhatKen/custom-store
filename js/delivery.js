@@ -110,9 +110,14 @@ function displayOrderInfo(order) {
 
 // Hiển thị thông tin người nhận
 function displayReceiverInfo(order) {
-    document.getElementById('receiver-name').textContent = order.deliveryInfo.fullname;
-    document.getElementById('receiver-phone').textContent = order.deliveryInfo.phone;
-    document.getElementById('receiver-address').textContent = order.deliveryInfo.address;
+    const d = order && order.deliveryInfo ? order.deliveryInfo : {};
+    document.getElementById('receiver-name').textContent = d.fullname || '--';
+    document.getElementById('receiver-phone').textContent = d.phone || '--';
+    const formatAddress = typeof window !== 'undefined' && typeof window.formatAddressParts === 'function'
+        ? window.formatAddressParts
+        : ((detail, ward, district, city) => [detail, ward, district, city].filter(Boolean).join(', '));
+    const addr = formatAddress(d.addressDetail || '', d.ward || '', d.district || '', d.province || '') || d.address || '--';
+    document.getElementById('receiver-address').textContent = addr;
 }
 
 // Hiển thị các mục đơn hàng

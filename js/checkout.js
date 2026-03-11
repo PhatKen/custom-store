@@ -189,6 +189,11 @@ function validateAndSubmitCheckout() {
         ? wardSelect.options[wardSelect.selectedIndex].textContent
         : '';
 
+    const formatAddress = typeof window !== 'undefined' && typeof window.formatAddressParts === 'function'
+        ? window.formatAddressParts
+        : ((detail, ward, district, city) => [detail, ward, district, city].filter(Boolean).join(', '));
+    const fullAddress = formatAddress(address, wardName, districtName, provinceName);
+
     // Lưu thông tin người nhận
     const deliveryInfo = {
         fullname: fullname,
@@ -201,7 +206,7 @@ function validateAndSubmitCheckout() {
         ward: wardName,
         wardCode: wardCode,
         addressDetail: address,
-        address: address
+        address: fullAddress
     };
     
     sessionStorage.setItem('deliveryInfo', JSON.stringify(deliveryInfo));

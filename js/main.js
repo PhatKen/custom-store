@@ -122,7 +122,11 @@ const CONTACT_INFO_STORAGE_KEY = 'contactInfo';
 
 function getDefaultContactInfo() {
     return {
-        address: '123 Đường ABC, Quận XYZ, TP.HCM',
+        store_city: 'Thành phố Hồ Chí Minh',
+        store_district: 'Quận 1',
+        store_ward: 'Phường Bến Nghé',
+        store_address_detail: '123 Đường ABC',
+        address: '',
         phone: '0123 456 789',
         email: 'info@customstore.com',
         facebook: '',
@@ -136,8 +140,32 @@ function getContactInfo() {
     const defaults = getDefaultContactInfo();
     const stored = JSON.parse(localStorage.getItem(CONTACT_INFO_STORAGE_KEY) || 'null');
     if (!stored || typeof stored !== 'object') return defaults;
-    return { ...defaults, ...stored };
+    const merged = { ...defaults, ...stored };
+    if ((!merged.store_city && !merged.store_district && !merged.store_ward && !merged.store_address_detail) && typeof merged.address === 'string' && merged.address.includes(',')) {
+        const parts = merged.address.split(',').map(s => s.trim()).filter(Boolean);
+        if (parts.length >= 4) {
+            merged.store_city = parts[parts.length - 1];
+            merged.store_district = parts[parts.length - 2];
+            merged.store_ward = parts[parts.length - 3];
+            merged.store_address_detail = parts.slice(0, parts.length - 3).join(', ');
+        } else if (parts.length === 3) {
+            merged.store_city = parts[2];
+            merged.store_district = parts[1];
+            merged.store_address_detail = parts[0];
+        } else if (parts.length === 2) {
+            merged.store_city = parts[1];
+            merged.store_address_detail = parts[0];
+        }
+    }
+    return merged;
 }
+
+function formatAddressParts(detail, ward, district, city) {
+    const safe = v => (v || '').trim();
+    return [safe(detail), safe(ward), safe(district), safe(city)].filter(Boolean).join(', ');
+}
+
+window.formatAddressParts = formatAddressParts;
 
 function renderSiteFooter() {
     const footer = document.querySelector('footer');
@@ -146,7 +174,7 @@ function renderSiteFooter() {
     const c = getContactInfo();
     const year = new Date().getFullYear();
     const safe = v => (v || '').trim();
-    const address = safe(c.address);
+    const address = formatAddressParts(c.store_address_detail || c.address, c.store_ward, c.store_district, c.store_city);
     const phone = safe(c.phone);
     const email = safe(c.email);
     const facebook = safe(c.facebook);
@@ -213,7 +241,7 @@ function initContactPage() {
         const el = document.getElementById(id);
         if (el) el.textContent = value || '';
     };
-    setText('contact-page-address', c.address || '');
+    setText('contact-page-address', formatAddressParts(c.store_address_detail || c.address, c.store_ward, c.store_district, c.store_city) || '');
     setText('contact-page-phone', c.phone || '');
     setText('contact-page-email', c.email || '');
 
@@ -601,7 +629,7 @@ function initChatbot() {
             if (t.includes('liên hệ') || t.includes('hotline') || t.includes('số điện thoại') || t.includes('địa chỉ') || t.includes('email') || t.includes('facebook') || t.includes('instagram') || t.includes('youtube') || t.includes('twitter') || /\bx\b/.test(t)) {
                 const ci = getContactInfo();
                 const v = s => (s || '').trim();
-                const address = v(ci.address);
+                const address = formatAddressParts(ci.store_address_detail || ci.address, ci.store_ward, ci.store_district, ci.store_city);
                 const phone = v(ci.phone);
                 const email = v(ci.email);
                 const facebook = v(ci.facebook);

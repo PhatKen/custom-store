@@ -38,7 +38,11 @@ function loadAccountInfo() {
 function displayUserInfo(user) {
     document.getElementById('display-fullname').textContent = user.fullName || '--';
     document.getElementById('display-phone').textContent = user.phone || '--';
-    document.getElementById('display-address').textContent = user.address || '--';
+    const formatAddress = typeof window !== 'undefined' && typeof window.formatAddressParts === 'function'
+        ? window.formatAddressParts
+        : ((detail, ward, district, city) => [detail, ward, district, city].filter(Boolean).join(', '));
+    const fullAddress = formatAddress(user.addressDetail || '', user.ward || '', user.district || '', user.province || '') || user.address || '--';
+    document.getElementById('display-address').textContent = fullAddress;
     const nameDisplay = document.getElementById('user-name-display');
     const emailDisplay = document.getElementById('user-email-display');
     const membershipBadge = document.getElementById('user-membership-badge');
@@ -86,7 +90,7 @@ function fillEditForm(user) {
                 province = lastOrder.deliveryInfo.province || '';
                 district = lastOrder.deliveryInfo.district || '';
                 ward = lastOrder.deliveryInfo.ward || '';
-                addressDetail = lastOrder.deliveryInfo.address || '';
+                addressDetail = lastOrder.deliveryInfo.addressDetail || '';
             }
         }
     }
@@ -183,6 +187,10 @@ function loadUserOrders() {
             `;
         }).join('');
         const delivery = order.deliveryInfo || {};
+        const formatAddress = typeof window !== 'undefined' && typeof window.formatAddressParts === 'function'
+            ? window.formatAddressParts
+            : ((detail, w, d, p) => [detail, w, d, p].filter(Boolean).join(', '));
+        const deliveryAddress = formatAddress(delivery.addressDetail || '', delivery.ward || '', delivery.district || '', delivery.province || '') || (delivery.address || '');
         container.innerHTML = `
             <div class="order-card-header">
                 <div class="order-card-head-left">
@@ -205,11 +213,11 @@ function loadUserOrders() {
                     <div class="order-delivery-grid">
                         <div><span>Người nhận:</span> <strong>${delivery.fullname || ''}</strong></div>
                         <div><span>Số điện thoại:</span> <strong>${delivery.phone || ''}</strong></div>
-                        <div class="order-delivery-address"><span>Địa chỉ:</span> <strong>${delivery.address || ''}${delivery.ward ? ', ' + delivery.ward : ''}${delivery.district ? ', ' + delivery.district : ''}${delivery.province ? ', ' + delivery.province : ''}</strong></div>
+                        <div class="order-delivery-address"><span>Địa chỉ:</span> <strong>${deliveryAddress}</strong></div>
                     </div>
                 </div>
                 <div class="order-detail-actions">
-                    <a href="delivery.html" class="btn-secondary">Xem trạng thái giao hàng</a>
+                    <a href="delivery.html?id=${order.id}" class="btn-secondary">Xem trạng thái giao hàng</a>
                 </div>
             </div>
         `;
@@ -302,11 +310,10 @@ async function saveAccountInfo(e) {
             return;
         }
         
-        // Tạo địa chỉ đầy đủ
-        let fullAddress = addressDetail || '';
-        if (ward) fullAddress = (fullAddress ? ward + ', ' + fullAddress : ward);
-        if (district) fullAddress = (fullAddress ? district + ', ' + fullAddress : district);
-        if (province) fullAddress = (fullAddress ? province + ', ' + fullAddress : province);
+        const formatAddress = typeof window !== 'undefined' && typeof window.formatAddressParts === 'function'
+            ? window.formatAddressParts
+            : ((detail, w, d, p) => [detail, w, d, p].filter(Boolean).join(', '));
+        const fullAddress = formatAddress(addressDetail, ward, district, province);
 
         const payload = {
             fullName,
