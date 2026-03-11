@@ -2908,7 +2908,7 @@ body.modal-open {
 .unit-price {
     font-size: 12px;
     color: var(--gray-color);
-    text-decoration: line-through;
+    text-decoration: none;
 }
 
 .total-price {
