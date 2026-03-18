@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     migrateStaffEmails();
 
     initAdminNavigation();
+    initAdminSidebarToggle();
     applyRoleRestrictions();
 
     loadDashboardData();
@@ -206,6 +207,44 @@ function initAdminScrollLock() {
     [header].forEach(el => {
         if (!el) return;
         el.addEventListener('wheel', forwardWheel, { passive: false });
+    });
+}
+
+function initAdminSidebarToggle() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggle = document.getElementById('admin-sidebar-toggle');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (!sidebar || !toggle || !overlay) return;
+
+    const closeSidebar = () => {
+        sidebar.classList.add('collapsed');
+        overlay.classList.remove('active');
+    };
+
+    const openSidebar = () => {
+        sidebar.classList.remove('collapsed');
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+    };
+
+    toggle.addEventListener('click', function() {
+        if (sidebar.classList.contains('collapsed') || !sidebar.classList.contains('active')) {
+            openSidebar();
+        } else {
+            closeSidebar();
+        }
+    });
+
+    overlay.addEventListener('click', closeSidebar);
+
+    // Automatically close sidebar on narrow screens when navigation item selected
+    document.querySelectorAll('.admin-menu a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 1024) {
+                closeSidebar();
+            }
+        });
     });
 }
 
