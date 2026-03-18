@@ -922,8 +922,8 @@ function renderAnalytics() {
         rangeLabelEl.textContent = getRangeLabel(range);
     }
     
-    const categoryNames = { ao: 'Áo', quan: 'Quần', giay: 'Giày', non: 'Nón' };
-    const categories = ['ao', 'quan', 'giay', 'non'];
+    const categoryNames = { ao: 'Áo', quan: 'Quần', giay: 'Giày', non: 'Nón', tuixach: 'Túi xách' };
+    const categories = ['ao', 'quan', 'giay', 'non', 'tuixach'];
     
     const stats = {};
     categories.forEach(cat => {
@@ -1201,7 +1201,8 @@ function displayProductsTable(products) {
             'ao': 'Áo',
             'quan': 'Quần',
             'giay': 'Giày',
-            'non': 'Nón'
+            'non': 'Nón',
+            'tuixach': 'Túi xách'
         };
         
         const status = product.status || (product.quantity > 0 ? 'in-stock' : 'out-of-stock');

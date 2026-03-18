@@ -696,11 +696,11 @@ function initChatbot() {
                 }
                 return;
             }
-            const prodMatch = t.match(/(áo|quần|giày|nón)/);
+            const prodMatch = t.match(/(áo|quần|giày|nón|túi xách)/);
             if (prodMatch) {
-                const catMap = { 'áo': 'ao', 'quần': 'quan', 'giày': 'giay', 'nón': 'non' };
+                const catMap = { 'áo': 'ao', 'quần': 'quan', 'giày': 'giay', 'nón': 'non', 'túi xách': 'tuixach' };
                 const cat = catMap[prodMatch[1]];
-                const listItems = products.filter(p => p.category === cat);
+                const listItems = cat ? products.filter(p => p.category === cat) : []; 
                 if (listItems.length === 0) {
                     addMsg(`Chưa có sản phẩm trong danh mục ${prodMatch[1]}.`, 'bot');
                 } else {
@@ -1048,7 +1048,8 @@ function createProductCard(product) {
         'ao': 'Áo',
         'quan': 'Quần',
         'giay': 'Giày',
-        'non': 'Nón'
+        'non': 'Nón',
+        'tuixach': 'Túi xách'
     };
     
     // Kiểm tra trạng thái đăng nhập
@@ -1250,7 +1251,8 @@ function showProductDetailModal(product) {
         'ao': 'Áo',
         'quan': 'Quần',
         'giay': 'Giày',
-        'non': 'Nón'
+        'non': 'Nón',
+        'tuixach': 'Túi xách'
     };
     // Kiểm tra trạng thái hàng
     const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
@@ -1541,7 +1543,7 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
     const card = document.createElement('div');
     card.className = 'product-card';
     const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + '₫';
-    const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón' };
+    const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón', 'tuixach': 'Túi xách' };
     const loggedIn = JSON.parse(localStorage.getItem('currentUser')) !== null;
     const isOutOfStock = recoProduct.status === 'out-of-stock' || recoProduct.quantity === 0;
     const recoImages = Array.isArray(recoProduct.images) && recoProduct.images.length ? recoProduct.images : [recoProduct.image];

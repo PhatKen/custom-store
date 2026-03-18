@@ -108,6 +108,17 @@ const DEFAULT_PRODUCTS = [
         quantity: 62,
         sold: 73,
         createdAt: new Date().toISOString()
+    },
+    {
+        id: 11,
+        name: 'Túi xách nữ thời trang',
+        category: 'tuixach',
+        price: 580000,
+        description: 'Túi xách nữ da PU, form chữ nhật, quai xách và dây đeo chéo tiện lợi.',
+        image: 'https://images.unsplash.com/photo-1520975897352-ef4446ca173a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
+        quantity: 33,
+        sold: 12,
+        createdAt: new Date().toISOString()
     }
 ];
 

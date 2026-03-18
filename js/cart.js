@@ -73,7 +73,8 @@ function createCartItemElement(item) {
         'ao': 'Áo',
         'quan': 'Quần',
         'giay': 'Giày',
-        'non': 'Nón'
+        'non': 'Nón',
+        'tuixach': 'Túi xách'
     };
     
     cartItem.innerHTML = `
@@ -521,7 +522,8 @@ function createRecommendedProductCard(product) {
         'ao': 'Áo',
         'quan': 'Quần',
         'giay': 'Giày',
-        'non': 'Nón'
+        'non': 'Nón',
+        'tuixach': 'Túi xách'
     };
     
     // Kiểm tra trạng thái đăng nhập
