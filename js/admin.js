@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
     migrateStaffEmails();
 
     initAdminNavigation();
+    initAdminSidebarToggle();
     applyRoleRestrictions();
 
     loadDashboardData();
@@ -190,6 +191,24 @@ function initAdminNavigation() {
                 targetSection.classList.add('active');
             }
         });
+    });
+}
+
+function initAdminSidebarToggle() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.getElementById('admin-sidebar-toggle');
+    if (!sidebar || !toggleBtn) return;
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('active');
+        document.body.classList.toggle('sidebar-collapsed');
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!sidebar.contains(event.target) && !toggleBtn.contains(event.target) && window.innerWidth < 768) {
+            sidebar.classList.remove('active');
+            document.body.classList.add('sidebar-collapsed');
+        }
     });
 }
 
