@@ -109,7 +109,7 @@ function initFilterEvents() {
 }
 
 // Áp dụng các filter
-const PRODUCTS_PAGE_SIZE = 10;
+const PRODUCTS_PAGE_SIZE = 15;
 let productsCurrentPage = 1;
 let productsLastFiltered = [];
 
