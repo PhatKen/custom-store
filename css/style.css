@@ -790,13 +790,32 @@ nav {
 }
 
 .about-image {
-    flex: 1;
+    flex: 0 0 45%;
+    max-width: 45%;
 }
 
 .about-image img {
     width: 100%;
+    max-height: 340px;
+    object-fit: cover;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
+}
+
+@media (max-width: 1000px) {
+    .about .container {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .about-image {
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .about-image img {
+        max-height: none;
+    }
 }
 
 /* Footer */
