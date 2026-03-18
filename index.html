@@ -11,35 +11,20 @@
 <body>
     <!-- Header & Navigation -->
     <header>
-        <div class="container header-top">
-            <div class="header-left">
+        <div class="container">
+            <nav>
                 <a href="index.html" class="logo">Custom<span>Store</span></a>
-            </div>
-            <div class="header-right">
-                <div class="auth-actions">
-                    <a href="register.html" class="btn-register">Đăng ký</a>
-                    <a href="login.html" class="btn-login">Đăng nhập</a>
+                <ul class="nav-links">
+                    <li><a href="index.html" class="active">Trang chủ</a></li>
+                    <li><a href="products.html">Sản phẩm</a></li>
+                    <li><a href="news.html">Tin tức</a></li>
+                    <li><a href="about.html">Về chúng tôi</a></li>
+                    <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
+                </ul>
+                <div class="nav-actions" id="nav-actions">
+                    <!-- Nội dung sẽ được thêm bằng JavaScript -->
                 </div>
-                <button class="menu-toggle" aria-label="Mở menu"><i class="fas fa-bars"></i></button>
-            </div>
-        </div>
-        <div class="container header-search-wrap">
-            <div class="header-search">
-                <input type="text" placeholder="Tìm sản phẩm, thương hiệu..." aria-label="Tìm kiếm">
-                <button aria-label="Tìm kiếm"><i class="fas fa-search"></i></button>
-            </div>
-        </div>
-        <div class="container nav-wrapper">
-            <ul class="nav-links">
-                <li><a href="index.html" class="active">Trang chủ</a></li>
-                <li><a href="products.html">Sản phẩm</a></li>
-                <li><a href="news.html">Tin tức</a></li>
-                <li><a href="about.html">Về chúng tôi</a></li>
-                <li><a href="cart.html">Giỏ hàng <span id="cart-count">0</span></a></li>
-            </ul>
-            <div class="nav-actions" id="nav-actions">
-                <!-- Nội dung sẽ được thêm bằng JavaScript -->
-            </div>
+            </nav>
         </div>
     </header>
 
