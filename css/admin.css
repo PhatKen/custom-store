@@ -415,6 +415,11 @@
     color: var(--danger-color);
 }
 
+.category-tuixach {
+    background-color: rgba(23, 162, 184, 0.1);
+    color: var(--info-color);
+}
+
 .status-badge {
     display: inline-block;
     padding: 4px 10px;
