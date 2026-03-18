@@ -695,13 +695,13 @@ nav {
 
 /* About Section */
 .about {
-    padding: 100px 0;
+    padding: 60px 0;
 }
 
 .about .container {
     display: flex;
     align-items: center;
-    gap: 50px;
+    gap: 30px;
 }
 
 .about-content {
@@ -709,14 +709,14 @@ nav {
 }
 
 .about-content p {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     color: var(--gray-color);
 }
 
 .about-actions {
     display: flex;
     gap: 12px;
-    margin: 10px 0 24px;
+    margin: 8px 0 16px;
 }
 
 .about-stats {
