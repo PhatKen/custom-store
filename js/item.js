@@ -140,12 +140,21 @@ const DEFAULT_PRODUCTS = [
         image: 'image/ao5.png',
         quantity: 28,
         sold: 73,
-        gender: 'unisex',
+        gender: 'male',
         createdAt: new Date().toISOString()
     }
 ];
 
 function getDefaultProducts() {
     return DEFAULT_PRODUCTS.map(p => ({ ...p }));
+}
+
+// Sync data cho phép chỉnh thủ công trực tiếp trong item.js
+// (Khi muốn sửa product chỉ cần edit DEFAULT_PRODUCTS, không cần vào admin)
+const DEFAULT_PRODUCTS_VERSION = 1;
+const CURRENT_PRODUCTS_VERSION = parseInt(localStorage.getItem('itemProductsVersion') || '0', 10);
+if (CURRENT_PRODUCTS_VERSION !== DEFAULT_PRODUCTS_VERSION) {
+    localStorage.setItem('products', JSON.stringify(DEFAULT_PRODUCTS));
+    localStorage.setItem('itemProductsVersion', String(DEFAULT_PRODUCTS_VERSION));
 }
 
