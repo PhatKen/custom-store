@@ -8,6 +8,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 50,
         sold: 152,
+        gender: 'unisex',
         createdAt: new Date().toISOString()
     },
     {
@@ -19,6 +20,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 30,
         sold: 98,
+        gender: 'male',
         createdAt: new Date().toISOString()
     },
     {
@@ -30,6 +32,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 20,
         sold: 45,
+        gender: 'unisex',
         createdAt: new Date().toISOString()
     },
     {
@@ -41,6 +44,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 45,
         sold: 189,
+        gender: 'unisex',
         createdAt: new Date().toISOString()
     },
     {
@@ -52,6 +56,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 25,
         sold: 67,
+        gender: 'male',
         createdAt: new Date().toISOString()
     },
     {
@@ -63,6 +68,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 40,
         sold: 134,
+        gender: 'unisex',
         createdAt: new Date().toISOString()
     },
     {
@@ -74,6 +80,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 35,
         sold: 76,
+        gender: 'female',
         createdAt: new Date().toISOString()
     },
     {
@@ -85,6 +92,7 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1534215754734-18e55d13e346?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 28,
         sold: 53,
+        gender: 'female',
         createdAt: new Date().toISOString()
     },
     {
@@ -96,6 +104,7 @@ const DEFAULT_PRODUCTS = [
         image: 'image/ao3.png',
         quantity: 34,
         sold: 41,
+        gender: 'female',
         createdAt: new Date().toISOString()
     },
     {
@@ -107,6 +116,7 @@ const DEFAULT_PRODUCTS = [
         image: 'image/ao2.png',
         quantity: 62,
         sold: 73,
+        gender: 'male',
         createdAt: new Date().toISOString()
     },
     {
@@ -118,6 +128,19 @@ const DEFAULT_PRODUCTS = [
         image: 'https://images.unsplash.com/photo-1520975897352-ef4446ca173a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80',
         quantity: 33,
         sold: 12,
+        gender: 'female',
+        createdAt: new Date().toISOString()
+    },
+    {
+        id: 12,
+        name: 'NikeCourt Slam',
+        category: 'ao',
+        price: 1100000,
+        description: 'Áo thể thao, rộng rãi, thoáng mát.',
+        image: 'image/ao5.png',
+        quantity: 28,
+        sold: 73,
+        gender: 'unisex',
         createdAt: new Date().toISOString()
     }
 ];

@@ -99,6 +99,12 @@ function initFilterEvents() {
     
     // Filter by category
     document.getElementById('filter-category').addEventListener('change', applyFilters);
+
+    // Filter by gender
+    const genderFilter = document.getElementById('filter-gender');
+    if (genderFilter) {
+        genderFilter.addEventListener('change', applyFilters);
+    }
     
     // Price range filter
     document.getElementById('price-min').addEventListener('input', applyFilters);
@@ -121,21 +127,29 @@ function applyFilters(resetPage = true) {
     const sortName = document.getElementById('sort-name').value;
     const sortPrice = document.getElementById('sort-price').value;
     const filterCategory = document.getElementById('filter-category').value;
+    const filterGender = document.getElementById('filter-gender') ? document.getElementById('filter-gender').value : 'all';
     const priceMin = parseInt(document.getElementById('price-min').value) || 0;
     const priceMax = parseInt(document.getElementById('price-max').value) || Infinity;
     
     // Lọc sản phẩm
     let filteredProducts = products.filter(product => {
+        const productGender = (product.gender || 'unisex').toLowerCase();
+
         // Filter by name
         const matchName = product.name.toLowerCase().includes(searchName);
-        
+
         // Filter by category
         const matchCategory = filterCategory === 'all' || product.category === filterCategory;
-        
+
+        // Filter by gender
+        const matchGender = filterGender === 'all' ||
+            (filterGender === 'male' && (productGender === 'male' || productGender === 'unisex')) ||
+            (filterGender === 'female' && (productGender === 'female' || productGender === 'unisex'));
+
         // Filter by price
         const matchPrice = product.price >= priceMin && product.price <= priceMax;
-        
-        return matchName && matchCategory && matchPrice;
+
+        return matchName && matchCategory && matchGender && matchPrice;
     });
     
     // Sắp xếp theo tên
