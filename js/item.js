@@ -335,6 +335,18 @@ const DEFAULT_PRODUCTS = [
         sold: 43,
         gender: 'male',
         createdAt: new Date().toISOString()
+    },
+    {
+        id: 28,
+        name: 'Quần jeans slimfit',
+        category: 'quan',
+        price: 1030000,
+        description: 'Quần thể thao, rộng rãi, thoáng mát',
+        image: 'image/quan/quan1.png',
+        quantity: 43,
+        sold: 68,
+        gender: 'male',
+        createdAt: new Date().toISOString()
     }
 ];
 
