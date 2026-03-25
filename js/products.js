@@ -289,7 +289,7 @@ function createProductCardForPage(product) {
         'quan': 'Quần',
         'giay': 'Giày',
         'non': 'Nón',
-        'dolot': 'Đồ lót'
+        'dolot': 'Phụ kiện'
     };
     
     // Kiểm tra trạng thái đăng nhập

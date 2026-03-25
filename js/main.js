@@ -696,9 +696,9 @@ function initChatbot() {
                 }
                 return;
             }
-            const prodMatch = t.match(/(áo|quần|giày|nón|đồ lót)/);
+            const prodMatch = t.match(/(áo|quần|giày|nón|phụ kiện)/);
             if (prodMatch) {
-                const catMap = { 'áo': 'ao', 'quần': 'quan', 'giày': 'giay', 'nón': 'non', 'đồ lót': 'dolot' };
+                const catMap = { 'áo': 'ao', 'quần': 'quan', 'giày': 'giay', 'nón': 'non', 'phụ kiện': 'dolot' };
                 const cat = catMap[prodMatch[1]];
                 const listItems = cat ? products.filter(p => p.category === cat) : []; 
                 if (listItems.length === 0) {
@@ -1049,7 +1049,7 @@ function createProductCard(product) {
         'quan': 'Quần',
         'giay': 'Giày',
         'non': 'Nón',
-        'dolot': 'Đồ lót'
+        'dolot': 'Phụ kiện'
     };
     
     // Kiểm tra trạng thái đăng nhập
@@ -1252,7 +1252,7 @@ function showProductDetailModal(product) {
         'quan': 'Quần',
         'giay': 'Giày',
         'non': 'Nón',
-        'dolot': 'Đồ lót'
+        'dolot': 'Phụ kiện'
     };
     // Kiểm tra trạng thái hàng
     const isOutOfStock = product.status === 'out-of-stock' || product.quantity === 0;
@@ -1543,7 +1543,7 @@ function createRecommendedCardForModal(recoProduct, currentProductId) {
     const card = document.createElement('div');
     card.className = 'product-card';
     const formattedPrice = recoProduct.price.toLocaleString('vi-VN') + '₫';
-    const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón', 'dolot': 'Đồ lót' };
+    const categoryNames = { 'ao': 'Áo', 'quan': 'Quần', 'giay': 'Giày', 'non': 'Nón', 'dolot': 'Phụ kiện' };
     const loggedIn = JSON.parse(localStorage.getItem('currentUser')) !== null;
     const isOutOfStock = recoProduct.status === 'out-of-stock' || recoProduct.quantity === 0;
     const recoImages = Array.isArray(recoProduct.images) && recoProduct.images.length ? recoProduct.images : [recoProduct.image];
