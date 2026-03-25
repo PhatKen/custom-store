@@ -125,7 +125,7 @@ const DEFAULT_PRODUCTS = [
         category: 'giay',
         price: 4155000,
         description: 'Giày thể thao Nike Air Max Plus, thiết kế hiện đại, êm ái và bền đẹp.',
-        image: 'image/giay1.png',
+        image: 'image/giay/giay1.png',
         quantity: 183,
         sold: 73,
         gender: 'unisex',
