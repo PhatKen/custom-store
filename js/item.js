@@ -1217,6 +1217,17 @@ const DEFAULT_PRODUCTS = [
     }
 ];
 
+function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+DEFAULT_PRODUCTS.forEach(product => {
+    product.id = getRandomInt(1, 100);
+    product.price = getRandomInt(100, 5000) * 1000;
+    product.quantity = getRandomInt(0, 500);
+    product.sold = getRandomInt(0, 500);
+});
+
 function getDefaultProducts() {
     return DEFAULT_PRODUCTS.map(p => ({ ...p }));
 }
