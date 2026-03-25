@@ -74,7 +74,7 @@ function createCartItemElement(item) {
         'quan': 'Quần',
         'giay': 'Giày',
         'non': 'Nón',
-        'dolot': 'Phụ kiện'
+        'phukien': 'Phụ kiện'
     };
     
     cartItem.innerHTML = `
@@ -523,7 +523,7 @@ function createRecommendedProductCard(product) {
         'quan': 'Quần',
         'giay': 'Giày',
         'non': 'Nón',
-        'dolot': 'Phụ kiện'
+        'phukien': 'Phụ kiện'
     };
     
     // Kiểm tra trạng thái đăng nhập
